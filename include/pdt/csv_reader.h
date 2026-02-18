@@ -1,6 +1,3 @@
-#ifndef CSV_READER_H
-#define CSV_READER_H
-
 #pragma once
 #include "types.h"
 #include <istream>
@@ -8,15 +5,12 @@
 
 namespace pdt {
 
-std::vector<Sample> read_csv(std::istream& input);
+struct ImportResult {
+    std::vector<Sample> samples;
+    std::size_t parsed_ok{};
+    std::size_t skipped{};
+};
+
+ImportResult read_csv(std::istream& input);
 
 } // namespace pdt
-
-
-// class csv_reader
-// {
-// public:
-//     csv_reader();
-// };
-
-#endif // CSV_READER_H

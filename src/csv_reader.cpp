@@ -1,29 +1,58 @@
 #include "pdt/csv_reader.h"
 #include <sstream>
 
+// public library namespace
 namespace pdt {
 
-std::vector<Sample> read_csv(std::istream& input) {
-    std::vector<Sample> result;
+// anonynmous namespace (internal linkage)
+namespace {
+
+bool parse_line(const std::string& line, Sample& out_sample) {
+    std::istringstream ss(line);
+    std::string ts_str;
+    std::string sensor;
+    std::string value_str;
+
+    if (!std::getline(ss, ts_str, ','))
+        return false;
+
+    if (!std::getline(ss, sensor, ','))
+        return false;
+
+    if (!std::getline(ss, value_str, ','))
+        return false;
+
+    try {
+        out_sample.timestamp = std::chrono::sys_seconds{}; // na razie placeholder
+        out_sample.sensor = sensor;
+        out_sample.value = std::stod(value_str);    // string to double
+    } catch (...) {
+        return false;
+    }
+
+    return true;
+}
+
+} // namespace
+
+ImportResult read_csv(std::istream& input) {
+    ImportResult result;
     std::string line;
 
+    if (!std::getline(input, line))
+        return result;
+
     while (std::getline(input, line)) {
-        std::istringstream ss(line);
-        std::string ts_str, sensor, value_str;
-
-        if (!std::getline(ss, ts_str, ','))
-            continue;
-        if (!std::getline(ss, sensor, ','))
-            continue;
-        if (!std::getline(ss, value_str, ','))
+        if (line.empty())
             continue;
 
-        Sample s{};
-        s.timestamp = std::chrono::sys_seconds{};
-        s.sensor = sensor;
-        s.value = std::stod(value_str);
-
-        result.push_back(std::move(s));
+        Sample sample{};
+        if (parse_line(line, sample)) {
+            result.samples.push_back(std::move(sample));
+            ++result.parsed_ok;
+        } else {
+            ++result.skipped;
+        }
     }
 
     return result;
@@ -31,5 +60,3 @@ std::vector<Sample> read_csv(std::istream& input) {
 
 } // namespace pdt
 
-
-// csv_reader::csv_reader() {}
