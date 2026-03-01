@@ -11,7 +11,23 @@ std::size_t DataSet::size() const noexcept { return samples().size(); }
 bool DataSet::empty() const noexcept { return samples_.empty(); }
 
 DataSet DataSet::filter(const FilterOptions& opt) const {
-    return DataSet{filter_samples(samples_, opt)};
+    std::vector<Sample> out;
+    out.reserve(samples_.size());
+
+    for (const auto& s : samples_) {
+        if (opt.sensor && s.sensor != *opt.sensor)  // *opt.sensor == opt.sensor.value() <-- std::optional<T>;
+            continue;
+
+        if (opt.from && s.timestamp < *opt.from)
+            continue;
+
+        if (opt.to && s.timestamp > *opt.to)
+            continue;
+
+        out.push_back(s);
+    }
+
+    return DataSet{std::move(out)};
 }
 
 Stats DataSet::stats() const {

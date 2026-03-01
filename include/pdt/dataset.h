@@ -1,10 +1,11 @@
 #pragma once
-#include "filter.h"
 #include "stats.h"
 #include "types.h"
 
 #include <span>
 #include <vector>
+
+// a collection of process data that can be filtered and used to calculate statistics
 
 namespace pdt {
 
@@ -18,6 +19,9 @@ class DataSet {
 
     std::size_t size() const noexcept;
     bool empty() const noexcept;
+
+    auto begin() const noexcept { return samples_.begin(); }
+    auto end() const noexcept { return samples_.end(); }
 
     //domains ops
     DataSet filter(const FilterOptions& opt) const;

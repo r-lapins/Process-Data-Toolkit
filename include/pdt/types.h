@@ -18,4 +18,11 @@ struct Stats {
     std::size_t count{};
 };
 
+struct FilterOptions
+{
+    std::optional<std::string> sensor; // exact math for now
+    std::optional<std::chrono::sys_seconds> from;   // inclusive
+    std::optional<std::chrono::sys_seconds> to;     // inclusive
+};
+
 } // namespace pdt

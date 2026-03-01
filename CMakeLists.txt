@@ -18,7 +18,6 @@ add_library(pdt
     src/csv_reader.cpp
     src/stats.cpp
     src/time.cpp
-    src/filter.cpp
     src/dataset.cpp
 )
 
