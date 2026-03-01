@@ -13,3 +13,7 @@ add_test(NAME time COMMAND test_time)
 add_executable(test_filter test_filter.cpp)
 target_link_libraries(test_filter PRIVATE pdt)
 add_test(NAME filter COMMAND test_filter)
+
+add_executable(test_dataset test_dataset.cpp)
+target_link_libraries(test_dataset PRIVATE pdt)
+add_test(NAME dataset COMMAND test_dataset)

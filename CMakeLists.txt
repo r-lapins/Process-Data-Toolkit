@@ -19,6 +19,7 @@ add_library(pdt
     src/stats.cpp
     src/time.cpp
     src/filter.cpp
+    src/dataset.cpp
 )
 
 target_include_directories(pdt PUBLIC include)
