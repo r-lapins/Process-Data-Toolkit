@@ -33,6 +33,3 @@ Stats compute_stats(std::span<const Sample> samples) {
 }
 
 } // namespace pdt
-
-
-// stats::stats() {}

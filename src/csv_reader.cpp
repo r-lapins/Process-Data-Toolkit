@@ -1,4 +1,5 @@
 #include "pdt/csv_reader.h"
+#include "pdt/time.h"
 #include <sstream>
 
 // public library namespace
@@ -23,7 +24,11 @@ bool parse_line(const std::string& line, Sample& out_sample) {
         return false;
 
     try {
-        out_sample.timestamp = std::chrono::sys_seconds{}; // na razie placeholder
+        auto ts = parse_iso8601(ts_str);
+        if (!ts)
+            return false;
+
+        out_sample.timestamp = *ts;
         out_sample.sensor = sensor;
         out_sample.value = std::stod(value_str);    // string to double
     } catch (...) {
@@ -39,6 +44,7 @@ ImportResult read_csv(std::istream& input) {
     ImportResult result;
     std::string line;
 
+    // skip the first line of headers
     if (!std::getline(input, line))
         return result;
 

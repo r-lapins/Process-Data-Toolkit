@@ -17,6 +17,8 @@ endif()
 add_library(pdt
     src/csv_reader.cpp
     src/stats.cpp
+    src/time.cpp
+    src/filter.cpp
 )
 
 target_include_directories(pdt PUBLIC include)
