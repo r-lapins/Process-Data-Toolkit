@@ -22,13 +22,17 @@ pdt::FilterOptions opt_sensor(std::string s) {
 
 pdt::FilterOptions opt_from(std::string_view from) {
     pdt::FilterOptions o{};
-    o.from = *pdt::parse_iso8601(from);
+    auto t = pdt::parse_iso8601(from);
+    assert(t.has_value());
+    o.from = *t;
     return o;
 }
 
 pdt::FilterOptions opt_to(std::string_view to) {
-    pdt::FilterOptions o{};
-    o.to = *pdt::parse_iso8601(to);
+    pdt::FilterOptions o{};    
+    auto t = pdt::parse_iso8601(to);
+    assert(t.has_value());
+    o.to = *t;
     return o;
 }
 

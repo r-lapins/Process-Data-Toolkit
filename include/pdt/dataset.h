@@ -1,5 +1,4 @@
 #pragma once
-#include "stats.h"
 #include "types.h"
 
 #include <span>

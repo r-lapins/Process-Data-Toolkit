@@ -1,4 +1,6 @@
 #include "pdt/dataset.h"
+#include <algorithm>
+#include <cmath>
 
 namespace pdt {
 
@@ -31,7 +33,34 @@ DataSet DataSet::filter(const FilterOptions& opt) const {
 }
 
 Stats DataSet::stats() const {
-    return compute_stats(samples_);
+    Stats result{};
+
+    if (samples_.empty())
+        return result;
+
+    result.count = samples_.size();
+
+    double sum = 0.0;
+    result.min = samples_.front().value;
+    result.max = samples_.front().value;
+
+    for (const auto& s : samples_) {
+        sum += s.value;
+        result.min = std::min(result.min, s.value);
+        result.max = std::max(result.min, s.value);
+    }
+
+    result.mean = sum / result.count;
+
+    double sq_sum = 0.0;
+    for (const auto& s : samples_) {
+        double diff = s.value - result.mean;
+        sq_sum += diff * diff;
+    }
+
+    result.stddev = std::sqrt(sq_sum / result.count);
+
+    return result;
 }
 
 } // namespace pdt

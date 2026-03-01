@@ -1,10 +1,9 @@
 #include "pdt/time.h"
-#include <cctype>
 
 namespace pdt {
 namespace {
 
-constexpr bool is_digit(char c) { return c >= '0' && c <= '9'; }
+bool is_digit(char c) { return c >= '0' && c <= '9'; }
 
 bool parse_2(std::string_view s, std::size_t pos, int& out) {
     if (pos + 2 > s.size()) return false;
@@ -46,7 +45,7 @@ std::optional<std::chrono::sys_seconds> parse_iso8601(std::string_view s) {
 
     // Range checks
     if (mo < 1 || mo > 12) return std::nullopt;
-    if (h < 0 || mo > 23) return std::nullopt;
+    if (h < 0 || h > 23) return std::nullopt;
     if (mi < 0 || mi > 59) return std::nullopt;
     if (sec < 0 || sec > 59) return std::nullopt;
 
