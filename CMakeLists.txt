@@ -19,15 +19,18 @@ add_library(pdt
     src/time.cpp
     src/dataset.cpp
 )
-
 target_include_directories(pdt PUBLIC include)
 
 if(TARGET pdt_sanitizers)
     target_link_libraries(pdt PUBLIC pdt_sanitizers)
 endif()
 
+add_library(pdt_cli_args app/cli_args.cpp)
+target_include_directories(pdt_cli_args PUBLIC app)
+target_link_libraries(pdt_cli_args PUBLIC pdt)
+
 add_executable(pdt_cli app/main.cpp)
-target_link_libraries(pdt_cli PRIVATE pdt)
+target_link_libraries(pdt_cli PRIVATE pdt_cli_args)
 
 enable_testing()
 add_subdirectory(tests)
