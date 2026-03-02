@@ -1,0 +1,22 @@
+{
+  "import": {
+    "parsed_ok": 31,
+    "skipped": 7
+  },
+  "filter": {
+    "sensor": "S1",
+    "from": "2026-02-18T11:00:00",
+    "to": "2026-02-18T13:45:00",
+  },
+  "data": {
+    "total": 31,
+    "filtered": 5
+  },
+  "stats": {
+    "count": 5,
+    "min": 15.2,
+    "max": 18.2,
+    "mean": 16.86,
+    "stddev": 0.962497
+  }
+}

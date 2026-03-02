@@ -9,6 +9,7 @@ add_pdt_test(test_time test_time.cpp)
 add_pdt_test(test_stats test_stats.cpp)
 add_pdt_test(test_filter test_filter.cpp)
 add_pdt_test(test_dataset test_dataset.cpp)
+add_pdt_test(test_report test_report.cpp)
 
 add_executable(test_cli_smoke test_cli_smoke.cpp)
 target_link_libraries(test_cli_smoke PRIVATE pdt_cli_args)

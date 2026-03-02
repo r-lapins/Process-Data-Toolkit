@@ -1,5 +1,6 @@
-#include "pdt/dataset.h"
 #include "pdt/csv_reader.h"
+#include "pdt/dataset.h"
+#include "pdt/report.h"
 #include "cli_args.h"
 
 #include <iostream>
@@ -57,22 +58,29 @@ int main(int argc, char** argv) {
     // Stats
     auto st = filtered.stats();
 
-    // Output: import summary + filter summary + stats
-    std::cout << "Import:\n";
-    std::cout << "  parsed_ok: " << import.parsed_ok << "\n";
-    std::cout << "  skipped:   " << import.skipped << "\n";
-    std::cout << "Data:\n";
-    std::cout << "  total:     " << ds.size() << "\n";
-    std::cout << "  filtered:  " << filtered.size() << "\n";
-    std::cout << "Stats:\n";
-    std::cout << "  count:  " << st.count << "\n";
-    std::cout << "  min:    " << st.min << "\n";
-    std::cout << "  max:    " << st.max << "\n";
-    std::cout << "  mean:   " << st.mean << "\n";
-    std::cout << "  stddev: " << st.stddev << "\n";
+    pdt::ReportContext ctx{};
+    ctx.parsed_ok = import.parsed_ok;
+    ctx.skipped = import.skipped;
+    ctx.total = ds.size();
+    ctx.filtered = filtered.size();
+    ctx.sensor = opt.sensor;
+    ctx.from = opt.from;
+    ctx.to = opt.to;
+
+    if (opt.output_path) {
+        std::ofstream out(*opt.output_path);
+        if (!out) {
+            std::cerr << "Cannot open  output file: " << *opt.output_path << "\n";
+            return 2;
+        }
+        pdt::write_json_report(out, ctx, st);
+    } else {
+        pdt::write_json_report(std::cout, ctx, st);
+    }
 
     return 0;
 }
+
 
 
 

@@ -18,6 +18,7 @@ add_library(pdt
     src/csv_reader.cpp
     src/time.cpp
     src/dataset.cpp
+    src/report.cpp
 )
 target_include_directories(pdt PUBLIC include)
 

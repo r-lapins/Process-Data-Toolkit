@@ -7,6 +7,17 @@
 
 namespace pdt_app {
 
+namespace {
+
+// Helper: consume "--key value" from
+std::optional<std::string_view> get_value(int& i, int argc, const char* const* argv) {
+    if (i + 1 >= argc) return std::nullopt;
+    ++i;
+    return std::string_view{argv[i]};
+}
+
+} // namespace
+
 void print_help(std::ostream& os) {
     os <<
         R"(Proces Data Toolkit
@@ -19,20 +30,10 @@ Options:
     --sensor    Filter by exact sensor name
     --from      Inclusive time lower bound, ISO: YYYY-MM-DDTHH:MM:SS
     --to        Inclusive time upper bound, ISO: YYYY-MM-DDTHH:MM:SS
+    --out       Write JSON report to file
     --help      Show this help
 )";
 }
-
-namespace {
-
-// Helper: consume "--key value" from
-std::optional<std::string_view> get_value(int& i, int argc, const char* const* argv) {
-    if (i + 1 >= argc) return std::nullopt;
-    ++i;
-    return std::string_view{argv[i]};
-}
-
-} // namespace
 
 bool parse_args(int argc, const char* const* argv, CliOptions& out, std::ostream& err) {
     for (int i = 1; i < argc; ++i) {
@@ -80,6 +81,13 @@ bool parse_args(int argc, const char* const* argv, CliOptions& out, std::ostream
             auto ts = pdt::parse_iso8601(*v);
             if (!ts) { err << "Invalid --to timestamp (expected YYYY-MM-DDTHH:MM:SS)\n"; return false; }
             out.to = *ts;
+            continue;
+        }
+
+        if (a == "--out") {
+            auto v = get_value(i, argc, argv);
+            if (!v) { err << "Missing value for --out\n"; return false; }
+            out.output_path = std::string{*v};
             continue;
         }
 
