@@ -47,7 +47,7 @@ Stats DataSet::stats() const {
     for (const auto& s : samples_) {
         sum += s.value;
         result.min = std::min(result.min, s.value);
-        result.max = std::max(result.min, s.value);
+        result.max = std::max(result.max, s.value);
     }
 
     result.mean = sum / result.count;
