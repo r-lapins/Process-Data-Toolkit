@@ -36,6 +36,11 @@ int main(int argc, char** argv) {
         return 2;
     }
 
+    if (opt.per_sensor && opt.sensor) {
+        std::cerr << "Invalid arguments: --per-sensor cannot be used with --sensor\n";
+        return 2;
+    }
+
     std::ifstream in(opt.input_path);
     if (!in) {
         std::cerr << "Cannot open input file: " << opt.input_path << "\n";
@@ -50,13 +55,10 @@ int main(int argc, char** argv) {
 
     // Filter
     pdt::DataSet filtered = ds.filter({         // temporary FilterOptions object; 'opt' is a CliOptions object
-        .sensor = opt.sensor,
+        .sensor = opt.per_sensor ? std::nullopt : opt.sensor,   // in case both are delivered
         .from = opt.from,
         .to = opt.to
     });
-
-    // Stats
-    auto st = filtered.stats();
 
     pdt::ReportContext ctx{};
     ctx.parsed_ok = import.parsed_ok;
@@ -67,15 +69,25 @@ int main(int argc, char** argv) {
     ctx.from = opt.from;
     ctx.to = opt.to;
 
+    std::ostream* out_stream = &std::cout;
+    std::ofstream file;
+
     if (opt.output_path) {
-        std::ofstream out(*opt.output_path);
-        if (!out) {
+        file.open(*opt.output_path);
+        if (!file) {
             std::cerr << "Cannot open  output file: " << *opt.output_path << "\n";
             return 2;
         }
-        pdt::write_json_report(out, ctx, st);
+        out_stream = &file;
+    }
+
+      // Stats
+    if (opt.per_sensor) {
+        auto st = filtered.stats_by_sensor();
+        pdt::write_json_report(*out_stream, ctx, st);
     } else {
-        pdt::write_json_report(std::cout, ctx, st);
+        auto st = filtered.stats();
+        pdt::write_json_report(*out_stream, ctx, st);
     }
 
     return 0;

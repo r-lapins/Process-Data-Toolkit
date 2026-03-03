@@ -63,4 +63,20 @@ Stats DataSet::stats() const {
     return result;
 }
 
+std::map<std::string, Stats> DataSet::stats_by_sensor() const {
+    // grouping -> calculating statistics on groups
+    std::map<std::string, std::vector<Sample>> groups;
+    for (const auto& s : samples_) {
+        groups[s.sensor].push_back(s);
+    }
+
+    std::map<std::string, Stats> out;
+    for (auto& [sensor, vec] : groups) {
+        DataSet ds{std::move(vec)};
+        out.emplace(sensor, ds.stats());
+    }
+
+    return out;
+}
+
 } // namespace pdt

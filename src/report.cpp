@@ -24,10 +24,12 @@ std::string to_string(std::chrono::sys_seconds ts) {
 namespace pdt {
 
 void write_json_report(std::ostream& os,
-                       const pdt::ReportContext& ctx,
-                       const pdt::Stats& stats)
+                       const ReportContext& ctx,
+                       const Stats& stats)
 {
     os << "{\n";
+
+    os << "  \"mode\": \"global/sensor\",\n";
 
     os << "  \"import\": {\n";
     os << "    \"parsed_ok\": " << ctx.parsed_ok << ",\n";
@@ -35,12 +37,19 @@ void write_json_report(std::ostream& os,
     os << "  },\n";
 
     os << "  \"filter\": {\n";
-    if (ctx.sensor)
-        os << "    \"sensor\": \"" << *ctx.sensor << "\",\n";
-    if (ctx.from)
-        os << "    \"from\": \"" << to_string(*ctx.from) << "\",\n";
-    if (ctx.to)
-        os << "    \"to\": \"" << to_string(*ctx.to) << "\",\n";
+    bool first = true;
+
+    auto field = [&](const char* k, const std::string& v) {
+        if (!first) os << ",\n";
+        first = false;
+        os << "    \"" << k << "\": \"" << v << "\"";
+    };
+
+    if (ctx.sensor) field("sensor", *ctx.sensor);
+    if (ctx.from)   field("from", to_string(*ctx.from));
+    if (ctx.to)     field("to", to_string(*ctx.to));
+
+    if (!first) os << "\n";
     os << "  },\n";
 
     os << "  \"data\": {\n";
@@ -56,6 +65,61 @@ void write_json_report(std::ostream& os,
     os << "    \"stddev\": " << stats.stddev << "\n";
     os << "  }\n";
 
+    os << "}\n";
+}
+
+void write_json_report(std::ostream &os,
+                       const ReportContext &ctx,
+                       const std::map<std::string, Stats> &per_sensor)
+{
+    os << "{\n";
+
+    os << "  \"mode\": \"per_sensor\",\n";
+
+    os << "  \"import\": {\n";
+    os << "    \"parsed_ok\": " << ctx.parsed_ok << ",\n";
+    os << "    \"skipped\": " << ctx.skipped << "\n";
+    os << "  },\n";
+
+
+    os << "  \"filter\": {\n";
+    bool first = true;
+
+    auto field = [&](const char* k, const std::string& v) {
+        if (!first) os << ",\n";
+        first = false;
+        os << "    \"" << k << "\": \"" << v << "\"";
+    };
+
+    if (ctx.from)   field("from", to_string(*ctx.from));
+    if (ctx.to)     field("to", to_string(*ctx.to));
+
+    if (!first) os << "\n";
+    os << "  },\n";
+
+    os << "  \"data\": {\n";
+    os << "    \"total\": " << ctx.total << ",\n";
+    os << "    \"filtered\": " << ctx.filtered << "\n";
+    os << "  },\n";
+
+
+    os << "  \"stats_by_sensor\": {\n";
+
+    bool first_s = true;
+    for (const auto& [name, st] : per_sensor) {
+        if (!first_s) os << ",\n";
+        first_s = false;
+
+        os << "    \"" << name << "\": {\n";
+        os << "      \"count\": " << st.count << ",\n";
+        os << "      \"min\": " << st.min << ",\n";
+        os << "      \"max\": " << st.max << ",\n";
+        os << "      \"mean\": " << st.mean << ",\n";
+        os << "      \"stddev\": " << st.stddev << "\n";
+        os << "    }";
+    }
+
+    os << "\n  }\n";
     os << "}\n";
 }
 

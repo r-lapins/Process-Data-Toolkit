@@ -1,6 +1,7 @@
 #pragma once
 #include "types.h"
 
+#include <map>
 #include <span>
 #include <vector>
 
@@ -25,6 +26,7 @@ class DataSet {
     //domains ops
     DataSet filter(const FilterOptions& opt) const;
     Stats stats() const;
+    std::map<std::string, Stats> stats_by_sensor() const;
 
   private:
     std::vector<Sample> samples_;

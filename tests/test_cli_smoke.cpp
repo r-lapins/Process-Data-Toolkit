@@ -43,5 +43,16 @@ int main() {
         assert(!ok);
     }
 
+    {
+        const char* argv[] = {"pdt_cli", "--in", "x.csv", "--sensor", "S1", "--per-sensor"};
+        pdt_app::CliOptions opt{};
+        std::stringstream err;
+        bool ok = pdt_app::parse_args(6, const_cast<char**>(argv), opt, err);
+        assert(ok); // parse przejdzie
+        // konflikt łapany w main -> tu można tylko sprawdzić, że oba ustawione
+        assert(opt.sensor.has_value());
+        assert(opt.per_sensor);
+    }
+
     return 0;
 }

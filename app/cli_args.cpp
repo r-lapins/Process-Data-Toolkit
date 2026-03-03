@@ -26,12 +26,13 @@ Usage:
     pdt_cli --in <file.csv> [--sensor <name>] [--from <ISO>] [--to <ISO>]
 
 Options:
-    --in        Path to CSV file (required)
-    --sensor    Filter by exact sensor name
-    --from      Inclusive time lower bound, ISO: YYYY-MM-DDTHH:MM:SS
-    --to        Inclusive time upper bound, ISO: YYYY-MM-DDTHH:MM:SS
-    --out       Write JSON report to file
-    --help      Show this help
+    --in          Path to CSV file (required)
+    --sensor      Filter by exact sensor name
+    --per-sensor  Output per-sensor statistics (mutually exclusive with --sensor)
+    --from        Inclusive time lower bound, ISO: YYYY-MM-DDTHH:MM:SS
+    --to          Inclusive time upper bound, ISO: YYYY-MM-DDTHH:MM:SS
+    --out         Write JSON report to file
+    --help        Show this help
 )";
 }
 
@@ -63,6 +64,11 @@ bool parse_args(int argc, const char* const* argv, CliOptions& out, std::ostream
             auto v = get_value(i, argc, argv);
             if (!v) { err << "Missing value for --sensor\n"; return false; }
             out.sensor = std::string{*v};
+            continue;
+        }
+
+        if (a == "--per-sensor") {
+            out.per_sensor = true;
             continue;
         }
 

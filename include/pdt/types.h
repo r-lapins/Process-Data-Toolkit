@@ -20,7 +20,7 @@ struct Stats {
 
 struct FilterOptions
 {
-    std::optional<std::string> sensor; // exact math for now
+    std::optional<std::string> sensor;
     std::optional<std::chrono::sys_seconds> from;   // inclusive
     std::optional<std::chrono::sys_seconds> to;     // inclusive
 };

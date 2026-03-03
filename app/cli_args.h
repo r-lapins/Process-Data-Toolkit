@@ -12,6 +12,7 @@ struct CliOptions {
     std::optional<std::chrono::sys_seconds> from;
     std::optional<std::chrono::sys_seconds> to;
     std::optional<std::string> output_path;
+    bool per_sensor{false};
     bool help{false};
 };
 

@@ -20,4 +20,8 @@ void write_json_report(std::ostream& os,
                        const ReportContext& ctx,
                        const Stats& stats);
 
+void write_json_report(std::ostream& os,
+                       const ReportContext& ctx,
+                       const std::map<std::string, Stats>& per_sensor);
+
 } // namespace pdt
