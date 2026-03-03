@@ -18,11 +18,13 @@ ctest --preset debug
 
 ## Run
 
+Basic (global statistics):
+
 ```bash
 ./build/debug/pdt_cli --in data.csv
 ```
 
-With filtering:
+Filter by sensor:
 
 ```bash
 ./build/debug/pdt_cli \
@@ -32,25 +34,53 @@ With filtering:
   --to   2026-02-18T12:00:00
 ```
 
-Test:
+Per-sensor statistics (mutually exclusive with `--sensor`):
+
 ```bash
-./build/debug/pdt_cli --in sample.csv --sensor S1
+./build/debug/pdt_cli \
+  --in data.csv \
+  --per-sensor \
+  --from 2026-02-18T10:00:00 \
+  --to   2026-02-18T12:00:00
 ```
 
-Output:
-```text
-Import:
-  parsed_ok: 31
-  skipped:   7
-Data:
-  total:     31
-  filtered:  14
-Stats:
-  count:  14
-  min:    -2
-  max:    100
-  mean:   19.45
-  stddev: 22.9087
+Export JSON report:
+
+```bash
+./build/debug/pdt_cli \
+  --in data.csv \
+  --per-sensor \
+  --out report.json
+```
+
+---
+
+## JSON Output (example)
+
+```json
+{
+  "mode": "per_sensor",
+  "import": {
+    "parsed_ok": 31,
+    "skipped": 7
+  },
+  "stats_by_sensor": {
+    "S1": {
+      "count": 14,
+      "min": -2,
+      "max": 100,
+      "mean": 19.45,
+      "stddev": 22.9087
+    },
+    "S2": {
+      "count": 10,
+      "min": 0,
+      "max": 55,
+      "mean": 21.3,
+      "stddev": 12.1
+    }
+  }
+}
 ```
 
 ---
@@ -67,6 +97,7 @@ timestamp,sensor,value
 
 - Timestamp format: `YYYY-MM-DDTHH:MM:SS`
 - Invalid lines are skipped and reported
+- Time filtering is inclusive (`--from`, `--to`)
 
 ---
 
@@ -83,6 +114,8 @@ timestamp,sensor,value
   - `min`
   - `max`
   - `stddev`
+- Per-sensor statistics mode (`--per-sensor`)
+- JSON report export (`--out`)
 - Domain model: `DataSet` encapsulating data and operations
 - Separate CLI layer with dedicated argument parser
 - CMake presets (Debug / Release)
@@ -107,7 +140,6 @@ tests/         unit tests
 
 ## Roadmap
 
-- JSON report export
 - CSV report export
-- Simple anomaly detection
+- Simple anomaly detection (z-score)
 - Benchmark target
