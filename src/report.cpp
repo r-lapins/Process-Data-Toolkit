@@ -19,13 +19,45 @@ std::string to_string(std::chrono::sys_seconds ts) {
     return oss.str();
 }
 
+void write_anomaly(std::ostream& os, const pdt::Anomaly& a, int indent) {
+    std::string sp(indent, ' ');
+    os << sp << "{"
+       << "\"timestamp\":\"" << to_string(a.timestamp) << "\","
+       << "\"sensor\":\"" << a.sensor << "\","
+       << "\"value\":" << a.value << ","
+       << "\"z\":" << a.zscore
+       << "}";
+}
+
+void write_anomaly_summary(std::ostream& os, const pdt::AnomalySummary& s, int indent) {
+    std::string sp(indent, ' ');
+
+    if (s.count == 0) {
+        os << sp << "{ \"count\": 0, \"top\": [] }";
+        return;
+    }
+
+    os << sp << "{\n";
+    os << sp << "  \"count\": " << s.count << ",\n";
+    os << sp << "  \"top\": [\n";
+
+    for (std::size_t i = 0; i < s.top.size(); ++i) {
+        write_anomaly(os, s.top[i], indent + 4);
+        os << (i + 1 < s.top.size() ? ",\n" : "\n");
+    }
+
+    os << sp << "  ]\n";
+    os << sp << "}";
+}
+
 } // namespace
 
 namespace pdt {
 
 void write_json_report(std::ostream& os,
                        const ReportContext& ctx,
-                       const Stats& stats)
+                       const Stats& stats,
+                       const std::optional<AnomalySummary>& global_anomalies)
 {
     os << "{\n";
 
@@ -63,14 +95,37 @@ void write_json_report(std::ostream& os,
     os << "    \"max\": " << stats.max << ",\n";
     os << "    \"mean\": " << stats.mean << ",\n";
     os << "    \"stddev\": " << stats.stddev << "\n";
-    os << "  }\n";
+    os << "  }";
+
+    if (ctx.z_threshold) {
+        os << ",\n  \"anomalies\": {\n";
+        os << "    \"method\": \"zscore\",\n";
+        os << "    \"threshold\": " << *ctx.z_threshold << ",\n";
+        os << "    \"top_n\": " << ctx.top_n << ",\n";
+
+        if (global_anomalies) {
+            os << "    \"mode\": \"global\",\n";
+            os << "    \"global\": ";
+            if (global_anomalies) {
+                write_anomaly_summary(os, *global_anomalies, 4);
+                os << "\n";
+            } else {
+                os << "{ \"count\": 0, \"top\": [] }\n";
+            }
+        }
+
+        os << "  }\n";
+        os << "}\n";
+        return;
+    }
 
     os << "}\n";
 }
 
 void write_json_report(std::ostream &os,
                        const ReportContext &ctx,
-                       const std::map<std::string, Stats> &per_sensor)
+                       const std::map<std::string, Stats> &per_sensor,
+                       const std::optional<std::map<std::string, AnomalySummary>>& per_sensor_anomalies)
 {
     os << "{\n";
 
@@ -102,7 +157,6 @@ void write_json_report(std::ostream &os,
     os << "    \"filtered\": " << ctx.filtered << "\n";
     os << "  },\n";
 
-
     os << "  \"stats_by_sensor\": {\n";
 
     bool first_s = true;
@@ -117,6 +171,31 @@ void write_json_report(std::ostream &os,
         os << "      \"mean\": " << st.mean << ",\n";
         os << "      \"stddev\": " << st.stddev << "\n";
         os << "    }";
+    }
+
+    if (ctx.z_threshold) {
+        os << ",\n  \"anomalies\": {\n";
+        os << "    \"method\": \"zscore\",\n";
+        os << "    \"threshold\": " << *ctx.z_threshold << ",\n";
+        os << "    \"top_n\": " << ctx.top_n << ",\n";
+
+        if (per_sensor_anomalies) {
+            os << "    \"mode\": \"per_sensor\",\n";
+            os << "    \"per_sensor\": {\n";
+
+            std::size_t i = 0;
+            for (const auto& [sensor, sum] : *per_sensor_anomalies) {
+                os << "      \"" << sensor << "\": ";
+                write_anomaly_summary(os, sum, 6);
+                os << (++i < per_sensor_anomalies->size() ? ",\n" : "\n");
+            }
+
+            os << "    }\n";
+        }
+
+        os << "  }\n";
+        os << "}\n";
+        return;
     }
 
     os << "\n  }\n";

@@ -1,4 +1,5 @@
 #include "pdt/csv_reader.h"
+#include "pdt/anomaly.h"
 #include "pdt/dataset.h"
 #include "pdt/report.h"
 #include "cli_args.h"
@@ -68,7 +69,10 @@ int main(int argc, char** argv) {
     ctx.sensor = opt.sensor;
     ctx.from = opt.from;
     ctx.to = opt.to;
+    ctx.z_threshold = opt.z_threshold;
+    ctx.top_n = opt.top;
 
+    // output
     std::ostream* out_stream = &std::cout;
     std::ofstream file;
 
@@ -80,14 +84,24 @@ int main(int argc, char** argv) {
         }
         out_stream = &file;
     }
+    // ~output
 
-      // Stats
+    std::optional<pdt::AnomalySummary> global_anoms;
+    std::optional<std::map<std::string, pdt::AnomalySummary>> per_sensor_anoms;
+
+    // Stats & Anomalies & JSON report (function 'write_json_report' is overloaded)
     if (opt.per_sensor) {
         auto st = filtered.stats_by_sensor();
-        pdt::write_json_report(*out_stream, ctx, st);
+
+        if (opt.z_threshold) { per_sensor_anoms = pdt::detect_zscore_per_sensor(filtered, *opt.z_threshold, opt.top); }
+
+        pdt::write_json_report(*out_stream, ctx, st, per_sensor_anoms);
     } else {
         auto st = filtered.stats();
-        pdt::write_json_report(*out_stream, ctx, st);
+
+        if (opt.z_threshold) { global_anoms = pdt::detect_zscore_global(filtered, *opt.z_threshold, opt.top); }
+
+        pdt::write_json_report(*out_stream, ctx, st, global_anoms);
     }
 
     return 0;

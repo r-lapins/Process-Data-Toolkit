@@ -19,6 +19,7 @@ add_library(pdt
     src/time.cpp
     src/dataset.cpp
     src/report.cpp
+    src/anomaly.cpp
 )
 target_include_directories(pdt PUBLIC include)
 
