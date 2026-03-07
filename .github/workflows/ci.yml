@@ -6,13 +6,40 @@ on:
 
 jobs:
   build-test:
+    name: Build & test (GCC)
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Install deps
-        run: sudo apt-get update && sudo apt-get install -y ninja-build cmake g++
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build cmake g++
+
+      - name: Configure
+        run: cmake --preset debug
+
+      - name: Build
+        run: cmake --build --preset debug
+
+      - name: Test
+        run: ctest --preset debug --output-on-failure
+
+  build-test-clang-sanitizers:
+    name: Build & test (Clang + sanitizers)
+    runs-on: ubuntu-latest
+    env:
+      CC: clang
+      CXX: clang++
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build cmake clang
 
       - name: Configure
         run: cmake --preset debug
