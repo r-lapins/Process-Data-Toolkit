@@ -5,14 +5,14 @@ on:
   pull_request:
 
 jobs:
-  build:
+  build-test:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Install deps
-        run: sudo apt-get update && sudo apt-get install -y ninja-build
+        run: sudo apt-get update && sudo apt-get install -y ninja-build cmake g++
 
       - name: Configure
         run: cmake --preset debug
@@ -21,4 +21,4 @@ jobs:
         run: cmake --build --preset debug
 
       - name: Test
-        run: ctest --preset debug
+        run: ctest --preset debug --output-on-failure
