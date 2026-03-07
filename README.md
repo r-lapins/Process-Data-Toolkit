@@ -21,14 +21,14 @@ ctest --preset debug
 Basic (global statistics):
 
 ```bash
-./build/debug/pdt_cli --in data.csv
+./build/debug/pdt_cli --in sample.csv
 ```
 
 Filter by sensor:
 
 ```bash
 ./build/debug/pdt_cli \
-  --in data.csv \
+  --in sample.csv \
   --sensor S1 \
   --from 2026-02-18T10:00:00 \
   --to   2026-02-18T12:00:00
@@ -38,7 +38,7 @@ Per-sensor statistics (mutually exclusive with `--sensor`):
 
 ```bash
 ./build/debug/pdt_cli \
-  --in data.csv \
+  --in sample.csv \
   --per-sensor \
   --from 2026-02-18T10:00:00 \
   --to   2026-02-18T12:00:00
@@ -48,9 +48,37 @@ Export JSON report:
 
 ```bash
 ./build/debug/pdt_cli \
-  --in data.csv \
+  --in sample.csv \
   --per-sensor \
   --out report.json
+```
+
+### Anomaly detection (z-score)
+
+Detect outliers using z-score threshold:
+
+```bash
+./build/debug/pdt_cli \
+  --in sample.csv \
+  --z 3.0
+```
+
+Limit number of reported anomalies:
+
+```bash
+./build/debug/pdt_cli \
+  --in sample.csv \
+  --z 2.5 \
+  --top 5
+```
+
+Per-sensor anomaly detection:
+
+```bash
+./build/debug/pdt_cli \
+  --in sample.csv \
+  --per-sensor \
+  --z 2.5
 ```
 
 ---
@@ -79,6 +107,25 @@ Export JSON report:
       "mean": 21.3,
       "stddev": 12.1
     }
+  },
+  "anomalies": {
+    "method": "zscore",
+    "threshold": 2.5,
+    "top_n": 5,
+    "mode": "per_sensor",
+    "per_sensor": {
+      "S1": {
+        "count": 2,
+        "top": [
+          {
+            "timestamp": "2026-02-18T10:45:00",
+            "sensor": "S1",
+            "value": 100,
+            "z": 3.2
+          }
+        ]
+      }
+    }
   }
 }
 ```
@@ -95,9 +142,12 @@ timestamp,sensor,value
 2026-02-18T10:30:00,S2,2.0
 ```
 
+Rules:
+
 - Timestamp format: `YYYY-MM-DDTHH:MM:SS`
 - Invalid lines are skipped and reported
 - Time filtering is inclusive (`--from`, `--to`)
+- Duplicate timestamps are allowed
 
 ---
 
@@ -115,11 +165,12 @@ timestamp,sensor,value
   - `max`
   - `stddev`
 - Per-sensor statistics mode (`--per-sensor`)
+- Z-score anomaly detection (`--z`, `--top`)
 - JSON report export (`--out`)
 - Domain model: `DataSet` encapsulating data and operations
 - Separate CLI layer with dedicated argument parser
 - CMake presets (Debug / Release)
-- ASAN + UBSAN in Debug
+- ASAN + UBSAN in Debug builds
 - Unit tests (core logic + CLI parsing)
 - GitHub Actions CI
 - clang-format / clang-tidy
@@ -128,7 +179,7 @@ timestamp,sensor,value
 
 ## Project structure
 
-```text
+```
 include/pdt/   public API
 src/           library implementation
 app/           CLI
@@ -138,8 +189,24 @@ tests/         unit tests
 
 ---
 
+## Architecture
+
+The project is structured around a small domain model.
+
+`DataSet` encapsulates ownership of sensor samples and provides operations such as:
+
+- filtering by sensor and time range
+- statistics computation
+- per-sensor statistics
+- anomaly detection
+
+The CLI layer (`app/`) is intentionally separated from the core library to keep the domain logic reusable and testable.
+
+---
+
 ## Roadmap
 
-- CSV report export
-- Simple anomaly detection (z-score)
+- Robust anomaly detection (MAD / IQR)
+- Streaming / incremental processing
 - Benchmark target
+- Larger dataset tests
