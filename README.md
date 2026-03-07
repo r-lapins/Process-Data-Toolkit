@@ -1,8 +1,24 @@
 # Process Data Toolkit
 
+![CI](https://github.com/r-lapins/Process-Data-Toolkit/actions/workflows/ci.yml/badge.svg)
+
 Modern C++20 **library + CLI** for processing industrial sensor CSV data.
 
-Designed as a production-style project with a clear domain model, unit tests, sanitizers, and CI.
+Designed as a production-style project with a clear domain model, unit tests, sanitizers, static analysis, and CI.
+
+---
+
+## Requirements
+
+- C++20 compatible compiler
+- CMake ≥ 3.25
+- Ninja
+
+Tested with:
+
+- GCC
+- Clang
+- Linux
 
 ---
 
@@ -12,6 +28,62 @@ Designed as a production-style project with a clear domain model, unit tests, sa
 cmake --preset debug
 cmake --build --preset debug
 ctest --preset debug
+```
+
+---
+
+## Testing
+
+Run all unit tests:
+
+```bash
+ctest --preset debug
+```
+
+Tests cover:
+
+- CSV parsing
+- timestamp parsing
+- filtering logic
+- statistics computation
+- per-sensor statistics
+- anomaly detection
+- CLI argument parsing
+
+---
+
+## Quick example
+
+Input CSV:
+
+```
+timestamp,sensor,value
+2026-02-18T10:00:00,S1,1.0
+2026-02-18T10:30:00,S2,2.0
+2026-02-18T11:00:00,S1,3.0
+```
+
+Run:
+
+```bash
+./build/debug/pdt_cli --in sample.csv --sensor S1
+```
+
+Output:
+
+```
+Import:
+  parsed_ok: 3
+  skipped:   0
+Data:
+  total:     3
+  filtered:  2
+Stats:
+  count:  2
+  min:    1
+  max:    3
+  mean:   2
+  stddev: 1
 ```
 
 ---
@@ -53,7 +125,9 @@ Export JSON report:
   --out report.json
 ```
 
-### Anomaly detection (z-score)
+---
+
+## Anomaly detection (z-score)
 
 Detect outliers using z-score threshold:
 
@@ -136,7 +210,7 @@ Per-sensor anomaly detection:
 
 CSV with header:
 
-```text
+```
 timestamp,sensor,value
 2026-02-18T10:00:00,S1,1.0
 2026-02-18T10:30:00,S2,2.0
@@ -173,7 +247,8 @@ Rules:
 - ASAN + UBSAN in Debug builds
 - Unit tests (core logic + CLI parsing)
 - GitHub Actions CI
-- clang-format / clang-tidy
+- clang-format
+- clang-tidy
 
 ---
 
@@ -182,9 +257,9 @@ Rules:
 ```
 include/pdt/   public API
 src/           library implementation
-app/           CLI
+app/           CLI application
 tests/         unit tests
-.github/       CI
+.github/       CI workflows
 ```
 
 ---
@@ -201,6 +276,43 @@ The project is structured around a small domain model.
 - anomaly detection
 
 The CLI layer (`app/`) is intentionally separated from the core library to keep the domain logic reusable and testable.
+
+---
+
+## Library usage
+
+The core functionality is provided by the `pdt` library and can be used independently from the CLI.
+
+Example:
+
+```cpp
+#include <pdt/dataset.h>
+#include <pdt/csv_reader.h>
+
+#include <fstream>
+
+int main() {
+    std::ifstream in("sample.csv");
+
+    auto import = pdt::read_csv(in);
+
+    pdt::DataSet ds{std::move(import.samples)};
+
+    auto stats = ds.stats();
+
+    return 0;
+}
+```
+
+---
+
+## Design goals
+
+- modern C++20
+- clear separation between CLI and core library
+- testable domain logic
+- reproducible builds via CMake presets
+- CI with multiple compilers and static analysis
 
 ---
 
