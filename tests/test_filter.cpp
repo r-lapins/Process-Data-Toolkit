@@ -48,7 +48,8 @@ void assert_same_order_by_value(const pdt::DataSet& out, const std::vector<doubl
     assert(out.size() == values.size());
     std::size_t i = 0;
     for (const auto& s : out) {
-        assert(s.value == values[i++]);
+        assert(s.value == values[i]);
+        ++i;
     }
 }
 

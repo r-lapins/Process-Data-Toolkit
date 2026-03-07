@@ -50,7 +50,7 @@ Stats DataSet::stats() const {
         result.max = std::max(result.max, s.value);
     }
 
-    result.mean = sum / result.count;
+    result.mean = sum / static_cast<double>(result.count);
 
     double sq_sum = 0.0;
     for (const auto& s : samples_) {

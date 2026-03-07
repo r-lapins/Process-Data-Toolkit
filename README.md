@@ -210,3 +210,9 @@ The CLI layer (`app/`) is intentionally separated from the core library to keep 
 - Streaming / incremental processing
 - Benchmark target
 - Larger dataset tests
+
+---
+
+## Development
+
+Development notes and CI instructions are available in [DEVELOPMENT.md](DEVELOPMENT.md).
