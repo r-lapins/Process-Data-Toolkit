@@ -21,6 +21,7 @@ add_library(pdt
     src/report.cpp
     src/anomaly.cpp
     src/dft.cpp
+    src/peak_detection.cpp
 )
 target_include_directories(pdt PUBLIC include)
 

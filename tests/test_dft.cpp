@@ -1,4 +1,5 @@
 #include "pdt/dft.h"
+#include "pdt/peak_detection.h"
 
 #include <algorithm>
 #include <cassert>
@@ -31,14 +32,13 @@ int main() {
      */
     for (std::size_t n = 0; n < N; ++n) {
         const double sample = std::sin(2.0 * std::numbers::pi_v<double> * f0 * static_cast<double>(n) / fs);
-
         signal.push_back(sample);
     }
 
-           // Compute spectrum
+    // Compute spectrum
     const auto spectrum = compute_single_sided_spectrum(signal, fs);
 
-           // Basic sanity checks
+    // Basic sanity checks
     assert(!spectrum.frequencies.empty());
     assert(spectrum.frequencies.size() == spectrum.magnitudes.size());
 
@@ -61,6 +61,21 @@ int main() {
      * so 50 Hz lands exactly on a spectral bin.
      */
     assert(std::abs(peak_frequency - f0) < 1e-9);
+
+    //
+    // Threshold-based peak detection on the computed spectrum
+    const auto peaks = find_peaks(spectrum.frequencies, spectrum.magnitudes, 0.8);
+    assert(!peaks.empty());
+
+    bool found_target_peak = false;
+    for (const auto& peak : peaks) {
+        if (std::abs(peak.frequency - f0) < 1e-9) {
+            found_target_peak = true;
+            break;
+        }
+    }
+
+    assert(found_target_peak);
 
     return 0;
 }
