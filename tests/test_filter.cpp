@@ -8,10 +8,18 @@
 
 namespace {
 
+std::chrono::sys_seconds must_parse(std::string_view ts) {
+    auto parsed = pdt::parse_iso8601(ts);
+    assert(parsed.has_value());
+    return *parsed;
+}
+
 pdt::Sample mk(std::string_view ts, std::string sensor, double v) {
-    auto t = pdt::parse_iso8601(ts);
-    assert(t.has_value());
-    return pdt::Sample{*t, std::move(sensor), v};
+    return pdt::Sample{
+        .timestamp = must_parse(ts),
+        .sensor = std::move(sensor),
+        .value = v
+    };
 }
 
 pdt::FilterOptions opt_sensor(std::string s) {
@@ -33,14 +41,6 @@ pdt::FilterOptions opt_to(std::string_view to) {
     auto t = pdt::parse_iso8601(to);
     assert(t.has_value());
     o.to = *t;
-    return o;
-}
-
-pdt::FilterOptions opt_sensor_from_to(std::string s, std::string_view from, std::string_view to) {
-    pdt::FilterOptions o{};
-    o.sensor = std::move(s);
-    o.from = *pdt::parse_iso8601(from);
-    o.to = *pdt::parse_iso8601(to);
     return o;
 }
 
@@ -105,8 +105,8 @@ int main() {
            // 6) from + to (time window, inclusive)
     {
         pdt::FilterOptions o{};
-        o.from = *pdt::parse_iso8601("2026-02-18T10:30:00");
-        o.to   = *pdt::parse_iso8601("2026-02-18T12:00:00");
+        o.from = must_parse("2026-02-18T10:30:00");
+        o.to   = must_parse("2026-02-18T12:00:00");
         auto out = ds.filter(o);
         // 10:30..12:00 => 2,3,4,5
         assert_same_order_by_value(out, {2,3,4,5});
@@ -114,7 +114,12 @@ int main() {
 
            // 7) sensor + from + to (combined)
     {
-        auto out = ds.filter(opt_sensor_from_to("S2", "2026-02-18T10:00:00", "2026-02-18T12:00:00"));
+        pdt::FilterOptions o{};
+        o.sensor = std::string{"S2"};
+        o.from = must_parse("2026-02-18T10:00:00");
+        o.to = must_parse("2026-02-18T12:00:00");
+
+        auto out = ds.filter(o);
         // S2 w oknie => 2,4
         assert_same_order_by_value(out, {2,4});
     }
@@ -122,8 +127,8 @@ int main() {
            // 8) Bounds: exactly one point in time (from==to)
     {
         pdt::FilterOptions o{};
-        o.from = *pdt::parse_iso8601("2026-02-18T11:30:00");
-        o.to   = *pdt::parse_iso8601("2026-02-18T11:30:00");
+        o.from = must_parse("2026-02-18T11:30:00");
+        o.to   = must_parse("2026-02-18T11:30:00");
         auto out = ds.filter(o);
         // dokładnie 11:30:00 => tylko value 4.0
         assert_same_order_by_value(out, {4});
@@ -132,8 +137,8 @@ int main() {
            // 9) Edge-case: from > to => sensible behaviour: empty
     {
         pdt::FilterOptions o{};
-        o.from = *pdt::parse_iso8601("2026-02-18T12:00:00");
-        o.to   = *pdt::parse_iso8601("2026-02-18T10:00:00");
+        o.from = must_parse("2026-02-18T12:00:00");
+        o.to   = must_parse("2026-02-18T10:00:00");
         auto out = ds.filter(o);
         assert(out.empty());
     }

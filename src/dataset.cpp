@@ -17,14 +17,17 @@ DataSet DataSet::filter(const FilterOptions& opt) const {
     out.reserve(samples_.size());
 
     for (const auto& s : samples_) {
-        if (opt.sensor && s.sensor != *opt.sensor)  // *opt.sensor == opt.sensor.value() <-- std::optional<T>;
+        if (opt.sensor && s.sensor != *opt.sensor) {  // *opt.sensor == opt.sensor.value() <-- std::optional<T>;
             continue;
+        }
 
-        if (opt.from && s.timestamp < *opt.from)
+        if (opt.from && s.timestamp < *opt.from) {
             continue;
+        }
 
-        if (opt.to && s.timestamp > *opt.to)
+        if (opt.to && s.timestamp > *opt.to) {
             continue;
+        }
 
         out.push_back(s);
     }
@@ -58,7 +61,7 @@ Stats DataSet::stats() const {
         sq_sum += diff * diff;
     }
 
-    result.stddev = std::sqrt(sq_sum / result.count);
+    result.stddev = std::sqrt(sq_sum / static_cast<double>(result.count));
 
     return result;
 }
