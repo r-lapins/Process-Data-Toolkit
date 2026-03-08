@@ -22,6 +22,7 @@ add_library(pdt
     src/anomaly.cpp
     src/dft.cpp
     src/peak_detection.cpp
+    src/wav_reader.cpp
 )
 target_include_directories(pdt PUBLIC include)
 
