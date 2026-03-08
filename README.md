@@ -49,6 +49,7 @@ Tests cover:
 - per-sensor statistics
 - anomaly detection
 - CLI argument parsing
+- spectral peak detection
 
 ---
 
@@ -173,32 +174,6 @@ Per-sensor anomaly detection:
       "max": 100,
       "mean": 19.45,
       "stddev": 22.9087
-    },
-    "S2": {
-      "count": 10,
-      "min": 0,
-      "max": 55,
-      "mean": 21.3,
-      "stddev": 12.1
-    }
-  },
-  "anomalies": {
-    "method": "zscore",
-    "threshold": 2.5,
-    "top_n": 5,
-    "mode": "per_sensor",
-    "per_sensor": {
-      "S1": {
-        "count": 2,
-        "top": [
-          {
-            "timestamp": "2026-02-18T10:45:00",
-            "sensor": "S1",
-            "value": 100,
-            "z": 3.2
-          }
-        ]
-      }
     }
   }
 }
@@ -213,7 +188,6 @@ CSV with header:
 ```
 timestamp,sensor,value
 2026-02-18T10:00:00,S1,1.0
-2026-02-18T10:30:00,S2,2.0
 ```
 
 Rules:
@@ -242,13 +216,119 @@ Rules:
 - Z-score anomaly detection (`--z`, `--top`)
 - JSON report export (`--out`)
 - Domain model: `DataSet` encapsulating data and operations
-- Separate CLI layer with dedicated argument parser
+- Signal processing utilities (DFT, spectral peaks)
 - CMake presets (Debug / Release)
 - ASAN + UBSAN in Debug builds
-- Unit tests (core logic + CLI parsing)
+- Unit tests
 - GitHub Actions CI
 - clang-format
 - clang-tidy
+
+---
+
+# Signal Processing Module
+
+The project also contains a small experimental module for **time-series and spectral analysis** implemented in modern C++.
+
+Features:
+
+- Discrete Fourier Transform (DFT)
+- Single-sided spectrum computation
+- Configurable spectral peak detection
+- Detection of dominant spectral components
+
+Example demo:
+
+```
+./build/debug/spectrum_demo
+```
+
+The demo:
+
+1. generates a synthetic signal with multiple sinusoids
+2. computes the spectrum
+3. detects peaks
+4. reports dominant frequencies
+
+Example signal used:
+
+```
+x(t) = sin(2π·50t) + 0.5·sin(2π·120t)
+```
+
+Expected peaks:
+
+```
+50 Hz
+120 Hz
+```
+
+---
+
+# Algorithms implemented
+
+### Statistics
+
+```
+mean
+min
+max
+stddev
+```
+
+Standard deviation:
+
+```
+σ = sqrt( Σ(x - μ)² / N )
+```
+
+---
+
+### Z-score anomaly detection
+
+```
+z = (x - μ) / σ
+```
+
+Samples with `|z| > threshold` are reported as anomalies.
+
+---
+
+### Discrete Fourier Transform
+
+```
+X[k] = Σ x[n] · e^(−j2πkn/N)
+```
+
+Current implementation is `O(N²)` and serves as a reference implementation.
+
+---
+
+### Spectral peak detection
+
+Two strategies:
+
+**ThresholdOnly**
+
+```
+X[i] >= threshold_ratio · max(X)
+```
+
+**LocalMaxima**
+
+```
+X[i] > X[i-1] && X[i] > X[i+1]
+```
+
+---
+
+### Dominant spectral components
+
+Dominant frequencies are extracted by:
+
+1. detecting peaks
+2. sorting them by magnitude
+3. selecting strongest components
 
 ---
 
@@ -257,7 +337,7 @@ Rules:
 ```
 include/pdt/   public API
 src/           library implementation
-app/           CLI application
+app/           CLI application + demos
 tests/         unit tests
 .github/       CI workflows
 ```
@@ -280,8 +360,6 @@ The CLI layer (`app/`) is intentionally separated from the core library to keep 
 ---
 
 ## Library usage
-
-The core functionality is provided by the `pdt` library and can be used independently from the CLI.
 
 Example:
 
@@ -312,7 +390,7 @@ int main() {
 - clear separation between CLI and core library
 - testable domain logic
 - reproducible builds via CMake presets
-- CI with multiple compilers and static analysis
+- CI with multiple compilers
 
 ---
 
