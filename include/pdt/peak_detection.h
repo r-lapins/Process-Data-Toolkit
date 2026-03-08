@@ -11,9 +11,15 @@ struct Peak {
     double magnitude;
 };
 
+enum class PeakDetectionMode {
+    ThresholdOnly,
+    LocalMaxima
+};
+
 std::vector<Peak> find_peaks(std::span<const double> frequencies,
                              std::span<const double> magnitudes,
-                             double threshold_ratio);
+                             double threshold_ratio,
+                             PeakDetectionMode mode);
 
 } // namespace pdt
 
