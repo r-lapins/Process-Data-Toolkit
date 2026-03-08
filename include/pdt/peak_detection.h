@@ -1,7 +1,9 @@
 #pragma once
+#include "dft.h"
 #include <cstddef>
 #include <span>
 #include <vector>
+#include <cstddef>
 
 namespace pdt {
 
@@ -20,6 +22,16 @@ std::vector<Peak> find_peaks(std::span<const double> frequencies,
                              std::span<const double> magnitudes,
                              double threshold_ratio,
                              PeakDetectionMode mode);
+
+std::vector<Peak> detect_dominant_peaks(const Spectrum& spectrum,
+                                              double threshold_ratio,
+                                              PeakDetectionMode mode,
+                                              std::size_t max_count
+                                              );
+
+// double spectral_centroid(const Spectrum& spectrum);
+// double spectral_rolloff(const Spectrum& spectrum, double ratio);
+// double spectral_bandwidth(const Spectrum& spectrum);
 
 } // namespace pdt
 
@@ -48,4 +60,13 @@ std::vector<Peak> find_peaks(std::span<const double> frequencies,
  *   - This is a simple threshold-based detector.
  *   - It does not yet enforce local maxima detection.
  *   - frequencies and magnitudes must have the same size.
+ */
+
+/*
+ * detect_dominant_frequencies
+ *
+ * Returns dominant frequencies detected in the spectrum.
+ *
+ * Peaks are filtered using the selected detection mode and threshold,
+ * then sorted by descending magnitude.
  */
