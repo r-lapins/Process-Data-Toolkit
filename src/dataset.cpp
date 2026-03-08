@@ -38,8 +38,9 @@ DataSet DataSet::filter(const FilterOptions& opt) const {
 Stats DataSet::stats() const {
     Stats result{};
 
-    if (samples_.empty())
+    if (samples_.empty()) {
         return result;
+    }
 
     result.count = samples_.size();
 
