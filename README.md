@@ -217,6 +217,8 @@ Rules:
 - JSON report export (`--out`)
 - Domain model: `DataSet` encapsulating data and operations
 - Signal processing utilities (DFT, spectral peaks)
+- WAV (PCM16 mono) reader
+- Spectrum analysis demo for real signals
 - CMake presets (Debug / Release)
 - ASAN + UBSAN in Debug builds
 - Unit tests
@@ -236,8 +238,60 @@ Features:
 - Single-sided spectrum computation
 - Configurable spectral peak detection
 - Detection of dominant spectral components
+- WAV (PCM16 mono) input support
 
-Example demo:
+---
+
+## Spectrum demo
+
+Build the project:
+
+```
+cmake --preset debug
+cmake --build --preset debug
+```
+
+### WAV signal analysis
+
+The demo can also analyze a real WAV file.
+
+Run:
+
+```
+./build/debug/spectrum_demo input.wav
+```
+
+Example output:
+
+```
+Loaded WAV file
+sample_rate = 48000 Hz
+channels    = 1
+samples     = 949760
+Analyzed range: [300, 10000)
+segment size   = 9700
+
+Dominant peaks
+-------------------------------------
+f = 7298.97 Hz |X| = 71.7
+f = 7417.73 Hz |X| = 61.8
+...
+```
+
+The demo:
+
+1. loads a WAV file (PCM16 mono)
+2. extracts a fragment of samples
+3. computes the spectrum
+4. detects dominant spectral peaks
+
+---
+
+### Synthetic signal demo
+
+(Change in *app/spectrum_demo.cpp* needed -> build)
+
+Run:
 
 ```
 ./build/debug/spectrum_demo
@@ -247,21 +301,17 @@ The demo:
 
 1. generates a synthetic signal with multiple sinusoids
 2. computes the spectrum
-3. detects peaks
+3. detects spectral peaks
 4. reports dominant frequencies
 
-Example signal used:
+Example signal:
 
-```
 x(t) = sin(2π·50t) + 0.5·sin(2π·120t)
-```
 
-Expected peaks:
+Expected dominant frequencies:
 
-```
 50 Hz
 120 Hz
-```
 
 ---
 
