@@ -20,6 +20,7 @@ add_library(pdt
     src/dataset.cpp
     src/report.cpp
     src/anomaly.cpp
+    src/dft.cpp
 )
 target_include_directories(pdt PUBLIC include)
 
@@ -36,6 +37,9 @@ target_link_libraries(pdt_cli PRIVATE pdt_cli_args)
 
 enable_testing()
 add_subdirectory(tests)
+
+add_executable(spectrum_demo app/spectrum_demo.cpp)
+target_link_libraries(spectrum_demo PRIVATE pdt)
 
 # include(GNUInstallDirs)
 # install(TARGETS process_data_toolkit

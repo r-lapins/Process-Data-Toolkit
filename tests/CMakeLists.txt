@@ -16,3 +16,7 @@ add_pdt_test(test_anomaly test_anomaly.cpp)
 add_executable(test_cli_smoke test_cli_smoke.cpp)
 target_link_libraries(test_cli_smoke PRIVATE pdt_cli_args)
 add_test(NAME cli_smoke COMMAND test_cli_smoke)
+
+add_executable(test_dft test_dft.cpp)
+target_link_libraries(test_dft PRIVATE pdt)
+add_test(NAME dft COMMAND test_dft)
