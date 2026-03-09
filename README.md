@@ -2,7 +2,9 @@
 
 ![CI](https://github.com/r-lapins/Process-Data-Toolkit/actions/workflows/ci.yml/badge.svg)
 
-Modern C++20 **library + CLI** for processing industrial sensor CSV data.
+Modern C++20 library + CLI for processing industrial sensor data and basic signal analysis.
+
+The project combines industrial data processing (CSV time-series) with a small signal-processing module (DFT, spectrum analysis, spectral peak detection).
 
 Designed as a production-style project with a clear domain model, unit tests, sanitizers, static analysis, and CI.
 
