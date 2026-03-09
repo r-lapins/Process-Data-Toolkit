@@ -42,7 +42,7 @@ bool skip_bytes(std::istream& in, std::uint32_t size) {
 
 } // namespace
 
-std::optional<WavData> read_wav_pcm16_mono(const char* path) {
+std::optional<WavData> read_wav_pcm16_mono(const std::filesystem::path& path) {
     std::ifstream in(path, std::ios::binary);
     if (!in) {
         return std::nullopt;

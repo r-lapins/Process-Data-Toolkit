@@ -15,7 +15,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    const auto wav = read_wav_pcm16_mono(argv[1]);
+    const auto wav = read_wav_pcm16_mono(std::filesystem::path(argv[1]));
     if (!wav) {
         std::cerr << "Failed to read WAV file or unsupported format.\n";
         return 1;

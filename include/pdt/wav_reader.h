@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <optional>
 #include <vector>
+#include <filesystem>
 
 namespace pdt {
 
@@ -12,7 +13,7 @@ struct WavData {
     std::vector<double> samples;
 };
 
-std::optional<WavData> read_wav_pcm16_mono(const char* path);
+std::optional<WavData> read_wav_pcm16_mono(const std::filesystem::path& path);
 
 } // namespace pdt
 
