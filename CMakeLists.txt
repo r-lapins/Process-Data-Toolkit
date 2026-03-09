@@ -7,6 +7,10 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(PDT_ENABLE_SANITIZERS "Enable sanitizers" ON)
 
+option(PDT_BUILD_TESTS "Build tests" ON)
+option(PDT_BUILD_CLI "Build CLI apps" ON)
+option(PDT_BUILD_DEMOS "Build demos" ON)
+
 # Sanitizers (ASAN/UBSAN) – apply to *all* targets that link with pdt
 if(PDT_ENABLE_SANITIZERS AND CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_library(pdt_sanitizers INTERFACE)
@@ -30,18 +34,24 @@ if(TARGET pdt_sanitizers)
     target_link_libraries(pdt PUBLIC pdt_sanitizers)
 endif()
 
-add_library(pdt_cli_args app/cli_args.cpp)
-target_include_directories(pdt_cli_args PUBLIC app)
-target_link_libraries(pdt_cli_args PUBLIC pdt)
+if(PDT_BUILD_CLI)
+    add_library(pdt_cli_args app/cli_args.cpp)
+    target_include_directories(pdt_cli_args PUBLIC app)
+    target_link_libraries(pdt_cli_args PUBLIC pdt)
 
-add_executable(pdt_cli app/main.cpp)
-target_link_libraries(pdt_cli PRIVATE pdt_cli_args)
+    add_executable(pdt_cli app/main.cpp)
+    target_link_libraries(pdt_cli PRIVATE pdt_cli_args)
+endif()
 
-enable_testing()
-add_subdirectory(tests)
+if(PDT_BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
 
-add_executable(spectrum_demo app/spectrum_demo.cpp)
-target_link_libraries(spectrum_demo PRIVATE pdt)
+if(PDT_BUILD_DEMOS)
+    add_executable(spectrum_demo app/spectrum_demo.cpp)
+    target_link_libraries(spectrum_demo PRIVATE pdt)
+endif()
 
 # include(GNUInstallDirs)
 # install(TARGETS process_data_toolkit
