@@ -69,7 +69,7 @@ timestamp,sensor,value
 Run:
 
 ```bash
-./build/debug/pdt_cli --in sample.csv --sensor S1
+./build/debug/pdt_cli --in examples/sample.csv --sensor S1
 ```
 
 Output:
@@ -96,14 +96,14 @@ Stats:
 Basic (global statistics):
 
 ```bash
-./build/debug/pdt_cli --in sample.csv
+./build/debug/pdt_cli --in examples/sample.csv
 ```
 
 Filter by sensor:
 
 ```bash
 ./build/debug/pdt_cli \
-  --in sample.csv \
+  --in examples/sample.csv \
   --sensor S1 \
   --from 2026-02-18T10:00:00 \
   --to   2026-02-18T12:00:00
@@ -113,7 +113,7 @@ Per-sensor statistics (mutually exclusive with `--sensor`):
 
 ```bash
 ./build/debug/pdt_cli \
-  --in sample.csv \
+  --in examples/sample.csv \
   --per-sensor \
   --from 2026-02-18T10:00:00 \
   --to   2026-02-18T12:00:00
@@ -123,9 +123,9 @@ Export JSON report:
 
 ```bash
 ./build/debug/pdt_cli \
-  --in sample.csv \
+  --in examples/sample.csv \
   --per-sensor \
-  --out report.json
+  --out examples/report.json
 ```
 
 ---
@@ -136,7 +136,7 @@ Detect outliers using z-score threshold:
 
 ```bash
 ./build/debug/pdt_cli \
-  --in sample.csv \
+  --in examples/sample.csv \
   --z 3.0
 ```
 
@@ -144,7 +144,7 @@ Limit number of reported anomalies:
 
 ```bash
 ./build/debug/pdt_cli \
-  --in sample.csv \
+  --in examples/sample.csv \
   --z 2.5 \
   --top 5
 ```
@@ -153,7 +153,7 @@ Per-sensor anomaly detection:
 
 ```bash
 ./build/debug/pdt_cli \
-  --in sample.csv \
+  --in examples/sample.csv \
   --per-sensor \
   --z 2.5
 ```
@@ -422,7 +422,7 @@ Example:
 #include <fstream>
 
 int main() {
-    std::ifstream in("sample.csv");
+    std::ifstream in("examples/sample.csv");
 
     auto import = pdt::read_csv(in);
 
