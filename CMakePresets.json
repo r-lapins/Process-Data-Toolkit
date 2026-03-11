@@ -24,6 +24,16 @@
         "CMAKE_BUILD_TYPE": "Release",
         "PDT_ENABLE_SANITIZERS": "OFF"
       }
+    },
+    {
+      "name": "debug-nosan",
+      "displayName": "Debug (no sanitizers)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/debug-nosan",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "PDT_ENABLE_SANITIZERS": "OFF"
+      }
     }
   ],
   "buildPresets": [
@@ -34,12 +44,20 @@
     {
       "name": "release",
       "configurePreset": "release"
+    },
+    {
+      "name": "debug-nosan",
+      "configurePreset": "debug-nosan"
     }
   ],
   "testPresets": [
     {
       "name": "debug",
       "configurePreset": "debug"
+    },
+    {
+      "name": "debug-nosan",
+      "configurePreset": "debug-nosan"
     }
   ]
 }
