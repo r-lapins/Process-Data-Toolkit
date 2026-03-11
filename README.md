@@ -1,97 +1,168 @@
-# Process Data Toolkit
+# Process Data Toolkit (PDT)
 
 ![CI](https://github.com/r-lapins/Process-Data-Toolkit/actions/workflows/ci.yml/badge.svg)
 
-Modern C++20 library + CLI for processing industrial sensor data and basic signal analysis.
+Modern C++20 library and CLI for time-series processing and basic signal analysis.
 
-The project combines industrial data processing (CSV time-series) with a small signal-processing module (DFT, spectrum analysis, spectral peak detection).
+---
 
-Designed as a production-style project with a clear domain model, unit tests, sanitizers, static analysis, and CI.
+## Project goals
+
+This project demonstrates modern C++ development practices and serves as a portfolio example.
+
+Key aspects:
+
+- Modern C++20 design
+- Clean separation between CLI and reusable core library
+- Reproducible builds using CMake presets
+- CI (GCC + Clang)
+- Sanitizers (ASan + UBSan)
+- Static analysis (clang-tidy)
+- Debugging and memory analysis (GDB + Valgrind)
+- Unit testing
+
+---
+
+## Features
+
+### Core data processing
+
+- CSV parser with import summary (`parsed_ok`, `skipped`)
+- ISO 8601 timestamp parsing using `std::chrono`
+- Data filtering by sensor and time range
+- Domain model based on `DataSet` class
+- Statistical analysis (`count`, `mean`, `min`, `max`, `stddev`)
+- Per-sensor statistics mode (`--per-sensor`)
+- Z-score based anomaly detection (`--z`, `--top`)
+- JSON report export (`--out`)
+
+### Signal analysis
+
+- Discrete Fourier Transform (DFT)
+- Single-sided spectrum computation
+- Spectral peak detection (`ThresholdOnly`, `LocalMaxima`)
+- Dominant spectral peak extraction
+- WAV reader (RIFF/WAVE, PCM mono)
+- Spectrum analysis demo (`spectrum_demo`, `spectrum_demo_synthetic`)
+
+---
+
+## Project structure
+
+```
+include/pdt/   public API
+src/           library implementation
+app/           CLI application + demos
+tests/         unit tests
+examples/      sample CSV and WAV inputs
+.github/       CI workflows
+```
 
 ---
 
 ## Requirements
 
-- C++20 compatible compiler
-- CMake ≥ 3.25
+- CMake 3.25+
 - Ninja
-
-Tested with:
-
-- GCC
-- Clang
-- Linux
+- C++20 compatible compiler
+- Linux environment is recommended
 
 ---
 
 ## Build
 
+### Debug (sanitizers)
+
 ```bash
 cmake --preset debug
 cmake --build --preset debug
-ctest --preset debug
+```
+
+### Debug (no sanitizers — for Valgrind/GDB)
+
+```bash
+cmake --preset debug-nosan
+cmake --build --preset debug-nosan
+```
+
+### Release
+
+```bash
+cmake --preset release
+cmake --build --preset release
+```
+
+### Run examples
+
+Build and run the CLI:
+
+```bash
+./build/release/pdt_cli --in examples/sample.csv
+./build/release/spectrum_demo examples/file.wav
 ```
 
 ---
 
-## Testing
+## Testing & Debugging
 
-Run all unit tests:
+### Run tests
+
+With sanitizers:
 
 ```bash
 ctest --preset debug
 ```
 
-Tests cover:
-
-- CSV parsing
-- timestamp parsing
-- filtering logic
-- statistics computation
-- per-sensor statistics
-- anomaly detection
-- CLI argument parsing
-- spectral peak detection
-
----
-
-## Quick example
-
-Input CSV:
-
-```
-timestamp,sensor,value
-2026-02-18T10:00:00,S1,1.0
-2026-02-18T10:30:00,S2,2.0
-2026-02-18T11:00:00,S1,3.0
-```
-
-Run:
+Without sanitizers
 
 ```bash
-./build/debug/pdt_cli --in examples/sample.csv --sensor S1
+ctest --preset debug-nosan
 ```
 
-Output:
+### Debugging (GDB)
 
+Use a debug build to inspect program execution with GDB.
+
+#### Run with GDB
+
+Without sanitizers:
+
+```bash
+gdb ./build/debug-nosan/spectrum_demo
 ```
-Import:
-  parsed_ok: 3
-  skipped:   0
-Data:
-  total:     3
-  filtered:  2
-Stats:
-  count:  2
-  min:    1
-  max:    3
-  mean:   2
-  stddev: 1
+
+Example debugging session:
+
+```gdb
+break main
+run examples/file.wav
+next
+step
+print var
+display var
+info locals
+bt
+```
+
+### Memory checking (Valgrind)
+
+Use the `debug-nosan` preset when running Valgrind.
+
+Why `debug-nosan`? 
+
+AddressSanitizer and Valgrind should not be used in the same build configuration.
+
+#### Valgrind Memcheck
+
+```bash
+valgrind --leak-check=full --track-origins=yes \
+./build/debug-nosan/pdt_cli --in examples/sample.csv \
+--per-sensor
 ```
 
 ---
 
-## Run
+## CLI usage
 
 Basic (global statistics):
 
@@ -128,62 +199,72 @@ Export JSON report:
   --out examples/report.json
 ```
 
----
-
-## Anomaly detection (z-score)
+#### Anomaly detection (z-score)
 
 Detect outliers using z-score threshold:
 
 ```bash
 ./build/debug/pdt_cli \
   --in examples/sample.csv \
-  --z 3.0
+  --z 2.5
 ```
 
-Limit number of reported anomalies:
-
-```bash
-./build/debug/pdt_cli \
-  --in examples/sample.csv \
-  --z 2.5 \
-  --top 5
-```
-
-Per-sensor anomaly detection:
+Per-sensor anomaly detection with limited number of reported anomalies:
 
 ```bash
 ./build/debug/pdt_cli \
   --in examples/sample.csv \
   --per-sensor \
-  --z 2.5
+  --z 2.5 \
+  --top 5
 ```
 
----
-
-## JSON Output (example)
+#### JSON Output (example)
 
 ```json
 {
   "mode": "per_sensor",
   "import": {
-    "parsed_ok": 31,
-    "skipped": 7
+    "parsed_ok": 37,
+    "skipped": 9
+  },
+  "filter": {
+    "from": "2026-02-18T08:00:00",
+    "to": "2026-02-18T18:15:00"
+  },
+  "data": {
+    "total": 37,
+    "filtered": 37
   },
   "stats_by_sensor": {
     "S1": {
-      "count": 14,
-      "min": -2,
+      "count": 15,
+      "min": -50,
       "max": 100,
-      "mean": 19.45,
-      "stddev": 22.9087
+      "mean": 14.82,
+      "stddev": 28.1058
+    }
+  },
+  "anomalies": {
+    "method": "zscore",
+    "threshold": 1,
+    "top_n": 5,
+    "mode": "per_sensor",
+    "per_sensor": {
+      "S1": {
+        "count": 1,
+        "top": [
+          {"timestamp":"2026-02-18T12:45:00","sensor":"S1","value":-50,"z":-2.30629}
+        ]
+      },
+      "S2": { "count": 0, "top": [] }
     }
   }
 }
+
 ```
 
----
-
-## Input format
+#### Input format
 
 CSV with header:
 
@@ -192,76 +273,40 @@ timestamp,sensor,value
 2026-02-18T10:00:00,S1,1.0
 ```
 
-Rules:
+Notes:
 
 - Timestamp format: `YYYY-MM-DDTHH:MM:SS`
 - Invalid lines are skipped and reported
-- Time filtering is inclusive (`--from`, `--to`)
-- Duplicate timestamps are allowed
+- Time filtering is inclusive
 
 ---
 
-## Features
+## Signal Processing Module
 
-- CSV parsing with import summary (`parsed_ok`, `skipped`)
-- ISO 8601 → `std::chrono::sys_seconds`
-- Filtering by:
-  - sensor (exact match)
-  - time range (inclusive)
-- Statistics:
-  - `count`
-  - `mean`
-  - `min`
-  - `max`
-  - `stddev`
-- Per-sensor statistics mode (`--per-sensor`)
-- Z-score anomaly detection (`--z`, `--top`)
-- JSON report export (`--out`)
-- Domain model: `DataSet` encapsulating data and operations
-- Signal processing utilities (DFT, spectral peaks)
-- WAV (PCM16 mono) reader
-- Spectrum analysis demo for real signals
-- CMake presets (Debug / Release)
-- ASAN + UBSAN in Debug builds
-- Unit tests
-- GitHub Actions CI
-- clang-format
-- clang-tidy
+The project includes a signal processing module for basic spectral analysis implemented in modern C++.
 
----
-
-# Signal Processing Module
-
-The project also contains a small experimental module for **time-series and spectral analysis** implemented in modern C++.
-
-Features:
-
-- Discrete Fourier Transform (DFT)
-- Single-sided spectrum computation
-- Configurable spectral peak detection
-- Detection of dominant spectral components
-- WAV (PCM16 mono) input support
-
----
-
-## Spectrum demo
-
-Build the project:
+### Pipeline
 
 ```
-cmake --preset debug
-cmake --build --preset debug
+Signal (WAV / synthetic) → DFT → Spectrum → Peak detection → Dominant components
 ```
 
-### WAV signal analysis
-
-The demo can also analyze a real WAV file.
+### Spectrum demo (WAV input)
 
 Run:
 
 ```
 ./build/debug/spectrum_demo input.wav
+./build/debug/spectrum_demo examples/HDSDR_20230515_072359Z_15047kHz_AF.wav
 ```
+
+The demo:
+
+1. Read a WAV file
+2. Decode PCM16 mono samples
+3. Compute a single-sided spectrum
+4. Detect spectral peaks
+5. Report dominant peaks
 
 Example output:
 
@@ -280,63 +325,41 @@ f = 7417.73 Hz |X| = 61.8
 ...
 ```
 
-The demo:
-
-1. loads a WAV file (PCM16 mono)
-2. extracts a fragment of samples
-3. computes the spectrum
-4. detects dominant spectral peaks
-
----
-
-### Synthetic signal demo
-
-(Change in *app/spectrum_demo.cpp* needed -> build)
+### Spectrum demo (synthetic signal)
 
 Run:
 
 ```
-./build/debug/spectrum_demo
+./build/debug/spectrum_demo_synthetic
 ```
 
 The demo:
 
-1. generates a synthetic signal with multiple sinusoids
-2. computes the spectrum
-3. detects spectral peaks
-4. reports dominant frequencies
+1. Generates a synthetic signal with multiple sinusoids
+2. Computes the spectrum
+3. Detects spectral peaks
+4. Reports dominant spectral peaks
 
 Example signal:
 
 x(t) = sin(2π·50t) + 0.5·sin(2π·120t)
 
-Expected dominant frequencies:
+Expected dominant spectral peaks:
 
 50 Hz
 120 Hz
 
 ---
 
-# Algorithms implemented
+## Algorithms
 
-### Statistics
-
-```
-mean
-min
-max
-stddev
-```
-
-Standard deviation:
+#### Standard deviation:
 
 ```
 σ = sqrt( Σ(x - μ)² / N )
 ```
 
----
-
-### Z-score anomaly detection
+#### Z-score anomaly detection
 
 ```
 z = (x - μ) / σ
@@ -344,9 +367,7 @@ z = (x - μ) / σ
 
 Samples with `|z| > threshold` are reported as anomalies.
 
----
-
-### Discrete Fourier Transform
+#### Discrete Fourier Transform (DFT)
 
 ```
 X[k] = Σ x[n] · e^(−j2πkn/N)
@@ -354,9 +375,7 @@ X[k] = Σ x[n] · e^(−j2πkn/N)
 
 Current implementation is `O(N²)` and serves as a reference implementation.
 
----
-
-### Spectral peak detection
+#### Spectral peak detection
 
 Two strategies:
 
@@ -371,43 +390,6 @@ X[i] >= threshold_ratio · max(X)
 ```
 X[i] > X[i-1] && X[i] > X[i+1]
 ```
-
----
-
-### Dominant spectral components
-
-Dominant frequencies are extracted by:
-
-1. detecting peaks
-2. sorting them by magnitude
-3. selecting strongest components
-
----
-
-## Project structure
-
-```
-include/pdt/   public API
-src/           library implementation
-app/           CLI application + demos
-tests/         unit tests
-.github/       CI workflows
-```
-
----
-
-## Architecture
-
-The project is structured around a small domain model.
-
-`DataSet` encapsulates ownership of sensor samples and provides operations such as:
-
-- filtering by sensor and time range
-- statistics computation
-- per-sensor statistics
-- anomaly detection
-
-The CLI layer (`app/`) is intentionally separated from the core library to keep the domain logic reusable and testable.
 
 ---
 
@@ -436,25 +418,23 @@ int main() {
 
 ---
 
-## Design goals
+## Future work
 
-- modern C++20
-- clear separation between CLI and core library
-- testable domain logic
-- reproducible builds via CMake presets
-- CI with multiple compilers
+Possible next steps:
 
----
-
-## Roadmap
-
+- FFT implementation
+- Additional DSP operations
 - Robust anomaly detection (MAD / IQR)
-- Streaming / incremental processing
-- Benchmark target
-- Larger dataset tests
+- Streaming processing
 
 ---
 
 ## Development
 
 Development notes and CI instructions are available in [DEVELOPMENT.md](DEVELOPMENT.md).
+
+---
+
+## License
+
+MIT License
