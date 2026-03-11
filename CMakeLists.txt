@@ -51,6 +51,9 @@ endif()
 if(PDT_BUILD_DEMOS)
     add_executable(spectrum_demo app/spectrum_demo.cpp)
     target_link_libraries(spectrum_demo PRIVATE pdt)
+
+    add_executable(spectrum_demo_synthetic app/spectrum_demo_synthetic.cpp)
+    target_link_libraries(spectrum_demo_synthetic PRIVATE pdt)
 endif()
 
 # include(GNUInstallDirs)
