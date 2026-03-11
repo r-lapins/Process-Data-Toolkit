@@ -31,7 +31,7 @@ bool parse_line(const std::string& line, Sample& out_sample) {
         out_sample.timestamp = *ts;
         out_sample.sensor = sensor;
         out_sample.value = std::stod(value_str);    // string to double
-    } catch (...) {
+    } catch (const std::exception&) {
         return false;
     }
 

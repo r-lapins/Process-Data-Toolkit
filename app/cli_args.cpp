@@ -104,7 +104,7 @@ bool parse_args(int argc, const char* const* argv, CliOptions& out, std::ostream
             if (!v) { err << "Missing value for --z\n"; return false; }
             try {
                 out.z_threshold = std::stod(std::string{*v});
-            } catch (...) {
+            } catch (const std::exception&) {
                 err << "Invalid value for --z\n";
                 return false;
             }
@@ -122,7 +122,7 @@ bool parse_args(int argc, const char* const* argv, CliOptions& out, std::ostream
                 auto n = std::stoi(std::string{*v});
                 if (n < 0 || n > 25) { err << "--top must be in range [0, 25]\n"; return false; }
                 out.top = static_cast<std::size_t>(n);
-            } catch (...) {
+            } catch (const std::exception&) {
                 err << "Invalid value for --top\n";
                 return false;
             }
