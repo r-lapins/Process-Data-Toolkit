@@ -1,4 +1,4 @@
-#include "pdt/dft.h"
+#include "pdt/fft.h"
 #include "pdt/peak_detection.h"
 
 #include <cmath>
@@ -9,13 +9,13 @@
 int main() {
     using namespace pdt;
 
-           // Signal parameters
-    const double fs = 1000.0;    // sampling frequency [Hz]
+    // Signal parameters
+    const double fs = 1024.0;    // sampling frequency [Hz]
     const double f0 = 50.0;      // first sinusoid frequency [Hz]
     const double f1 = 120.0;     // second sinusoid frequency [Hz]
-    const std::size_t N = 1000;  // number of samples
+    const std::size_t N = 1024;  // number of samples
 
-           // Generate a signal containing two sinusoids with different amplitudes
+    // Generate a signal containing two sinusoids with different amplitudes
     std::vector<double> signal;
     signal.reserve(N);
 
@@ -29,8 +29,8 @@ int main() {
         signal.push_back(sample);
     }
 
-           // Compute single-sided spectrum
-    const auto spectrum = compute_single_sided_spectrum(signal, fs);
+    // Compute single-sided spectrum
+    const auto spectrum = compute_spectrum(signal, fs);
 
     std::cout << "Single-sided spectrum\n";
     std::cout << "-------------------------------------\n";
@@ -44,7 +44,7 @@ int main() {
             << '\n';
     }
 
-           // Detect all bins above threshold
+    // Detect all bins above threshold
     const auto threshold_peaks = find_peaks(
         spectrum.frequencies,
         spectrum.magnitudes,
@@ -63,7 +63,7 @@ int main() {
             << '\n';
     }
 
-           // Detect local maxima above threshold
+    // Detect local maxima above threshold
     const auto local_maxima_peaks = find_peaks(
         spectrum.frequencies,
         spectrum.magnitudes,
@@ -82,7 +82,7 @@ int main() {
             << '\n';
     }
 
-           // Detect dominant peaks sorted by descending magnitude
+    // Detect dominant peaks sorted by descending magnitude
     const auto dominant_peaks = detect_dominant_peaks(
         spectrum,
         0.4,
