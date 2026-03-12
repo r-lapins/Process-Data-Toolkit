@@ -27,6 +27,7 @@ add_library(pdt
     src/dft.cpp
     src/peak_detection.cpp
     src/wav_reader.cpp
+    src/fft.cpp
 )
 target_include_directories(pdt PUBLIC include)
 
