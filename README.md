@@ -39,11 +39,15 @@ Key aspects:
 ### Signal analysis
 
 - Discrete Fourier Transform (DFT)
+- Radix-2 Fast Fourier Transform (FFT)
+- Automatic DFT / FFT selection depending on segment length
 - Single-sided spectrum computation
+- Window functions: Hann and Hamming
 - Spectral peak detection (`ThresholdOnly`, `LocalMaxima`)
 - Dominant spectral peak extraction
-- WAV reader (RIFF/WAVE, PCM mono)
-- Spectrum analysis demo (`spectrum_demo`, `spectrum_demo_synthetic`)
+- WAV reader (RIFF/WAVE PCM16 mono)
+- CLI spectrum analysis tool for WAV files (`spectrum_cli`)
+- Synthetic signal spectrum analysis demo (`spectrum_synth_demo`)
 
 ---
 
@@ -52,7 +56,7 @@ Key aspects:
 ```
 include/pdt/   public API
 src/           library implementation
-app/           CLI application + demos
+app/           CLI applications + demo
 tests/         unit tests
 examples/      sample CSV and WAV inputs
 .github/       CI workflows
@@ -98,7 +102,7 @@ Build and run the CLI:
 
 ```bash
 ./build/release/pdt_cli --in examples/sample.csv
-./build/release/spectrum_demo examples/file.wav
+./build/release/spectrum_cli examples/file.wav
 ```
 
 ---
@@ -170,32 +174,14 @@ Basic (global statistics):
 ./build/debug/pdt_cli --in examples/sample.csv
 ```
 
-Filter by sensor:
-
-```bash
-./build/debug/pdt_cli \
-  --in examples/sample.csv \
-  --sensor S1 \
-  --from 2026-02-18T10:00:00 \
-  --to   2026-02-18T12:00:00
-```
-
-Per-sensor statistics (mutually exclusive with `--sensor`):
+Filter by sensor and export JSON report:
 
 ```bash
 ./build/debug/pdt_cli \
   --in examples/sample.csv \
   --per-sensor \
   --from 2026-02-18T10:00:00 \
-  --to   2026-02-18T12:00:00
-```
-
-Export JSON report:
-
-```bash
-./build/debug/pdt_cli \
-  --in examples/sample.csv \
-  --per-sensor \
+  --to   2026-02-18T12:00:00 \
   --out examples/report.json
 ```
 
@@ -206,15 +192,7 @@ Detect outliers using z-score threshold:
 ```bash
 ./build/debug/pdt_cli \
   --in examples/sample.csv \
-  --z 2.5
-```
-
-Per-sensor anomaly detection with limited number of reported anomalies:
-
-```bash
-./build/debug/pdt_cli \
-  --in examples/sample.csv \
-  --per-sensor \
+  --sensor S1 \
   --z 2.5 \
   --top 5
 ```
@@ -288,49 +266,81 @@ The project includes a signal processing module for basic spectral analysis impl
 ### Pipeline
 
 ```
-Signal (WAV / synthetic) → DFT → Spectrum → Peak detection → Dominant components
+Signal (WAV / synthetic) → optional windowing → DFT / FFT → Spectrum → Peak detection → Dominant components
 ```
 
-### Spectrum demo (WAV input)
+### Spectrum CLI (WAV input)
 
 Run:
 
 ```
-./build/debug/spectrum_demo input.wav
-./build/debug/spectrum_demo examples/HDSDR_20230515_072359Z_15047kHz_AF.wav
+./build/debug/spectrum_cli input.wav
+./build/debug/spectrum_cli examples/HDSDR_20230515_072359Z_15047kHz_AF.wav
 ```
 
-The demo:
+Example with explicit options:
 
-1. Read a WAV file
-2. Decode PCM16 mono samples
-3. Compute a single-sided spectrum
-4. Detect spectral peaks
-5. Report dominant peaks
+```
+./build/debug/spectrum_cli \
+  --window hann \
+  --from 0 \
+  --bins 1024 \
+  --threshold 0.4 \
+  --mode local-maxima \
+  --top 10 \
+  --algorithm auto \
+  input.wav
+```
+
+Supported options:
+
+```
+--window <none|hann|hamming>
+--from <index>
+--bins <count>
+--threshold <0..1>
+--mode <threshold-only|local-maxima>
+--top <count>
+--algorithm <auto|dft|fft>
+```
+
+What the spectrum CLI does:
+
+1. Reads a WAV file
+2. Decodes PCM16 mono samples
+3. Extracts a selected sample range
+4. Optionally applies a window function
+5. Computes a single-sided spectrum using DFT or FFT
+6. Detects spectral peaks
+7. Reports dominant spectral peaks
 
 Example output:
 
 ```
-Loaded WAV file
-sample_rate = 48000 Hz
-channels    = 1
-samples     = 949760
-Analyzed range: [300, 10000)
-segment size   = 9700
+Input file   : examples/sample.wav
+Sample rate  : 48000 Hz
+Channels     : 1
+Samples      : 949760
+From sample  : 4736
+Bins         : 512
+Window       : hamming
+Algorithm    : fft
+Threshold    : 0.2
+Peak mode    : local-maxima
+Top peaks    : 2
 
 Dominant peaks
 -------------------------------------
-f = 7298.97 Hz |X| = 71.7
-f = 7417.73 Hz |X| = 61.8
-...
+1. f = 7312.5 Hz    |X| = 6.69779    (bin 78)
+2. f = 7125 Hz    |X| = 2.93414    (bin 76)
 ```
 
 ### Spectrum demo (synthetic signal)
 
-Run:
+The project also includes a small synthetic-signal demo:
 
 ```
-./build/debug/spectrum_demo_synthetic
+./build/debug/spectrum_synth_demo
 ```
 
 The demo:
@@ -422,7 +432,6 @@ int main() {
 
 Possible next steps:
 
-- FFT implementation
 - Additional DSP operations
 - Robust anomaly detection (MAD / IQR)
 - Streaming processing
