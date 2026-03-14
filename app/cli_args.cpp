@@ -1,22 +1,11 @@
 #include "cli_args.h"
+#include "cli_common.h"
 #include "pdt/time.h"
 
-#include <optional>
 #include <string>
 #include <string_view>
 
 namespace pdt_app {
-
-namespace {
-
-// Helper: consume "--key value" from
-std::optional<std::string_view> get_value(int& i, int argc, const char* const* argv) {
-    if (i + 1 >= argc) return std::nullopt;
-    ++i;
-    return std::string_view{argv[i]};
-}
-
-} // namespace
 
 void print_help(std::ostream& os) {
     os <<
@@ -39,11 +28,13 @@ Options:
 }
 
 bool parse_args(int argc, const char* const* argv, CliOptions& out, std::ostream& err) {
-    for (int i = 1; i < argc; ++i) {
-        std::string_view a{argv[i]};
+    cli_common::ArgReader args(argc, argv);
+
+    while (args.has_next()) {
+        const std::string_view a = args.next();
 
         if (a == "--") {
-            if (i + 1 < argc) {
+            if (args.has_remaining()) {
                 err << "Unexpected positional arguments after --\n";
                 return false;
             }
@@ -56,14 +47,14 @@ bool parse_args(int argc, const char* const* argv, CliOptions& out, std::ostream
         }
 
         if (a == "--in") {
-            auto v = get_value(i, argc, argv);
+            const auto v = args.value();
             if (!v) { err << "Missing value for --in\n"; return false; }
             out.input_path = std::string{*v};
             continue;
         }
 
         if (a == "--sensor") {
-            auto v = get_value(i, argc, argv);
+            const auto v = args.value();
             if (!v) { err << "Missing value for --sensor\n"; return false; }
             out.sensor = std::string{*v};
             continue;
@@ -75,63 +66,74 @@ bool parse_args(int argc, const char* const* argv, CliOptions& out, std::ostream
         }
 
         if (a == "--from") {
-            auto v = get_value(i, argc, argv);
+            const auto v = args.value();
             if (!v) { err << "Missing value for --from\n"; return false; }
-            auto ts = pdt::parse_iso8601(*v);
-            if (!ts) { err << "Invalid --from timestamp (expected YYYY-MM-DDTHH:MM:SS)\n"; return false; }
+
+            const auto ts = pdt::parse_iso8601(*v);
+            if (!ts) {
+                err << "Invalid --from timestamp (expected YYYY-MM-DDTHH:MM:SS)\n";
+                return false;
+            }
+
             out.from = *ts;
             continue;
         }
 
         if (a == "--to") {
-            auto v = get_value(i, argc, argv);
+            const auto v = args.value();
             if (!v) { err << "Missing value for --to\n"; return false; }
-            auto ts = pdt::parse_iso8601(*v);
-            if (!ts) { err << "Invalid --to timestamp (expected YYYY-MM-DDTHH:MM:SS)\n"; return false; }
+
+            const auto ts = pdt::parse_iso8601(*v);
+            if (!ts) {
+                err << "Invalid --to timestamp (expected YYYY-MM-DDTHH:MM:SS)\n";
+                return false;
+            }
+
             out.to = *ts;
             continue;
         }
 
         if (a == "--out") {
-            auto v = get_value(i, argc, argv);
+            const auto v = args.value();
             if (!v) { err << "Missing value for --out\n"; return false; }
             out.output_path = std::string{*v};
             continue;
         }
 
         if (a == "--z") {
-            auto v = get_value(i, argc, argv);
+            const auto v = args.value();
             if (!v) { err << "Missing value for --z\n"; return false; }
-            try {
-                out.z_threshold = std::stod(std::string{*v});
-            } catch (const std::exception&) {
+
+            double z = 0.0;
+            if (!cli_common::parse_double(*v, z)) {
                 err << "Invalid value for --z\n";
                 return false;
             }
-            if (*out.z_threshold <= 0.0) {
+
+            if (z <= 0.0) {
                 err << "--z must be > 0\n";
                 return false;
             }
+
+            out.z_threshold = z;
             continue;
         }
 
         if (a == "--top") {
-            auto v = get_value(i, argc, argv);
+            const auto v = args.value();
             if (!v) { err << "Missing value for --top\n"; return false; }
-            try {
-                auto n = std::stoi(std::string{*v});
-                if (n < 0 || n > 25) { err << "--top must be in range [0, 25]\n"; return false; }
-                out.top = static_cast<std::size_t>(n);
-            } catch (const std::exception&) {
-                err << "Invalid value for --top\n";
+
+            std::size_t n = 0;
+            if (!cli_common::parse_size_t(*v, n) || n > 25) {
+                err << "--top must be in range [0, 25]\n";
                 return false;
             }
+
+            out.top = n;
             continue;
         }
 
-        err << "Unknown argument: " << a << "\n";
-        err << "Use --help to see available options.\n";
-        return false;
+        return cli_common::fail_unknown_option(a, err);
     }
 
     return true;

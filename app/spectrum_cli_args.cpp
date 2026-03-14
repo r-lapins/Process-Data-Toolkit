@@ -1,6 +1,6 @@
 #include "spectrum_cli_args.h"
+#include "cli_common.h"
 
-#include <cstdlib>
 #include <optional>
 #include <ostream>
 #include <string>
@@ -8,13 +8,6 @@
 
 namespace spectrum_app {
 namespace {
-
-std::optional<std::string_view> get_value(int& i, int argc, const char* const* argv) {
-    if (i + 1 >= argc) { return std::nullopt; }
-
-    ++i;
-    return std::string_view{argv[i]};
-}
 
 std::optional<pdt::WindowType> parse_window_type(std::string_view value) {
     if (value == "hann") { return pdt::WindowType::Hann; }
@@ -33,32 +26,6 @@ std::optional<SpectrumAlgorithm> parse_algorithm(std::string_view value) {
     if (value == "dft") { return SpectrumAlgorithm::Dft; }
     if (value == "fft") { return SpectrumAlgorithm::Fft; }
     return std::nullopt;
-}
-
-bool parse_size_t(std::string_view text, std::size_t& out) {
-    if (!text.empty() && text.front() == '-') { return false; }
-
-    try {
-        std::size_t pos = 0;
-        const auto value = std::stoull(std::string{text}, &pos);
-        if (pos != text.size()) { return false; }
-        out = static_cast<std::size_t>(value);
-        return true;
-    } catch (...) {
-        return false;
-    }
-}
-
-bool parse_double(std::string_view text, double& out) {
-    if (!text.empty() && text.front() == '-') { return false; }
-
-    try {
-        std::size_t pos = 0;
-        out = std::stod(std::string{text}, &pos);
-        return pos == text.size();
-    } catch (...) {
-        return false;
-    }
 }
 
 } // namespace
@@ -80,8 +47,10 @@ void print_help(std::ostream& os) {
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity)
 bool parse_cli(int argc, const char* const* argv, CliOptions& options, std::ostream& err) {
-    for (int i = 1; i < argc; ++i) {
-        const std::string_view arg{argv[i]};
+    cli_common::ArgReader args(argc, argv);
+
+    while (args.has_next()) {
+        const std::string_view arg = args.next();
 
         if (arg == "--help" || arg == "-h") {
             options.help_requested = true;
@@ -89,7 +58,7 @@ bool parse_cli(int argc, const char* const* argv, CliOptions& options, std::ostr
         }
 
         if (arg == "--window") {
-            const auto value = get_value(i, argc, argv);
+            const auto value = args.value();
             if (!value) {
                 err << "Missing value for --window\n";
                 return false;
@@ -112,13 +81,13 @@ bool parse_cli(int argc, const char* const* argv, CliOptions& options, std::ostr
         }
 
         if (arg == "--from") {
-            const auto value = get_value(i, argc, argv);
+            const auto value = args.value();
             if (!value) {
                 err << "Missing value for --from\n";
                 return false;
             }
 
-            if (!parse_size_t(*value, options.from)) {
+            if (!cli_common::parse_size_t(*value, options.from)) {
                 err << "Invalid value for --from: " << *value << '\n';
                 return false;
             }
@@ -126,13 +95,13 @@ bool parse_cli(int argc, const char* const* argv, CliOptions& options, std::ostr
         }
 
         if (arg == "--bins") {
-            const auto value = get_value(i, argc, argv);
+            const auto value = args.value();
             if (!value) {
                 err << "Missing value for --bins\n";
                 return false;
             }
 
-            if (!parse_size_t(*value, options.bins) || options.bins == 0) {
+            if (!cli_common::parse_size_t(*value, options.bins) || options.bins == 0) {
                 err << "Invalid value for --bins: " << *value << '\n';
                 return false;
             }
@@ -140,13 +109,13 @@ bool parse_cli(int argc, const char* const* argv, CliOptions& options, std::ostr
         }
 
         if (arg == "--threshold") {
-            const auto value = get_value(i, argc, argv);
+            const auto value = args.value();
             if (!value) {
                 err << "Missing value for --threshold\n";
                 return false;
             }
 
-            if (!parse_double(*value, options.threshold) ||
+            if (!cli_common::parse_double(*value, options.threshold) ||
                 options.threshold < 0.0 || options.threshold > 1.0) {
                 err << "Invalid value for --threshold: " << *value << '\n';
                 return false;
@@ -155,7 +124,7 @@ bool parse_cli(int argc, const char* const* argv, CliOptions& options, std::ostr
         }
 
         if (arg == "--mode") {
-            const auto value = get_value(i, argc, argv);
+            const auto value = args.value();
             if (!value) {
                 err << "Missing value for --mode\n";
                 return false;
@@ -172,13 +141,13 @@ bool parse_cli(int argc, const char* const* argv, CliOptions& options, std::ostr
         }
 
         if (arg == "--top") {
-            const auto value = get_value(i, argc, argv);
+            const auto value = args.value();
             if (!value) {
                 err << "Missing value for --top\n";
                 return false;
             }
 
-            if (!parse_size_t(*value, options.top) || options.top == 0) {
+            if (!cli_common::parse_size_t(*value, options.top) || options.top == 0) {
                 err << "Invalid value for --top: " << *value << '\n';
                 return false;
             }
@@ -186,7 +155,7 @@ bool parse_cli(int argc, const char* const* argv, CliOptions& options, std::ostr
         }
 
         if (arg == "--algorithm") {
-            const auto value = get_value(i, argc, argv);
+            const auto value = args.value();
             if (!value) {
                 err << "Missing value for --algorithm\n";
                 return false;
@@ -202,10 +171,8 @@ bool parse_cli(int argc, const char* const* argv, CliOptions& options, std::ostr
             continue;
         }
 
-        if (!arg.empty() && arg.front() == '-') {
-            err << "Unknown option: " << arg << '\n';
-            err << "Use --help to see available options.\n";
-            return false;
+        if (cli_common::is_option(arg)) {
+            return cli_common::fail_unknown_option(arg, err);
         }
 
         if (!options.input_path.empty()) {

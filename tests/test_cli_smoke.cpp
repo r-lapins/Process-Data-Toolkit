@@ -54,5 +54,21 @@ int main() {
         assert(opt.per_sensor);
     }
 
+    {
+        const char* argv[] = {"pdt_cli", "--z", "abc"};
+        CliOptions opt{};
+        std::stringstream err;
+        bool ok = parse_args(3, argv, opt, err);
+        assert(!ok);
+    }
+
+    {
+        const char* argv[] = {"pdt_cli", "--top", "26"};
+        CliOptions opt{};
+        std::stringstream err;
+        bool ok = parse_args(3, argv, opt, err);
+        assert(!ok);
+    }
+
     return 0;
 }

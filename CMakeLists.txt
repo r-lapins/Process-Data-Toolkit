@@ -37,7 +37,7 @@ if(TARGET pdt_sanitizers)
 endif()
 
 if(PDT_BUILD_CLI)
-    add_library(pdt_cli_args app/cli_args.cpp)
+    add_library(pdt_cli_args app/cli_args.cpp app/cli_common.cpp)
     target_include_directories(pdt_cli_args PUBLIC app)
     target_link_libraries(pdt_cli_args PUBLIC pdt)
 
@@ -45,13 +45,8 @@ if(PDT_BUILD_CLI)
     target_link_libraries(pdt_cli PRIVATE pdt_cli_args)
 endif()
 
-if(PDT_BUILD_TESTS)
-    enable_testing()
-    add_subdirectory(tests)
-endif()
-
 if(PDT_BUILD_SPECTRUM)
-    add_library(pdt_spectrum_cli_args STATIC app/spectrum_cli_args.cpp)
+    add_library(pdt_spectrum_cli_args STATIC app/spectrum_cli_args.cpp app/cli_common.cpp)
     target_include_directories(pdt_spectrum_cli_args PUBLIC app)
     target_link_libraries(pdt_spectrum_cli_args PUBLIC pdt)
 
@@ -60,6 +55,11 @@ if(PDT_BUILD_SPECTRUM)
 
     add_executable(spectrum_synth_demo app/spectrum_synth_demo.cpp)
     target_link_libraries(spectrum_synth_demo PRIVATE pdt)
+endif()
+
+if(PDT_BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
 endif()
 
 # include(GNUInstallDirs)
