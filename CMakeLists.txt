@@ -9,7 +9,7 @@ option(PDT_ENABLE_SANITIZERS "Enable sanitizers" ON)
 
 option(PDT_BUILD_TESTS "Build tests" ON)
 option(PDT_BUILD_CLI "Build CLI apps" ON)
-option(PDT_BUILD_DEMOS "Build demos" ON)
+option(PDT_BUILD_SPECTRUM "Build demos" ON)
 
 # Sanitizers (ASAN/UBSAN) – apply to *all* targets that link with pdt
 if(PDT_ENABLE_SANITIZERS AND CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -50,16 +50,16 @@ if(PDT_BUILD_TESTS)
     add_subdirectory(tests)
 endif()
 
-if(PDT_BUILD_DEMOS)
-    add_library(spectrum_cli STATIC app/spectrum_cli_args.cpp)
-    target_include_directories(spectrum_cli PUBLIC app)
-    target_link_libraries(spectrum_cli PUBLIC pdt)
+if(PDT_BUILD_SPECTRUM)
+    add_library(pdt_spectrum_cli_args STATIC app/spectrum_cli_args.cpp)
+    target_include_directories(pdt_spectrum_cli_args PUBLIC app)
+    target_link_libraries(pdt_spectrum_cli_args PUBLIC pdt)
 
-    add_executable(spectrum_demo app/spectrum_demo.cpp)
-    target_link_libraries(spectrum_demo PRIVATE pdt spectrum_cli)
+    add_executable(spectrum_cli app/spectrum_main.cpp)
+    target_link_libraries(spectrum_cli PRIVATE pdt pdt_spectrum_cli_args)
 
-    add_executable(spectrum_demo_synthetic app/spectrum_demo_synthetic.cpp)
-    target_link_libraries(spectrum_demo_synthetic PRIVATE pdt)
+    add_executable(spectrum_synth_demo app/spectrum_synth_demo.cpp)
+    target_link_libraries(spectrum_synth_demo PRIVATE pdt)
 endif()
 
 # include(GNUInstallDirs)
