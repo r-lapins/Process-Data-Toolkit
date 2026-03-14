@@ -31,8 +31,8 @@ bool read_fourcc(std::istream& in, std::array<char, 4>& fourcc) {
     return read_exact(in, fourcc.data(), 4);
 }
 
-bool fourcc_equals(const std::array<char, 4>& a, const char (&b)[5]) {
-    return std::memcmp(a.data(), b, 4) == 0;
+bool fourcc_equals(const std::array<char,4>& a, const std::array<char,4>& b) {
+    return a == b;
 }
 
 bool skip_bytes(std::istream& in, std::uint32_t size) {
@@ -42,13 +42,14 @@ bool skip_bytes(std::istream& in, std::uint32_t size) {
 
 } // namespace
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 std::optional<WavData> read_wav_pcm16_mono(const std::filesystem::path& path) {
     std::ifstream in(path, std::ios::binary);
     if (!in) {
         return std::nullopt;
     }
 
-           // RIFF header
+    // RIFF header
     std::array<char, 4> chunk_id{};
     std::uint32_t riff_chunk_size{};
     std::array<char, 4> format{};
@@ -57,7 +58,7 @@ std::optional<WavData> read_wav_pcm16_mono(const std::filesystem::path& path) {
         return std::nullopt;
     }
 
-    if (!fourcc_equals(chunk_id, "RIFF") || !fourcc_equals(format, "WAVE")) {
+    if (chunk_id != std::array{'R','I','F','F'} || format != std::array{'W','A','V','E'}) {
         return std::nullopt;
     }
 
@@ -67,7 +68,7 @@ std::optional<WavData> read_wav_pcm16_mono(const std::filesystem::path& path) {
     FmtChunk fmt{};
     std::vector<double> samples;
 
-           // Read chunks until EOF or until fmt+data are found
+    // Read chunks until EOF or until fmt+data are found
     while (in && (!fmt_found || !data_found)) {
         std::array<char, 4> subchunk_id{};
         std::uint32_t subchunk_size{};
@@ -80,7 +81,7 @@ std::optional<WavData> read_wav_pcm16_mono(const std::filesystem::path& path) {
             return std::nullopt;
         }
 
-        if (fourcc_equals(subchunk_id, "fmt ")) {
+        if (subchunk_id == std::array{'f', 'm', 't', ' '}) {
             if (subchunk_size < 16) {
                 return std::nullopt;
             }
@@ -94,7 +95,7 @@ std::optional<WavData> read_wav_pcm16_mono(const std::filesystem::path& path) {
                 return std::nullopt;
             }
 
-                   // Skip any extra fmt bytes beyond the PCM base header
+            // Skip any extra fmt bytes beyond the PCM base header
             if (subchunk_size > 16) {
                 if (!skip_bytes(in, subchunk_size - 16)) {
                     return std::nullopt;
@@ -103,15 +104,15 @@ std::optional<WavData> read_wav_pcm16_mono(const std::filesystem::path& path) {
 
             fmt_found = true;
         }
-        else if (fourcc_equals(subchunk_id, "data")) {
+        else if (subchunk_id == std::array{'d', 'a', 't', 'a'}) {
             if (!fmt_found) {
                 // In standard WAV files fmt usually comes first.
                 // For simplicity, require fmt before data.
                 return std::nullopt;
             }
 
-                   // Supported format:
-                   // PCM, mono, 16-bit
+            // Supported format:
+            // PCM, mono, 16-bit
             if (fmt.audio_format != 1 || fmt.num_channels != 1 || fmt.bits_per_sample != 16) {
                 return std::nullopt;
             }
@@ -134,7 +135,7 @@ std::optional<WavData> read_wav_pcm16_mono(const std::filesystem::path& path) {
                     return std::nullopt;
                 }
 
-                       // Normalize signed 16-bit PCM to [-1.0, 1.0]
+                // Normalize signed 16-bit PCM to [-1.0, 1.0]
                 constexpr double scale = 32768.0;
                 samples.push_back(static_cast<double>(raw_sample) / scale);
             }
@@ -148,7 +149,7 @@ std::optional<WavData> read_wav_pcm16_mono(const std::filesystem::path& path) {
             }
         }
 
-               // Chunks are word-aligned; odd-sized chunks have one padding byte
+        // Chunks are word-aligned; odd-sized chunks have one padding byte
         if (subchunk_size % 2 != 0) {
             if (!skip_bytes(in, 1)) {
                 return std::nullopt;

@@ -51,8 +51,12 @@ if(PDT_BUILD_TESTS)
 endif()
 
 if(PDT_BUILD_DEMOS)
+    add_library(spectrum_cli STATIC app/spectrum_cli_args.cpp)
+    target_include_directories(spectrum_cli PUBLIC app)
+    target_link_libraries(spectrum_cli PUBLIC pdt)
+
     add_executable(spectrum_demo app/spectrum_demo.cpp)
-    target_link_libraries(spectrum_demo PRIVATE pdt)
+    target_link_libraries(spectrum_demo PRIVATE pdt spectrum_cli)
 
     add_executable(spectrum_demo_synthetic app/spectrum_demo_synthetic.cpp)
     target_link_libraries(spectrum_demo_synthetic PRIVATE pdt)
