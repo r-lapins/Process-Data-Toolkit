@@ -29,6 +29,7 @@ add_library(pdt
     src/wav_reader.cpp
     src/fft.cpp
     src/window.cpp
+    src/csv_export.cpp
 )
 target_include_directories(pdt PUBLIC include)
 
