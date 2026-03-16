@@ -1,5 +1,6 @@
-#include "pdt/types.h"
-#include "pdt/dataset.h"
+#include "pdt/core/types.h"
+#include "pdt/core/dataset.h"
+
 #include <cassert>
 #include <vector>
 

@@ -1,9 +1,10 @@
 #pragma once
+
 #include "dft.h"
+
 #include <cstddef>
-#include <span>
 #include <vector>
-#include <cstddef>
+#include <span>
 
 namespace pdt {
 

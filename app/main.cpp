@@ -1,7 +1,7 @@
-#include "pdt/csv_reader.h"
-#include "pdt/anomaly.h"
-#include "pdt/dataset.h"
-#include "pdt/report.h"
+#include "pdt/core/csv_reader.h"
+#include "pdt/core/anomaly.h"
+#include "pdt/core/dataset.h"
+#include "pdt/core/report.h"
 #include "cli_args.h"
 
 #include <iostream>

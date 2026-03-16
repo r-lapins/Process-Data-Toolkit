@@ -1,5 +1,6 @@
-#include "pdt/csv_reader.h"
-#include "pdt/time.h"
+#include "pdt/core/csv_reader.h"
+#include "pdt/core/time.h"
+
 #include <sstream>
 
 // public library namespace

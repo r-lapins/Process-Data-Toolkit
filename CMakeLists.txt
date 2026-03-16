@@ -19,17 +19,17 @@ if(PDT_ENABLE_SANITIZERS AND CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif()
 
 add_library(pdt
-    src/csv_reader.cpp
-    src/time.cpp
-    src/dataset.cpp
-    src/report.cpp
-    src/anomaly.cpp
-    src/dft.cpp
-    src/peak_detection.cpp
-    src/wav_reader.cpp
-    src/fft.cpp
-    src/window.cpp
-    src/csv_export.cpp
+    src/core/csv_reader.cpp
+    src/core/time.cpp
+    src/core/dataset.cpp
+    src/core/report.cpp
+    src/core/anomaly.cpp
+    src/signal/dft.cpp
+    src/signal/peak_detection.cpp
+    src/signal/wav_reader.cpp
+    src/signal/fft.cpp
+    src/signal/window.cpp
+    src/signal/csv_spectrum_export.cpp
 )
 target_include_directories(pdt PUBLIC include)
 
@@ -37,25 +37,29 @@ if(TARGET pdt_sanitizers)
     target_link_libraries(pdt PUBLIC pdt_sanitizers)
 endif()
 
+add_library(pdt_cli_common STATIC app/cli_common.cpp)
+target_include_directories(pdt_cli_common PUBLIC app)
+target_link_libraries(pdt_cli_common PUBLIC pdt)
+
 if(PDT_BUILD_CLI)
-    add_library(pdt_cli_args app/cli_args.cpp app/cli_common.cpp)
+    add_library(pdt_cli_args STATIC app/cli_args.cpp)
     target_include_directories(pdt_cli_args PUBLIC app)
-    target_link_libraries(pdt_cli_args PUBLIC pdt)
+    target_link_libraries(pdt_cli_args PUBLIC pdt_cli_common)
 
     add_executable(pdt_cli app/main.cpp)
     target_link_libraries(pdt_cli PRIVATE pdt_cli_args)
 endif()
 
 if(PDT_BUILD_SPECTRUM)
-    add_library(pdt_spectrum_cli_args STATIC app/spectrum_cli_args.cpp app/cli_common.cpp)
+    add_library(pdt_spectrum_cli_args STATIC app/spectrum_cli_args.cpp)
     target_include_directories(pdt_spectrum_cli_args PUBLIC app)
-    target_link_libraries(pdt_spectrum_cli_args PUBLIC pdt)
+    target_link_libraries(pdt_spectrum_cli_args PUBLIC pdt_cli_common)
 
     add_executable(spectrum_cli app/spectrum_main.cpp)
-    target_link_libraries(spectrum_cli PRIVATE pdt pdt_spectrum_cli_args)
+    target_link_libraries(spectrum_cli PRIVATE pdt_spectrum_cli_args)
 
     add_executable(spectrum_synth_demo app/spectrum_synth_demo.cpp)
-    target_link_libraries(spectrum_synth_demo PRIVATE pdt)
+    target_link_libraries(spectrum_synth_demo PRIVATE pdt_cli_common)
 endif()
 
 if(PDT_BUILD_TESTS)

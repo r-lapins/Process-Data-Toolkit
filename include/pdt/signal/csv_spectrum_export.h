@@ -1,6 +1,6 @@
 #pragma once
 
-#include "pdt/dft.h"
+#include "pdt/signal/dft.h"
 
 #include <ostream>
 

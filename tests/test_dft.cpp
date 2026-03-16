@@ -1,5 +1,5 @@
-#include "pdt/dft.h"
-#include "pdt/peak_detection.h"
+#include "pdt/signal/dft.h"
+#include "pdt/signal/peak_detection.h"
 
 #include <algorithm>
 #include <cassert>

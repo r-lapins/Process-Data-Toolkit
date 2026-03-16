@@ -1,10 +1,10 @@
 #include "spectrum_cli_args.h"
 
-#include "pdt/fft.h"
-#include "pdt/window.h"
-#include "pdt/csv_export.h"
-#include "pdt/wav_reader.h"
-#include "pdt/peak_detection.h"
+#include "pdt/signal/fft.h"
+#include "pdt/signal/window.h"
+#include "pdt/signal/csv_spectrum_export.h"
+#include "pdt/signal/wav_reader.h"
+#include "pdt/signal/peak_detection.h"
 
 #include <algorithm>
 #include <iostream>

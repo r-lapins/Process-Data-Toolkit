@@ -1,5 +1,6 @@
-#include "pdt/dataset.h"
-#include "pdt/time.h"
+#include "pdt/core/dataset.h"
+#include "pdt/core/time.h"
+
 #include <cassert>
 #include <vector>
 

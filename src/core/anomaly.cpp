@@ -1,6 +1,6 @@
-#include "pdt/anomaly.h"
+#include "pdt/core/anomaly.h"
+
 #include <algorithm>
-#include <cmath>
 
 namespace pdt {
 namespace {

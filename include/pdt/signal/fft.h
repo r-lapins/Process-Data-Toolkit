@@ -3,8 +3,8 @@
 #include "dft.h"
 
 #include <complex>
-#include <span>
 #include <vector>
+#include <span>
 
 namespace pdt {
 

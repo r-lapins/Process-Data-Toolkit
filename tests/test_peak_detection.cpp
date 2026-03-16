@@ -1,4 +1,4 @@
-#include "pdt/peak_detection.h"
+#include "pdt/signal/peak_detection.h"
 
 #include <cassert>
 #include <vector>

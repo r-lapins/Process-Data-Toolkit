@@ -1,10 +1,9 @@
-#include "pdt/dft.h"
-#include "pdt/fft.h"
+#include "pdt/signal/dft.h"
+#include "pdt/signal/fft.h"
 
 #include <algorithm>
 #include <cassert>
 #include <cmath>
-#include <complex>
 #include <vector>
 
 int main() {

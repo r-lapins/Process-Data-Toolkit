@@ -1,5 +1,5 @@
-#include "pdt/fft.h"
-#include "pdt/peak_detection.h"
+#include "pdt/signal/fft.h"
+#include "pdt/signal/peak_detection.h"
 
 #include <cmath>
 #include <iostream>

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "pdt/peak_detection.h"
-#include "pdt/window.h"
+#include "pdt/signal/peak_detection.h"
+#include "pdt/signal/window.h"
 
 #include <cstddef>
 #include <iosfwd>

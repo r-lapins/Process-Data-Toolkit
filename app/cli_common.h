@@ -1,9 +1,9 @@
 #pragma once
 
+#include <string_view>
 #include <cstddef>
 #include <optional>
 #include <ostream>
-#include <string_view>
 
 namespace cli_common {
 
