@@ -2,7 +2,7 @@
 
 ![CI](https://github.com/r-lapins/Process-Data-Toolkit/actions/workflows/ci.yml/badge.svg)
 
-Modern C++20 library and CLI for time-series processing and basic signal analysis.
+Modern C++20 library and CLI tools for time-series processing and basic signal analysis.
 
 ---
 
@@ -54,12 +54,17 @@ Key aspects:
 ## Project structure
 
 ```
-include/pdt/   public API
-src/           library implementation
-app/           CLI applications + demo
-tests/         unit tests
-examples/      sample CSV and WAV inputs
-.github/       CI workflows
+include/pdt/          public API
+include/pdt/core/     core data processing API
+include/pdt/signal/   signal processing API
+
+src/core/             core implementation
+src/signal/           signal processing implementation
+
+app/                  CLI applications
+tests/                unit tests
+examples/             sample CSV and WAV inputs
+.github/              CI workflows
 ```
 
 ---
@@ -102,7 +107,7 @@ Build and run the CLI:
 
 ```bash
 ./build/release/pdt_cli --in examples/sample.csv
-./build/release/spectrum_cli examples/file.wav
+./build/release/spectrum_cli --in examples/file.wav
 ```
 
 ---
@@ -132,7 +137,7 @@ Use a debug build to inspect program execution with GDB.
 Without sanitizers:
 
 ```bash
-gdb ./build/debug-nosan/spectrum_demo
+gdb ./build/debug-nosan/spectrum_cli
 ```
 
 Example debugging session:
@@ -266,7 +271,7 @@ The project includes a signal processing module for basic spectral analysis impl
 ### Pipeline
 
 ```
-Signal (WAV / synthetic) → optional windowing → DFT / FFT → Spectrum → Peak detection → Dominant components
+Signal (WAV / synthetic) → segment selection → optional windowing → DFT / FFT → Spectrum → Peak detection → Dominant spectral components
 ```
 
 ### Spectrum CLI (WAV input)
@@ -282,6 +287,7 @@ Example with explicit options:
 
 ```
 ./build/debug/spectrum_cli \
+  --in input.wav \
   --window hann \
   --from 0 \
   --bins 1024 \
@@ -289,12 +295,13 @@ Example with explicit options:
   --mode local-maxima \
   --top 10 \
   --algorithm auto \
-  input.wav
+  --out output_csv
 ```
 
 Supported options:
 
 ```
+--in <file.wav>
 --window <none|hann|hamming>
 --from <index>
 --bins <count>
@@ -302,6 +309,7 @@ Supported options:
 --mode <threshold-only|local-maxima>
 --top <count>
 --algorithm <auto|dft|fft>
+--out <file.csv>
 ```
 
 What the spectrum CLI does:
@@ -334,6 +342,24 @@ Dominant peaks
 1. f = 7312.5 Hz    |X| = 6.69779    (bin 78)
 2. f = 7125 Hz    |X| = 2.93414    (bin 76)
 ```
+
+The computed spectrum can be exported to CSV for further analysis.
+
+Example:
+
+```
+frequency_hz,magnitude
+0,0.0001
+46.875,0.0032
+93.75,0.0211
+...
+```
+
+The file can be opened in:
+
+- Excel / LibreOffice
+- Python (NumPy / Pandas)
+- MATLAB
 
 ### Spectrum demo (synthetic signal)
 
@@ -408,8 +434,8 @@ X[i] > X[i-1] && X[i] > X[i+1]
 Example:
 
 ```cpp
-#include <pdt/dataset.h>
-#include <pdt/csv_reader.h>
+#include <pdt/core/dataset.h>
+#include <pdt/core/csv_reader.h>
 
 #include <fstream>
 
