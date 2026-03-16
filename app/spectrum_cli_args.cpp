@@ -33,8 +33,9 @@ std::optional<SpectrumAlgorithm> parse_algorithm(std::string_view value) {
 void print_help(std::ostream& os) {
     os
         << "Usage:\n"
-        << "  spectrum_demo [options] <input.wav>\n\n"
+        << "  spectrum_cli [options]\n\n"
         << "Options:\n"
+        << "  --in <file.wav>                      Read input signal from WAV file (required)\n"
         << "  --window <none|hann|hamming>         Window function to apply (default: hann)\n"
         << "  --from <index>                       Start sample index (default: 0)\n"
         << "  --bins <count>                       Number of samples to analyze (default: 1024)\n"
@@ -42,6 +43,7 @@ void print_help(std::ostream& os) {
         << "  --mode <threshold-only|local-maxima> Peak detection mode (default: local-maxima)\n"
         << "  --top <count>                        Number of dominant peaks to print (default: 10)\n"
         << "  --algorithm <auto|dft|fft>           Spectrum algorithm (default: auto)\n"
+        << "  --out <file.csv>                     Export computed spectrum to CSV\n"
         << "  --help                               Show this help message\n";
 }
 
@@ -171,20 +173,40 @@ bool parse_cli(int argc, const char* const* argv, CliOptions& options, std::ostr
             continue;
         }
 
+        if (arg == "--out") {
+            const auto v = args.value();
+            if (!v) {
+                err << "Missing value for --out\n";
+                return false;
+            }
+            options.output_csv_path = std::string{*v};
+            continue;
+        }
+
+        if (arg == "--in") {
+            const auto v = args.value();
+            if (!v) {
+                err << "Missing value for --in\n";
+                return false;
+            }
+            if (!options.input_path.empty()) {
+                err << "Only one input WAV file may be provided.\n";
+                return false;
+            }
+            options.input_path = std::string{*v};
+            continue;
+        }
+
         if (cli_common::is_option(arg)) {
             return cli_common::fail_unknown_option(arg, err);
         }
 
-        if (!options.input_path.empty()) {
-            err << "Only one input WAV file may be provided.\n";
-            return false;
-        }
-
-        options.input_path = std::string{arg};
+        err << "Unexpected positional argument: " << arg << '\n';
+        return false;
     }
 
-    if (options.input_path.empty() && !options.help_requested) {
-        err << "Missing input WAV file.\n";
+    if (!options.help_requested && options.input_path.empty()) {
+        err << "Missing required option --in <file.wav>\n";
         return false;
     }
 

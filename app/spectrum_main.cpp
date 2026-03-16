@@ -1,13 +1,15 @@
 #include "spectrum_cli_args.h"
 
 #include "pdt/fft.h"
-#include "pdt/peak_detection.h"
-#include "pdt/wav_reader.h"
 #include "pdt/window.h"
+#include "pdt/csv_export.h"
+#include "pdt/wav_reader.h"
+#include "pdt/peak_detection.h"
 
 #include <algorithm>
-#include <cstddef>
 #include <iostream>
+#include <fstream>
+#include <cstddef>
 #include <vector>
 
 int main(int argc, char* argv[]) {
@@ -121,6 +123,22 @@ int main(int argc, char* argv[]) {
             << "f = " << peak.frequency << " Hz"
             << "    |X| = " << peak.magnitude
             << "    (bin " << peak.index << ")\n";
+    }
+
+    if (!options.output_csv_path.empty()) {
+        std::ofstream out_file(options.output_csv_path);
+        if (!out_file) {
+            std::cerr << "Failed to open output CSV file: "
+                      << options.output_csv_path << '\n';
+            return 1;
+        }
+
+        if (!write_spectrum_csv(out_file, spectrum)) {
+            std::cerr << "Failed to write spectrum CSV.\n";
+            return 1;
+        }
+
+        std::cout << "Spectrum exported to: " << options.output_csv_path << '\n';
     }
 
     return 0;

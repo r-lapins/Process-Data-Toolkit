@@ -16,6 +16,7 @@ add_pdt_test(test_dft test_dft.cpp)
 add_pdt_test(test_fft test_fft.cpp)
 add_pdt_test(test_peak_detection test_peak_detection.cpp)
 add_pdt_test(test_window test_window.cpp)
+add_pdt_test(test_csv_export test_csv_export.cpp)
 
 add_executable(test_cli_smoke test_cli_smoke.cpp)
 target_link_libraries(test_cli_smoke PRIVATE pdt_cli_args)

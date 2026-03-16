@@ -26,6 +26,7 @@ struct CliOptions {
     std::size_t top{10};
     SpectrumAlgorithm algorithm{SpectrumAlgorithm::Auto};
     bool help_requested{false};
+    std::string output_csv_path;
 };
 
 void print_help(std::ostream& os);
