@@ -10,6 +10,7 @@ option(PDT_ENABLE_SANITIZERS "Enable sanitizers" ON)
 option(PDT_BUILD_TESTS "Build tests" ON)
 option(PDT_BUILD_CLI "Build CLI apps" ON)
 option(PDT_BUILD_SPECTRUM "Build demos" ON)
+option(PDT_BUILD_BENCH "Build benchmarks" ON)
 
 # Sanitizers (ASAN/UBSAN) – apply to *all* targets that link with pdt
 if(PDT_ENABLE_SANITIZERS AND CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -65,6 +66,11 @@ endif()
 if(PDT_BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
+endif()
+
+if(PDT_BUILD_BENCH)
+    add_executable(fft_benchmark bench/fft_benchmark.cpp)
+    target_link_libraries(fft_benchmark PRIVATE pdt)
 endif()
 
 # include(GNUInstallDirs)
