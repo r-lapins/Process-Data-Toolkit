@@ -280,7 +280,7 @@ Run:
 
 ```
 ./build/debug/spectrum_cli input.wav
-./build/debug/spectrum_cli examples/HDSDR_20230515_072359Z_15047kHz_AF.wav
+./build/debug/spectrum_cli --in examples/HDSDR_20230515_072359Z_15047kHz_AF.wav
 ```
 
 Example with explicit options:
@@ -384,6 +384,37 @@ Expected dominant spectral peaks:
 
 50 Hz
 120 Hz
+
+---
+
+## Benchmark
+
+The repository includes a simple benchmark comparing the runtime of the naive Discrete Fourier Transform and the radix-2 Fast Fourier Transform.
+
+Run:
+
+```
+./build/release/fft_benchmark
+```
+
+Example output:
+
+```
+N,DFT(ms),FFT(ms)
+64,0.08,0.01
+128,0.3,0.01
+256,1.16,0.03
+512,4.57,0.07
+1024,18.02,0.14
+2048,71.7,0.32
+```
+
+This demonstrates the expected complexity difference:
+
+```
+DFT  ~ O(N²)
+FFT  ~ O(N log N)
+```
 
 ---
 
