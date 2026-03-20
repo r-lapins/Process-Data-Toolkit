@@ -43,11 +43,11 @@ target_include_directories(pdt_cli_common PUBLIC app)
 target_link_libraries(pdt_cli_common PUBLIC pdt)
 
 if(PDT_BUILD_CLI)
-    add_library(pdt_cli_args STATIC app/cli_args.cpp)
+    add_library(pdt_cli_args STATIC app/core_cli_args.cpp)
     target_include_directories(pdt_cli_args PUBLIC app)
     target_link_libraries(pdt_cli_args PUBLIC pdt_cli_common)
 
-    add_executable(pdt_cli app/main.cpp)
+    add_executable(pdt_cli app/core_main.cpp)
     target_link_libraries(pdt_cli PRIVATE pdt_cli_args)
 endif()
 
