@@ -72,16 +72,16 @@ void write_json_report(std::ostream& os,
     bool first = true;
 
     auto field = [&](const char* k, const std::string& v) {
-        if (!first) os << ",\n";
+        if (!first) {os << ",\n";}
         first = false;
         os << "    \"" << k << "\": \"" << v << "\"";
     };
 
-    if (ctx.sensor) field("sensor", *ctx.sensor);
-    if (ctx.from)   field("from", to_string(*ctx.from));
-    if (ctx.to)     field("to", to_string(*ctx.to));
+    if (ctx.sensor) {field("sensor", *ctx.sensor);}
+    if (ctx.from)   {field("from", to_string(*ctx.from));}
+    if (ctx.to)     {field("to", to_string(*ctx.to));}
 
-    if (!first) os << "\n";
+    if (!first) {os << "\n";}
     os << "  },\n";
 
     os << "  \"data\": {\n";
@@ -137,15 +137,15 @@ void write_json_report(std::ostream &os,
     bool first = true;
 
     auto field = [&](const char* k, const std::string& v) {
-        if (!first) os << ",\n";
+        if (!first) {os << ",\n";}
         first = false;
         os << "    \"" << k << "\": \"" << v << "\"";
     };
 
-    if (ctx.from)   field("from", to_string(*ctx.from));
-    if (ctx.to)     field("to", to_string(*ctx.to));
+    if (ctx.from)   {field("from", to_string(*ctx.from));}
+    if (ctx.to)     {field("to", to_string(*ctx.to));}
 
-    if (!first) os << "\n";
+    if (!first) {os << "\n";}
     os << "  },\n";
 
     os << "  \"data\": {\n";
@@ -157,7 +157,7 @@ void write_json_report(std::ostream &os,
 
     bool first_s = true;
     for (const auto& [name, st] : per_sensor) {
-        if (!first_s) os << ",\n";
+        if (!first_s) {os << ",\n";}
         first_s = false;
 
         os << "    \"" << name << "\": {\n";

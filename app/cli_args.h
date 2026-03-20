@@ -16,6 +16,7 @@ struct CliOptions {
     std::optional<double> z_threshold;
     std::size_t top;
     bool per_sensor{false};
+    bool show_skipped{false};
     bool help{false};
 };
 

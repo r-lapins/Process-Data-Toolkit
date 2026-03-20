@@ -51,6 +51,16 @@ int main(int argc, char** argv) {
     // Import
     auto import = pdt::read_csv(in);
 
+    if (opt.show_skipped && !import.skipped_rows.empty()) {
+        std::cerr << "Skipped CSV rows: " << import.skipped_rows.size() << "\n";
+
+        for (const auto& row : import.skipped_rows) {
+            std::cerr << "line " << row.line_number << ": " << row.text << "\n";
+        }
+
+        return 0;
+    }
+
     // DataSet
     pdt::DataSet ds{std::move(import.samples)};
 

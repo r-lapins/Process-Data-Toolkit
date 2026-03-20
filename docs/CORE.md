@@ -31,6 +31,25 @@ Detect outliers using z-score threshold:
   --top 5
 ```
 
+#### Skipped rows (invalid input)
+
+Display CSV rows that failed to parse:
+
+```bash
+./build/debug/pdt_cli \
+  --in examples/sample.csv \
+  --skipped
+```
+
+Example output:
+
+```
+Skipped CSV rows: 3
+line 5: invalid,data,row
+line 8: 2026-02-18T10:00:00,S1,abc
+line 12: missing,value
+```
+
 #### JSON Output (example)
 
 Example JSON report produced with `--out report.json`:
@@ -92,3 +111,4 @@ Notes:
 - Timestamp format: `YYYY-MM-DDTHH:MM:SS`
 - Invalid lines are skipped and reported
 - Time filtering is inclusive
+- Use `--skipped` to print invalid CSV rows with line numbers

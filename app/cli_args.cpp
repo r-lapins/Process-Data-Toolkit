@@ -23,6 +23,7 @@ Options:
     --out         Write JSON report to file
     --z <val>     Enable z-score anomaly detection (e.g. 3.0)
     --top <N>     Max anomalies to list
+    --skipped     Print skipped CSV rows to stderr
     --help        Show this help
 )";
 }
@@ -130,6 +131,11 @@ bool parse_args(int argc, const char* const* argv, CliOptions& out, std::ostream
             }
 
             out.top = n;
+            continue;
+        }
+
+        if (a == "--skipped") {
+            out.show_skipped = true;
             continue;
         }
 

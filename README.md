@@ -30,6 +30,7 @@ Key aspects:
 Notes and instructions are available in [docs/CORE.md](docs/CORE.md).
 
 - CSV parser with import summary (`parsed_ok`, `skipped`)
+- Optional display of skipped CSV rows with line numbers (`--skipped`)
 - ISO 8601 timestamp parsing using `std::chrono`
 - Data filtering by sensor and time range
 - Domain model based on `DataSet` class

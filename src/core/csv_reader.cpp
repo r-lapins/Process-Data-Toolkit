@@ -15,19 +15,23 @@ bool parse_line(const std::string& line, Sample& out_sample) {
     std::string sensor;
     std::string value_str;
 
-    if (!std::getline(ss, ts_str, ','))
+    if (!std::getline(ss, ts_str, ',')) {
         return false;
+    }
 
-    if (!std::getline(ss, sensor, ','))
+    if (!std::getline(ss, sensor, ',')) {
         return false;
+    }
 
-    if (!std::getline(ss, value_str, ','))
+    if (!std::getline(ss, value_str, ',')) {
         return false;
+    }
 
     try {
         auto ts = parse_iso8601(ts_str);
-        if (!ts)
+        if (!ts) {
             return false;
+        }
 
         out_sample.timestamp = *ts;
         out_sample.sensor = sensor;
@@ -44,14 +48,21 @@ bool parse_line(const std::string& line, Sample& out_sample) {
 ImportResult read_csv(std::istream& input) {
     ImportResult result;
     std::string line;
+    std::size_t line_number = 0;
 
-    // skip the first line of headers
-    if (!std::getline(input, line))
+    // skip header
+    if (!std::getline(input, line)) {
         return result;
+    }
+
+    ++line_number;
 
     while (std::getline(input, line)) {
-        if (line.empty())
+        ++line_number;
+
+        if (line.empty()) {
             continue;
+        }
 
         Sample sample{};
         if (parse_line(line, sample)) {
@@ -59,6 +70,10 @@ ImportResult read_csv(std::istream& input) {
             ++result.parsed_ok;
         } else {
             ++result.skipped;
+            result.skipped_rows.push_back(SkippedRow{
+                .line_number = line_number,
+                .text = line
+            });
         }
     }
 
