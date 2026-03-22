@@ -27,16 +27,20 @@ struct AnomalySummary {
     std::vector<Anomaly> top; // sorted descending by |score|
 };
 
-// unified API: per-sensor mode
+// unified API
 AnomalySummary detect_anomalies_global(const DataSet& ds, AnomalyMethod method, double threshold, std::size_t top_n);
 std::map<std::string, AnomalySummary> detect_anomalies_per_sensor(const DataSet& ds, AnomalyMethod method, double threshold, std::size_t top_n);
 
-// temporary public helpers Z-score
+// Z-score
 AnomalySummary detect_zscore_global(const DataSet& ds, double threshold, std::size_t top_n);
 std::map<std::string, AnomalySummary> detect_zscore_per_sensor(const DataSet& ds, double threshold, std::size_t top_n);
 
 // IQR
 AnomalySummary detect_iqr_global(const DataSet& ds, double threshold, std::size_t top_n);
 std::map<std::string, AnomalySummary> detect_iqr_per_sensor(const DataSet& ds, double threshold, std::size_t top_n);
+
+// MAD
+AnomalySummary detect_mad_global(const DataSet& ds, double threshold, std::size_t top_n);
+std::map<std::string, AnomalySummary> detect_mad_per_sensor(const DataSet& ds, double threshold, std::size_t top_n);
 
 } // namespace pdt
