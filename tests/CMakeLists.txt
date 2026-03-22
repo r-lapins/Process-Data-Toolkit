@@ -5,6 +5,7 @@ function(add_pdt_test name source)
 endfunction()
 
 add_pdt_test(test_anomaly core/test_anomaly.cpp)
+add_pdt_test(test_anomaly_iqr core/test_anomaly_iqr.cpp)
 add_pdt_test(test_csv core/test_csv.cpp)
 add_pdt_test(test_dataset core/test_dataset.cpp)
 add_pdt_test(test_filter core/test_filter.cpp)
