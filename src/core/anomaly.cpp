@@ -28,7 +28,7 @@ AnomalySummary detect_impl(std::span<const Sample> samples,
                 .timestamp = s.timestamp,
                 .sensor = s.sensor,
                 .value = s.value,
-                .zscore = z
+                .score = z
             });
         }
     }
@@ -39,7 +39,7 @@ AnomalySummary detect_impl(std::span<const Sample> samples,
 
     // top N by |z|
     std::partial_sort(anomalies.begin(), anomalies.begin() + n, anomalies.end(),
-              [](const Anomaly& a, const Anomaly& b) { return absd(a.zscore) > absd(b.zscore); }  // new rule for std::sort, descending
+              [](const Anomaly& a, const Anomaly& b) { return absd(a.score) > absd(b.score); }  // new rule for std::sort, descending
               );
 
     anomalies.resize(n);
@@ -67,6 +67,11 @@ std::map<std::string, AnomalySummary> detect_zscore_per_sensor(const DataSet &ds
         out.emplace(sensor, detect_impl(sub.samples(), st.mean, st.stddev, threshold, top_n));
     }
     return out;
+}
+
+std::map<std::string, AnomalySummary> detect_anomalies_per_sensor(const DataSet &ds, AnomalyMethod method, double threshold, std::size_t top_n)
+{
+
 }
 
 } // namespace pdt

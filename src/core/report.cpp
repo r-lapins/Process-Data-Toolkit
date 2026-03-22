@@ -25,7 +25,7 @@ void write_anomaly(std::ostream& os, const pdt::Anomaly& a, int indent) {
        << "\"timestamp\":\"" << to_string(a.timestamp) << "\","
        << "\"sensor\":\"" << a.sensor << "\","
        << "\"value\":" << a.value << ","
-       << "\"z\":" << a.zscore
+       << "\"z\":" << a.score
        << "}";
 }
 
@@ -99,7 +99,7 @@ void write_json_report(std::ostream& os,
 
     if (ctx.z_threshold) {
         os << ",\n  \"anomalies\": {\n";
-        os << "    \"method\": \"zscore\",\n";
+        os << "    \"method\": \"score\",\n";
         os << "    \"threshold\": " << *ctx.z_threshold << ",\n";
         os << "    \"top_n\": " << ctx.top_n << ",\n";
         os << "    \"mode\": \"global\",\n";
@@ -173,7 +173,7 @@ void write_json_report(std::ostream &os,
 
     if (ctx.z_threshold) {
         os << ",\n  \"anomalies\": {\n";
-        os << "    \"method\": \"zscore\",\n";
+        os << "    \"method\": \"score\",\n";
         os << "    \"threshold\": " << *ctx.z_threshold << ",\n";
         os << "    \"top_n\": " << ctx.top_n << ",\n";
         os << "    \"mode\": \"per_sensor\",\n";
