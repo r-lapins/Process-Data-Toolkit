@@ -36,7 +36,7 @@ Notes and instructions are available in [docs/CORE.md](docs/CORE.md).
 - Domain model based on `DataSet` class
 - Statistical analysis (`count`, `mean`, `min`, `max`, `stddev`)
 - Per-sensor statistics mode (`--per-sensor`)
-- Z-score based anomaly detection (`--z`, `--top`)
+- Configurable anomaly detection (`zscore`, `iqr`, `mad`) with threshold and top-N output (`--z`, `--method`, `--top`)
 - JSON report export (`--out`)
 
 ### Signal analysis
@@ -100,7 +100,11 @@ Development notes and CI instructions are available in [docs/DEVELOPMENT.md](doc
 σ = sqrt( Σ(x - μ)² / N )
 ```
 
-#### Z-score anomaly detection
+### Anomaly detection methods:
+
+The core CLI supports three anomaly detection methods:
+
+####  - Z-score
 
 ```
 z = (x - μ) / σ
@@ -108,7 +112,39 @@ z = (x - μ) / σ
 
 Samples with `|z| > threshold` are reported as anomalies.
 
-#### Discrete Fourier Transform (DFT)
+####  - IQR
+
+The interquartile range method uses:
+
+```
+IQR = Q3 - Q1
+```
+
+Samples outside the interval
+
+[Q1 - threshold · IQR, Q3 + threshold · IQR]
+
+are reported as anomalies.
+
+####  - MAD
+
+The median absolute deviation method uses:
+
+```
+MAD = median(|x - median(x)|)
+```
+
+A robust anomaly score is computed:
+
+```
+score = (x - median(x)) / MAD
+```
+
+Samples with `|score| > threshold` are reported as anomalies.
+
+### Signal processing methods:
+
+#### - Discrete Fourier Transform (DFT)
 
 ```
 X[k] = Σ x[n] · e^(−j2πkn/N),  k = 0..N−1
@@ -116,7 +152,26 @@ X[k] = Σ x[n] · e^(−j2πkn/N),  k = 0..N−1
 
 Current implementation is `O(N²)` and serves as a reference implementation.
 
-#### Spectral peak detection
+#### - Fast Fourier Transform (FFT)
+
+The project implements a radix-2 Cooley–Tuk FFT algorithm.
+
+The FFT recursively decomposes the DFT into even and odd indexed samples:
+
+```
+X[k] = E[k] + W_N^k · O[k]
+X[k + N/2] = E[k] - W_N^k · O[k]
+```
+
+where:
+
+```
+W_N^k = e^(−j2πk/N)
+```
+
+The algorithm requires the input size to be a power of two and has time complexity `O(N log N)`
+
+#### - Spectral peak detection
 
 Two strategies:
 

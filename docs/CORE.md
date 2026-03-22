@@ -19,17 +19,53 @@ Filter by sensor and export JSON report:
   --out examples/report.json
 ```
 
-#### Anomaly detection (z-score)
+#### Anomaly detection
 
-Detect outliers using z-score threshold:
+The CLI supports three anomaly detection methods:
 
+- `zscore` — standard score relative to mean and standard deviation
+- `iqr` — interquartile range based detection
+- `mad` — median absolute deviation based detection
+
+The threshold value is provided with `--z` and the method can be selected with `--anomaly-method`.
+
+Examples:
+
+**Z-score**
 ```bash
 ./build/debug/pdt_cli \
   --in examples/sample.csv \
   --sensor S1 \
   --z 2.5 \
+  --anomaly-method zscore \
   --top 5
 ```
+
+**IQR**
+```bash
+./build/debug/pdt_cli \
+  --in examples/sample.csv \
+  --sensor S1 \
+  --z 1.5 \
+  --anomaly-method iqr \
+  --top 5
+```
+
+**MAD**
+```bash
+./build/debug/pdt_cli \
+  --in examples/sample.csv \
+  --sensor S1 \
+  --z 3.0 \
+  --anomaly-method mad \
+  --top 5
+```
+
+Notes:
+
+- --z currently acts as the anomaly threshold parameter for all supported methods
+- --anomaly-method defaults to zscore
+- --top limits the number of reported anomalies
 
 #### Skipped rows (invalid input)
 
@@ -87,7 +123,7 @@ Example JSON report produced with `--out report.json`:
       "S1": {
         "count": 1,
         "top": [
-          {"timestamp":"2026-02-18T12:45:00","sensor":"S1","value":-50,"z":-2.30629}
+          {"timestamp":"2026-02-18T12:45:00","sensor":"S1","value":-50,"score":-2.30629}
         ]
       },
       "S2": { "count": 0, "top": [] }
@@ -112,3 +148,4 @@ Notes:
 - Invalid lines are skipped and reported
 - Time filtering is inclusive
 - Use `--skipped` to print invalid CSV rows with line numbers
+- Use `--method <zscore|iqr|mad>` to choose the anomaly detection strategy
