@@ -22,6 +22,7 @@ pdt::Sample make_sample(std::string_view ts, std::string sensor, double value) {
 
 int main() {
     using namespace pdt;
+    using enum AnomalyMethod;
 
     DataSet ds{std::vector<Sample>{
         make_sample("2026-02-18T10:00:00", "S1", 10.0),
@@ -32,7 +33,7 @@ int main() {
         make_sample("2026-02-18T10:05:00", "S1", 100.0)
     }};
 
-    const auto summary = detect_iqr_global(ds, 1.5, 5);
+    const auto summary = detect_anomalies_global(ds, IQR, 1.5, 5);
 
     assert(summary.count == 1);
     assert(summary.top.size() == 1);
@@ -40,7 +41,7 @@ int main() {
     assert(summary.top[0].value == 100.0);
     assert(summary.top[0].score > 0.0);
 
-    const auto unified = detect_anomalies_global(ds, AnomalyMethod::IQR, 1.5, 5);
+    const auto unified = detect_anomalies_global(ds, IQR, 1.5, 5);
     assert(unified.count == 1);
     assert(unified.top.size() == 1);
     assert(unified.top[0].value == 100.0);

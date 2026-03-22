@@ -27,64 +27,8 @@ double median_sorted(const std::vector<double>& values) {
     return values[mid];
 }
 
-std::vector<double> extract_values(std::span<const Sample> samples) {
-    std::vector<double> values;
-    values.reserve(samples.size());
-
-    for (const auto& sample : samples) {
-        values.push_back(sample.value);
-    }
-
-    return values;
-}
-
-Stats compute_stats_for_samples(std::span<const Sample> samples) {
-    Stats stats{};
-
-    if (samples.empty()) {
-        return stats;
-    }
-
-    stats.count = samples.size();
-    stats.min = samples.front().value;
-    stats.max = samples.front().value;
-
-    double sum = 0.0;
-    for (const auto& sample : samples) {
-        sum += sample.value;
-        stats.min = std::min(stats.min, sample.value);
-        stats.max = std::max(stats.max, sample.value);
-    }
-
-    stats.mean = sum / static_cast<double>(samples.size());
-
-    double sq_sum = 0.0;
-    for (const auto& sample : samples) {
-        const double diff = sample.value - stats.mean;
-        sq_sum += diff * diff;
-    }
-
-    stats.stddev = std::sqrt(sq_sum / static_cast<double>(samples.size()));
-    return stats;
-}
-
-double percentile_sorted(const std::vector<double>& values, double p) {
-    // Expects values sorted in ascending order.
-    // Percentile is computed by linear interpolation between neighboring points.
-    if (values.empty()) {
-        return 0.0;
-    }
-
-    const double pos = p * static_cast<double>(values.size() - 1);
-    const auto lo = static_cast<std::size_t>(std::floor(pos));
-    const auto hi = static_cast<std::size_t>(std::ceil(pos));
-
-    if (lo == hi) {
-        return values[lo];
-    }
-
-    const double frac = pos - static_cast<double>(lo);
-    return (values[lo] * (1.0 - frac)) + (values[hi] * frac);
+DataSet make_dataset(std::span<const Sample> samples) {
+    return DataSet{std::vector<Sample>{samples.begin(), samples.end()}};
 }
 
 void sort_and_trim(std::vector<Anomaly>& anomalies, std::size_t top_n) {
@@ -125,7 +69,7 @@ AnomalySummary detect_zscore_for_samples(std::span<const Sample> samples, double
         return {};
     }
 
-    const auto stats = compute_stats_for_samples(samples);
+    const auto stats = make_dataset(samples).stats();
     if (!(stats.stddev > 0.0)) {
         return {};
     }
@@ -158,11 +102,10 @@ AnomalySummary detect_iqr_for_samples(std::span<const Sample> samples, double th
         return {};
     }
 
-    auto values = extract_values(samples);
-    std::ranges::sort(values);
+    const auto stats = make_dataset(samples).stats();
 
-    const double q1 = percentile_sorted(values, 0.25);
-    const double q3 = percentile_sorted(values, 0.75);
+    const double q1 = stats.q1;
+    const double q3 = stats.q3;
     const double iqr = q3 - q1;
 
     if (!(iqr > 0.0)) {
@@ -208,10 +151,8 @@ AnomalySummary detect_mad_for_samples(std::span<const Sample> samples, double th
         return {};
     }
 
-    auto values = extract_values(samples);
-    std::ranges::sort(values);
-
-    const double median = median_sorted(values);
+    const auto stats = make_dataset(samples).stats();
+    const double median = stats.median;
 
     std::vector<double> abs_deviations;
     abs_deviations.reserve(samples.size());
@@ -259,8 +200,6 @@ std::map<std::string, AnomalySummary> run_per_sensor_detector(std::span<const Sa
     return result;
 }
 
-} // namespace
-
 AnomalySummary detect_zscore_global(const DataSet& ds, double threshold, std::size_t top_n) {
     return detect_zscore_for_samples(ds.samples(), threshold, top_n);
 }
@@ -284,6 +223,8 @@ AnomalySummary detect_mad_global(const DataSet& ds, double threshold, std::size_
 std::map<std::string, AnomalySummary> detect_mad_per_sensor(const DataSet& ds, double threshold, std::size_t top_n) {
     return run_per_sensor_detector(ds.samples(), threshold, top_n, detect_mad_for_samples);
 }
+
+} // namespace
 
 AnomalySummary detect_anomalies_global(const DataSet& ds, AnomalyMethod method, double threshold, std::size_t top_n) {
     using enum AnomalyMethod;

@@ -22,6 +22,7 @@ pdt::Sample make_sample(std::string_view ts, std::string sensor, double value) {
 
 int main() {
     using namespace pdt;
+    using enum AnomalyMethod;
 
     {
         DataSet ds{std::vector<Sample>{
@@ -33,7 +34,7 @@ int main() {
             make_sample("2026-02-18T10:05:00", "S1", 100.0)
         }};
 
-        const auto summary = detect_mad_global(ds, 3.0, 5);
+        const auto summary = detect_anomalies_global(ds, MAD, 3.0, 5);
 
         assert(summary.count == 1);
         assert(summary.top.size() == 1);
@@ -41,7 +42,7 @@ int main() {
         assert(summary.top[0].value == 100.0);
         assert(summary.top[0].score > 0.0);
 
-        const auto unified = detect_anomalies_global(ds, AnomalyMethod::MAD, 3.0, 5);
+        const auto unified = detect_anomalies_global(ds, MAD, 3.0, 5);
         assert(unified.count == 1);
         assert(unified.top.size() == 1);
         assert(unified.top[0].value == 100.0);
@@ -60,7 +61,7 @@ int main() {
             make_sample("2026-02-18T10:03:00", "S2", 100.0)
         }};
 
-        const auto per_sensor = detect_mad_per_sensor(ds, 3.0, 5);
+        const auto per_sensor = detect_anomalies_per_sensor(ds, MAD, 3.0, 5);
 
         assert(per_sensor.size() == 2);
         assert(per_sensor.contains("S1"));
@@ -74,7 +75,7 @@ int main() {
         assert(per_sensor.at("S2").top[0].sensor == "S2");
         assert(per_sensor.at("S2").top[0].value == 100.0);
 
-        const auto unified = detect_anomalies_per_sensor(ds, AnomalyMethod::MAD, 3.0, 5);
+        const auto unified = detect_anomalies_per_sensor(ds, MAD, 3.0, 5);
 
         assert(unified.size() == 2);
         assert(unified.contains("S1"));
@@ -94,7 +95,7 @@ int main() {
             make_sample("2026-02-18T10:04:00", "S1", 100.0)
         }};
 
-        const auto summary = detect_mad_global(ds, 3.0, 5);
+        const auto summary = detect_anomalies_global(ds, MAD, 3.0, 5);
 
         assert(summary.count == 0);
         assert(summary.top.empty());
@@ -110,7 +111,7 @@ int main() {
             make_sample("2026-02-18T10:05:00", "S1", 120.0)
         }};
 
-        const auto summary = detect_mad_global(ds, 3.0, 1);
+        const auto summary = detect_anomalies_global(ds, MAD, 3.0, 1);
 
         assert(summary.count == 2);
         assert(summary.top.size() == 1);
@@ -122,7 +123,7 @@ int main() {
             make_sample("2026-02-18T10:01:00", "S1", 100.0)
         }};
 
-        const auto summary = detect_mad_global(ds, 3.0, 5);
+        const auto summary = detect_anomalies_global(ds, MAD, 3.0, 5);
 
         assert(summary.count == 0);
         assert(summary.top.empty());
@@ -138,11 +139,11 @@ int main() {
             make_sample("2026-02-18T10:05:00", "S1", 100.0)
         }};
 
-        const auto summary_invalid_threshold = detect_mad_global(ds, 0.0, 5);
+        const auto summary_invalid_threshold = detect_anomalies_global(ds, MAD, 0.0, 5);
         assert(summary_invalid_threshold.count == 0);
         assert(summary_invalid_threshold.top.empty());
 
-        const auto summary_zero_top_n = detect_mad_global(ds, 3.0, 0);
+        const auto summary_zero_top_n = detect_anomalies_global(ds, MAD, 3.0, 0);
         assert(summary_zero_top_n.count == 0);
         assert(summary_zero_top_n.top.empty());
     }
