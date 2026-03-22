@@ -79,7 +79,8 @@ int main(int argc, char** argv) {
     ctx.sensor = opt.sensor;
     ctx.from = opt.from;
     ctx.to = opt.to;
-    ctx.z_threshold = opt.z_threshold;
+    ctx.anomaly_threshold = opt.anomaly_threshold;
+    ctx.anomaly_method = opt.anomaly_method;
     ctx.top_n = opt.top;
 
     // output
@@ -103,13 +104,13 @@ int main(int argc, char** argv) {
     if (opt.per_sensor) {
         auto st = filtered.stats_by_sensor();
 
-        if (opt.z_threshold) { per_sensor_anoms = pdt::detect_zscore_per_sensor(filtered, *opt.z_threshold, opt.top); }
+        if (opt.anomaly_threshold) { per_sensor_anoms = pdt::detect_anomalies_per_sensor(filtered, opt.anomaly_method, *opt.anomaly_threshold, opt.top); }
 
         pdt::write_json_report(*out_stream, ctx, st, per_sensor_anoms);
     } else {
         auto st = filtered.stats();
 
-        if (opt.z_threshold) { global_anoms = pdt::detect_zscore_global(filtered, *opt.z_threshold, opt.top); }
+        if (opt.anomaly_threshold) { global_anoms = pdt::detect_anomalies_global(filtered, opt.anomaly_method, *opt.anomaly_threshold, opt.top); }
 
         pdt::write_json_report(*out_stream, ctx, st, global_anoms);
     }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "pdt/core/anomaly.h"
+
 #include <chrono>
 #include <optional>
 #include <ostream>
@@ -13,8 +15,11 @@ struct CliOptions {
     std::optional<std::chrono::sys_seconds> from;
     std::optional<std::chrono::sys_seconds> to;
     std::optional<std::string> output_path;
-    std::optional<double> z_threshold;
-    std::size_t top;
+
+    std::optional<double> anomaly_threshold;
+    pdt::AnomalyMethod anomaly_method{pdt::AnomalyMethod::ZScore};
+
+    std::size_t top{10};
     bool per_sensor{false};
     bool show_skipped{false};
     bool help{false};

@@ -18,7 +18,8 @@ struct ReportContext {
     std::optional<std::chrono::sys_seconds> to;
 
     // anomaly settings
-    std::optional<double> z_threshold;
+    std::optional<double> anomaly_threshold;
+    std::optional<AnomalyMethod> anomaly_method;
     std::size_t top_n{10};
 };
 

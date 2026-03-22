@@ -7,6 +7,18 @@
 
 namespace pdt_app {
 
+namespace {
+
+std::optional<pdt::AnomalyMethod> parse_anomaly_method(std::string_view v) {
+    using enum pdt::AnomalyMethod;
+    if (v == "zscore") return ZScore;
+    if (v == "iqr")    return IQR;
+    if (v == "mad")    return MAD;
+    return std::nullopt;
+}
+
+} // namespace
+
 void print_help(std::ostream& os) {
     os <<
         R"(Proces Data Toolkit
@@ -15,16 +27,17 @@ Usage:
     pdt_cli --in <file.csv> [--sensor <name>] [--from <ISO>] [--to <ISO>]
 
 Options:
-    --in          Path to CSV file (required)
-    --sensor      Filter by exact sensor name
-    --per-sensor  Output per-sensor statistics (mutually exclusive with --sensor)
-    --from        Inclusive time lower bound, ISO: YYYY-MM-DDTHH:MM:SS
-    --to          Inclusive time upper bound, ISO: YYYY-MM-DDTHH:MM:SS
-    --out         Write JSON report to file
-    --z <val>     Enable z-score anomaly detection (e.g. 3.0)
-    --top <N>     Max anomalies to list
-    --skipped     Print skipped CSV rows to stderr
-    --help        Show this help
+    --in               Path to CSV file (required)
+    --sensor           Filter by exact sensor name
+    --per-sensor       Output per-sensor statistics (mutually exclusive with --sensor)
+    --from             Inclusive time lower bound, ISO: YYYY-MM-DDTHH:MM:SS
+    --to               Inclusive time upper bound, ISO: YYYY-MM-DDTHH:MM:SS
+    --out              Write JSON report to file
+    --z <val>          Enable anomaly detection and set threshold
+    --method           Anomaly method: zscore | iqr | mad (default: zscore)
+    --top <N>          Max anomalies to list
+    --skipped          Print skipped CSV rows to stderr
+    --help             Show this help
 )";
 }
 
@@ -105,18 +118,27 @@ bool parse_args(int argc, const char* const* argv, CliOptions& out, std::ostream
             const auto v = args.value();
             if (!v) { err << "Missing value for --z\n"; return false; }
 
-            double z = 0.0;
-            if (!cli_common::parse_double(*v, z)) {
+            double parsed{};
+            if (!cli_common::parse_double(*v, parsed) || parsed <= 0.0) {
                 err << "Invalid value for --z\n";
                 return false;
             }
 
-            if (z <= 0.0) {
-                err << "--z must be > 0\n";
+            out.anomaly_threshold = parsed;
+            continue;
+        }
+
+        if (a == "--method") {
+            const auto v = args.value();
+            if (!v) { err << "Missing value for --method\n"; return false; }
+
+            const auto method = parse_anomaly_method(*v);
+            if (!method) {
+                err << "Invalid value for --method (expected: zscore, iqr, mad)\n";
                 return false;
             }
 
-            out.z_threshold = z;
+            out.anomaly_method = *method;
             continue;
         }
 
