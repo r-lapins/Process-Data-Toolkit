@@ -17,6 +17,10 @@ struct Stats {
     double max{};
     double stddev{};
     std::size_t count{};
+
+    double median{};
+    double q1{};
+    double q3{};
 };
 
 struct FilterOptions
