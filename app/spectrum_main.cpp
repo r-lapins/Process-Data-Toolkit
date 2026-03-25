@@ -1,14 +1,14 @@
 #include "spectrum_cli_args.h"
 
+#include "pdt/signal/dft.h"
 #include "pdt/signal/fft.h"
 #include "pdt/signal/window.h"
-#include "pdt/signal/csv_spectrum_export.h"
 #include "pdt/signal/wav_reader.h"
 #include "pdt/signal/peak_detection.h"
+#include "pdt/signal/spectrum_report.h"
 
 #include <algorithm>
 #include <iostream>
-#include <fstream>
 #include <cstddef>
 #include <vector>
 
@@ -95,50 +95,35 @@ int main(int argc, char* argv[]) {
         options.top
         );
 
-    std::cout << "\nInput file   : " << options.input_path << '\n';
-    std::cout << "Sample rate  : " << wav->sample_rate << " Hz\n";
-    std::cout << "Channels     : " << wav->channels << '\n';
-    std::cout << "Samples      : " << wav->samples.size() << '\n';
-    std::cout << "From sample  : " << options.from << '\n';
-    std::cout << "Bins         : " << segment.size() << '\n';
-    std::cout << "Window       : " << (options.use_window ? to_string(options.window) : "none") << '\n';
-    std::cout << "Algorithm    : " << to_string(used_algorithm) << '\n';
-    std::cout << "Threshold    : " << options.threshold << '\n';
-    std::cout << "Peak mode    : " << to_string(options.peak_mode) << '\n';
-    std::cout << "Top peaks    : " << options.top << '\n';
+    pdt::SpectrumReport report{
+        .spectrum = spectrum,
+        .peaks = dominant_peaks,
+        .meta = {
+            .input_path = options.input_path,
+            .sample_rate = static_cast<double>(wav->sample_rate),
+            .channels = wav->channels,
+            .total_samples = wav->samples.size(),
+            .from = options.from,
+            .bins = segment.size(),
+            .window = options.use_window ? to_string(options.window) : "none",
+            .algorithm = to_string(used_algorithm),
+            .threshold = options.threshold,
+            .peak_mode = to_string(options.peak_mode),
+            .top = options.top
+        }
+    };
 
-    std::cout << "\nDominant peaks\n";
-    std::cout << "-------------------------------------\n";
-
-    if (dominant_peaks.empty()) {
-        std::cout << "No peaks detected.\n";
-        return 0;
-    }
-
-    for (std::size_t i = 0; i < dominant_peaks.size(); ++i) {
-        const auto& peak = dominant_peaks[i];
-
-        std::cout
-            << (i + 1) << ". "
-            << "f = " << peak.frequency << " Hz"
-            << "    |X| = " << peak.magnitude
-            << "    (bin " << peak.index << ")\n";
-    }
+    std::cout << pdt::format_spectrum_report(report);
 
     if (!options.output_csv_path.empty()) {
-        std::ofstream out_file(options.output_csv_path);
-        if (!out_file) {
-            std::cerr << "Failed to open output CSV file: "
+        if (!pdt::export_spectrum_csv(spectrum, options.output_csv_path)) {
+            std::cerr << "Failed to export CSV: "
                       << options.output_csv_path << '\n';
             return 1;
         }
 
-        if (!write_spectrum_csv(out_file, spectrum)) {
-            std::cerr << "Failed to write spectrum CSV.\n";
-            return 1;
-        }
-
-        std::cout << "Spectrum exported to: " << options.output_csv_path << '\n';
+        std::cout << "Spectrum exported to: "
+                  << options.output_csv_path << '\n';
     }
 
     return 0;

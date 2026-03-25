@@ -95,7 +95,7 @@ int main(int argc, char** argv) {
         }
         out_stream = &file;
     }
-    // ~output
+    // ~output out_stream -> file or stdout
 
     std::optional<pdt::AnomalySummary> global_anoms;
     std::optional<std::map<std::string, pdt::AnomalySummary>> per_sensor_anoms;
@@ -117,32 +117,3 @@ int main(int argc, char** argv) {
 
     return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

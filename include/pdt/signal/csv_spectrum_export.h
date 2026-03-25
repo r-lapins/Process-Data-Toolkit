@@ -1,6 +1,6 @@
 #pragma once
 
-#include "pdt/signal/dft.h"
+#include "peak_detection.h"
 
 #include <ostream>
 

@@ -1,12 +1,15 @@
 #pragma once
 
-#include "dft.h"
-
 #include <cstddef>
 #include <vector>
 #include <span>
 
 namespace pdt {
+
+struct Spectrum {
+    std::vector<double> frequencies;
+    std::vector<double> magnitudes;
+};
 
 struct Peak {
     std::size_t index;

@@ -1,15 +1,12 @@
 #pragma once
 
+#include "peak_detection.h"
+
 #include <complex>
 #include <vector>
 #include <span>
 
 namespace pdt {
-
-struct Spectrum {
-    std::vector<double> frequencies;
-    std::vector<double> magnitudes;
-};
 
 std::vector<std::complex<double>> compute_dft(std::span<const double> signal);
 

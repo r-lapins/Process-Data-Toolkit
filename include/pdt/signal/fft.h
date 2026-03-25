@@ -1,6 +1,6 @@
 #pragma once
 
-#include "dft.h"
+#include "peak_detection.h"
 
 #include <complex>
 #include <vector>
