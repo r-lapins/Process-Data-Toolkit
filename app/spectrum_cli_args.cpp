@@ -38,12 +38,13 @@ void print_help(std::ostream& os) {
         << "  --in <file.wav>                      Read input signal from WAV file (required)\n"
         << "  --window <none|hann|hamming>         Window function to apply (default: hann)\n"
         << "  --from <index>                       Start sample index (default: 0)\n"
-        << "  --bins <count>                       Number of samples to analyze (default: 1024)\n"
+        << "  --window-size <count>                Number of samples to analyze (default: 1024)\n"
         << "  --threshold <0..1>                   Peak detection threshold ratio (default: 0.4)\n"
         << "  --mode <threshold-only|local-maxima> Peak detection mode (default: local-maxima)\n"
         << "  --top <count>                        Number of dominant peaks to print (default: 10)\n"
         << "  --algorithm <auto|dft|fft>           Spectrum algorithm (default: auto)\n"
         << "  --out <file.csv>                     Export computed spectrum to CSV\n"
+        << "  --out-r <file.txt>                   Export text report to file\n"
         << "  --help                               Show this help message\n";
 }
 
@@ -57,6 +58,20 @@ bool parse_cli(int argc, const char* const* argv, CliOptions& options, std::ostr
         if (arg == "--help" || arg == "-h") {
             options.help_requested = true;
             return true;
+        }
+
+        if (arg == "--in") {
+            const auto v = args.value();
+            if (!v) {
+                err << "Missing value for --in\n";
+                return false;
+            }
+            if (!options.input_path.empty()) {
+                err << "Only one input WAV file may be provided.\n";
+                return false;
+            }
+            options.input_path = std::string{*v};
+            continue;
         }
 
         if (arg == "--window") {
@@ -96,15 +111,15 @@ bool parse_cli(int argc, const char* const* argv, CliOptions& options, std::ostr
             continue;
         }
 
-        if (arg == "--bins") {
+        if (arg == "--window-size") {
             const auto value = args.value();
             if (!value) {
-                err << "Missing value for --bins\n";
+                err << "Missing value for --window-size\n";
                 return false;
             }
 
-            if (!cli_common::parse_size_t(*value, options.bins) || options.bins == 0) {
-                err << "Invalid value for --bins: " << *value << '\n';
+            if (!cli_common::parse_size_t(*value, options.windowSize) || options.windowSize == 0) {
+                err << "Invalid value for --window-size: " << *value << '\n';
                 return false;
             }
             continue;
@@ -183,17 +198,13 @@ bool parse_cli(int argc, const char* const* argv, CliOptions& options, std::ostr
             continue;
         }
 
-        if (arg == "--in") {
+        if (arg == "--out-r") {
             const auto v = args.value();
             if (!v) {
-                err << "Missing value for --in\n";
+                err << "Missing value for " << arg << "\n";
                 return false;
             }
-            if (!options.input_path.empty()) {
-                err << "Only one input WAV file may be provided.\n";
-                return false;
-            }
-            options.input_path = std::string{*v};
+            options.output_report_path = std::string{*v};
             continue;
         }
 

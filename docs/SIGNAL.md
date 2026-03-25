@@ -24,12 +24,14 @@ Example with explicit options:
   --in input.wav \
   --window hann \
   --from 0 \
-  --bins 1024 \
+  --window-size 1024 \
   --threshold 0.4 \
   --mode local-maxima \
   --top 10 \
   --algorithm auto \
-  --out output.csv
+  --out output.csv \
+  --out-r output.txt
+  
 ```
 
 Supported options:
@@ -38,12 +40,13 @@ Supported options:
 --in <file.wav>
 --window <none|hann|hamming>
 --from <index>
---bins <count>
+--window-size <count>
 --threshold <0..1>
 --mode <threshold-only|local-maxima>
 --top <count>
 --algorithm <auto|dft|fft>
 --out <file.csv>
+--out-r <file.txt>
 ```
 
 What the spectrum CLI does:
@@ -54,30 +57,28 @@ What the spectrum CLI does:
 4. Optionally applies a window function
 5. Computes a single-sided spectrum using DFT or FFT
 6. Detects spectral peaks
-7. Reports dominant spectral peaks
+7. Selects dominant peaks sorted by magnitude
+8. Prints a text report and optionally exports CSV / report files
 
-Example output:
+Example text report:
 
 ```
-Input file   : examples/sample.wav
+Input file   : examples/HDSDR_20230515_072359Z_15047kHz_AF.wav
 Sample rate  : 48000 Hz
 Channels     : 1
 Samples      : 949760
 From sample  : 4736
-Bins         : 512
+Window size  : 512
 Window       : hamming
 Algorithm    : fft
 Threshold    : 0.2
-Peak mode    : local-maxima
-Top peaks    : 2
-
-Dominant peaks
--------------------------------------
-1. f = 7312.5 Hz    |X| = 6.69779    (bin 78)
-2. f = 7125 Hz    |X| = 2.93414    (bin 76)
+Peak mode    : threshold-only
+Detected peaks: 89 | showing top 15
+  1. f = 7546.88 Hz    |X| = 8.33    bin = 161
+  2. f = 7500.00 Hz    |X| = 5.80    bin = 160
 ```
 
-The computed spectrum can be exported to CSV for further analysis.
+The text report can be exported separately to a .txt file.
 
 Generated CSV format:
 
@@ -89,11 +90,14 @@ frequency_hz,magnitude
 ...
 ```
 
-The file can be opened in:
+The computed spectrum can be exported to CSV for further analysis.
 
-- Excel / LibreOffice
-- Python (NumPy / Pandas)
-- MATLAB
+Exported files can be opened in:
+
+- Excel / LibreOffice for CSV
+- Python (NumPy / Pandas) for CSV
+- MATLAB for CSV
+- Any text editor for the report
 
 ### Spectrum demo (synthetic signal)
 

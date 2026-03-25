@@ -2,13 +2,15 @@
 
 #include "pdt/signal/dft.h"
 #include "pdt/signal/fft.h"
-#include "pdt/signal/window.h"
-#include "pdt/signal/wav_reader.h"
 #include "pdt/signal/peak_detection.h"
-#include "pdt/signal/spectrum_report.h"
+#include "pdt/signal/spectrum.h"
+#include "pdt/signal/spectrum_output.h"
+#include "pdt/signal/wav_reader.h"
+#include "pdt/signal/window.h"
 
 #include <algorithm>
 #include <iostream>
+#include <fstream>
 #include <cstddef>
 #include <vector>
 
@@ -39,13 +41,13 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    if (options.from + options.bins > wav->samples.size()) {
-        std::cerr << "Last " << options.from + options.bins - wav->samples.size() << " samples are out of range.\n";
+    if (options.from + options.windowSize > wav->samples.size()) {
+        std::cerr << "Last " << options.from + options.windowSize - wav->samples.size() << " samples are out of range.\n";
         return 1;
     }
 
     const std::size_t available = wav->samples.size() - options.from;
-    const std::size_t segment_size = std::min(options.bins, available);
+    const std::size_t segment_size = std::min(options.windowSize, available);
 
     if (segment_size == 0) {
         std::cerr << "Selected segment is empty.\n";
@@ -64,22 +66,23 @@ int main(int argc, char* argv[]) {
     Spectrum spectrum{};
     SpectrumAlgorithm used_algorithm = options.algorithm;
 
+    using enum SpectrumAlgorithm;
     switch (options.algorithm) {
-    case SpectrumAlgorithm::Auto:
+    case Auto:
         if (is_power_of_two(segment.size())) {
             spectrum = compute_single_sided_spectrum_fft(segment, wav->sample_rate);
-            used_algorithm = SpectrumAlgorithm::Fft;
+            used_algorithm = Fft;
         } else {
             spectrum = compute_single_sided_spectrum(segment, wav->sample_rate);
-            used_algorithm = SpectrumAlgorithm::Dft;
+            used_algorithm = Dft;
         }
         break;
 
-    case SpectrumAlgorithm::Dft:
+    case Dft:
         spectrum = compute_single_sided_spectrum(segment, wav->sample_rate);
         break;
 
-    case SpectrumAlgorithm::Fft:
+    case Fft:
         if (!is_power_of_two(segment.size())) {
             std::cerr << "FFT requires number of bins to be a power of two.\n";
             return 1;
@@ -88,23 +91,20 @@ int main(int argc, char* argv[]) {
         break;
     }
 
-    const auto dominant_peaks = detect_dominant_peaks(
-        spectrum,
-        options.threshold,
-        options.peak_mode,
-        options.top
-        );
+    const auto all_peaks = find_peaks(spectrum, options.threshold, options.peak_mode);
+    const auto dominant_peaks = select_dominant_peaks(all_peaks, options.top);
 
     pdt::SpectrumReport report{
         .spectrum = spectrum,
-        .peaks = dominant_peaks,
+        .all_peaks = all_peaks,
+        .top_peaks = dominant_peaks,
         .meta = {
             .input_path = options.input_path,
             .sample_rate = static_cast<double>(wav->sample_rate),
             .channels = wav->channels,
             .total_samples = wav->samples.size(),
             .from = options.from,
-            .bins = segment.size(),
+            .windowSize = segment.size(),
             .window = options.use_window ? to_string(options.window) : "none",
             .algorithm = to_string(used_algorithm),
             .threshold = options.threshold,
@@ -113,17 +113,39 @@ int main(int argc, char* argv[]) {
         }
     };
 
-    std::cout << pdt::format_spectrum_report(report);
+    if (!pdt::write_spectrum_report(std::cout, report)) {
+        std::cerr << "Failed to write spectrum report.\n";
+        return 1;
+    }
 
     if (!options.output_csv_path.empty()) {
-        if (!pdt::export_spectrum_csv(spectrum, options.output_csv_path)) {
-            std::cerr << "Failed to export CSV: "
-                      << options.output_csv_path << '\n';
+        std::ofstream out_file(options.output_csv_path);
+        if (!out_file) {
+            std::cerr << "Failed to export CSV: " << options.output_csv_path << '\n';
             return 1;
         }
 
-        std::cout << "Spectrum exported to: "
-                  << options.output_csv_path << '\n';
+        if (!write_spectrum_csv(out_file, spectrum)) {
+            std::cerr << "Failed to write spectrum CSV.\n";
+            return 1;
+        }
+
+        std::cout << "Spectrum exported to: " << options.output_csv_path << '\n';
+    }
+
+    if (!options.output_report_path.empty()) {
+        std::ofstream report_file(options.output_report_path);
+        if (!report_file) {
+            std::cerr << "Failed to open report file: " << options.output_report_path << '\n';
+            return 1;
+        }
+
+        if (!write_spectrum_report(report_file, report)) {
+            std::cerr << "Failed to write spectrum report.\n";
+            return 1;
+        }
+
+        std::cout << "Report exported to: " << options.output_report_path << '\n';
     }
 
     return 0;

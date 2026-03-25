@@ -25,7 +25,7 @@ int main() {
             "spectrum_cli",
             "--window", "hamming",
             "--from", "128",
-            "--bins", "2048",
+            "--window-size", "2048",
             "--threshold", "0.75",
             "--mode", "threshold-only",
             "--top", "5",
@@ -47,7 +47,7 @@ int main() {
         assert(opt.window == pdt::WindowType::Hamming);
         assert(opt.use_window);
         assert(opt.from == std::size_t{128});
-        assert(opt.bins == std::size_t{2048});
+        assert(opt.windowSize == std::size_t{2048});
         assert(std::abs(opt.threshold - 0.75) < 1e-12);
         assert(opt.peak_mode == pdt::PeakDetectionMode::ThresholdOnly);
         assert(opt.top == std::size_t{5});
@@ -81,7 +81,7 @@ int main() {
         assert(opt.window == pdt::WindowType::Hann);
         assert(opt.use_window == true);
         assert(opt.from == 0);
-        assert(opt.bins == 1024);
+        assert(opt.windowSize == 1024);
         assert(opt.threshold == 0.4);
         assert(opt.peak_mode == pdt::PeakDetectionMode::LocalMaxima);
         assert(opt.top == 10);
@@ -145,14 +145,14 @@ int main() {
     }
 
     {
-        const char* argv[] = {"spectrum_cli", "--bins", "0", "--in", "input.wav"};
+        const char* argv[] = {"spectrum_cli", "--window-size", "0", "--in", "input.wav"};
         CliOptions opt{};
         std::stringstream err;
 
         const bool ok = parse_cli(5, argv, opt, err);
 
         assert(!ok);
-        assert(err.str().find("Invalid value for --bins: 0") != std::string::npos);
+        assert(err.str().find("Invalid value for --window-size: 0") != std::string::npos);
     }
 
     {

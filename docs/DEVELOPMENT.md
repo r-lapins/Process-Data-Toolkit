@@ -107,6 +107,13 @@ valgrind --leak-check=full --track-origins=yes \
 --per-sensor
 ```
 
+```bash
+valgrind --leak-check=full --track-origins=yes \
+./build/debug-nosan/spectrum_cli \
+--in examples/HDSDR_20230515_072359Z_15047kHz_AF.wav \
+--threshold 0.01 --window hamming --from 4096 --window-size 2048
+```
+
 ---
 
 ## clang-tidy

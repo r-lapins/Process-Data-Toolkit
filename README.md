@@ -49,11 +49,12 @@ Notes and instructions are available in [docs/SIGNAL.md](docs/SIGNAL.md).
 - Single-sided spectrum computation
 - Window functions: Hann and Hamming
 - Spectral peak detection (`ThresholdOnly`, `LocalMaxima`)
-- Dominant spectral peak extraction
+- Detection of peaks and selection of the dominant peak separately
 - WAV reader (RIFF/WAVE PCM16 mono)
 - CLI spectrum analysis tool for WAV files (`spectrum_cli`)
 - Synthetic signal spectrum analysis demo (`spectrum_synth_demo`)
 - CSV export of computed spectrum (`--out`)
+- Text report export (`--out-r`)
 - DFT vs FFT runtime benchmark tool (`fft_benchmark`)
 
 ---
@@ -218,9 +219,7 @@ int main() {
 
 Possible next steps:
 
-- Additional DSP operations
-- Robust anomaly detection (MAD / IQR)
-- Streaming processing
+- Streaming / online anomaly detection
 - Additional window functions
 - Spectrogram computation
 
