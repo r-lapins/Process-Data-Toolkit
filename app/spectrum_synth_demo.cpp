@@ -46,8 +46,7 @@ int main() {
 
     // Detect all bins above threshold
     const auto threshold_peaks = find_peaks(
-        spectrum.frequencies,
-        spectrum.magnitudes,
+        spectrum,
         0.4,
         PeakDetectionMode::ThresholdOnly
         );
@@ -65,8 +64,7 @@ int main() {
 
     // Detect local maxima above threshold
     const auto local_maxima_peaks = find_peaks(
-        spectrum.frequencies,
-        spectrum.magnitudes,
+        spectrum,
         0.4,
         PeakDetectionMode::LocalMaxima
         );

@@ -64,7 +64,7 @@ int main() {
 
     //
     // Threshold-based peak detection on the computed spectrum
-    const auto peaks = find_peaks(spectrum.frequencies, spectrum.magnitudes, 0.8, PeakDetectionMode::LocalMaxima);
+    const auto peaks = find_peaks(spectrum, 0.8, PeakDetectionMode::LocalMaxima);
     assert(!peaks.empty());
 
     bool found_target_peak = false;

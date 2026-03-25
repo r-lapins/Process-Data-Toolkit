@@ -59,11 +59,9 @@ int main() {
         assert(!spectrum.frequencies.empty());
         assert(spectrum.frequencies.size() == spectrum.magnitudes.size());
 
-        const auto max_it = std::max_element(
-            spectrum.magnitudes.begin(), spectrum.magnitudes.end());
+        const auto max_it = std::ranges::max_element(spectrum.magnitudes);
 
-        const auto max_index = static_cast<std::size_t>(
-            std::distance(spectrum.magnitudes.begin(), max_it));
+        const auto max_index = static_cast<std::size_t>(std::distance(spectrum.magnitudes.begin(), max_it));
 
         assert(std::abs(spectrum.frequencies[max_index] - f0) < 1e-9);
     }

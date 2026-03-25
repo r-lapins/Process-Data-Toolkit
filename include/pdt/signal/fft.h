@@ -1,6 +1,6 @@
 #pragma once
 
-#include "peak_detection.h"
+#include "spectrum.h"
 
 #include <complex>
 #include <vector>
