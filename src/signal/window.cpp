@@ -43,8 +43,9 @@ std::vector<double> make_window(WindowType type, std::size_t size) {
     return window;
 }
 
-std::vector<double> apply_window(std::span<const double> signal,
-                                 std::span<const double> window) {
+std::vector<double> apply_window(std::span<const double> signal, WindowType type) {
+    const auto window = make_window(type, signal.size());
+
     std::vector<double> output;
 
     if (signal.size() != window.size()) {
@@ -58,12 +59,6 @@ std::vector<double> apply_window(std::span<const double> signal,
     }
 
     return output;
-}
-
-std::vector<double> apply_window(std::span<const double> signal,
-                                 WindowType type) {
-    const auto window = make_window(type, signal.size());
-    return apply_window(signal, window);
 }
 
 } // namespace pdt

@@ -44,7 +44,7 @@ int main() {
 
         assert(w.size() == 8);
 
-               // Hamming does not go to zero at the edges
+        // Hamming does not go to zero at the edges
         assert(std::abs(w.front() - 0.08) < 1e-6);
         assert(std::abs(w.back() - 0.08) < 1e-6);
 
@@ -54,29 +54,7 @@ int main() {
         }
     }
 
-    // 5. Apply explicit window
-    {
-        const std::vector<double> signal{1.0, 2.0, 3.0};
-        const std::vector<double> window{0.0, 0.5, 1.0};
-
-        const auto out = apply_window(signal, window);
-
-        assert(out.size() == 3);
-        assert(std::abs(out[0] - 0.0) < eps);
-        assert(std::abs(out[1] - 1.0) < eps);
-        assert(std::abs(out[2] - 3.0) < eps);
-    }
-
-    // 6. Size mismatch
-    {
-        const std::vector<double> signal{1.0, 2.0, 3.0};
-        const std::vector<double> window{1.0, 1.0};
-
-        const auto out = apply_window(signal, window);
-        assert(out.empty());
-    }
-
-    // 7. Apply generated Hann window
+    // 5. Apply generated Hann window
     {
         const std::vector<double> signal(8, 1.0);
         const auto out = apply_window(signal, WindowType::Hann);
@@ -87,6 +65,19 @@ int main() {
         const auto w = make_window(WindowType::Hann, 8);
         for (std::size_t i = 0; i < out.size(); ++i) {
             assert(std::abs(out[i] - w[i]) < eps);
+        }
+    }
+
+    // 6. Apply generated Hamming window
+    {
+        const std::vector<double> signal(8, 2.0);
+        const auto out = apply_window(signal, WindowType::Hamming);
+
+        assert(out.size() == 8);
+
+        const auto w = make_window(WindowType::Hamming, 8);
+        for (std::size_t i = 0; i < out.size(); ++i) {
+            assert(std::abs(out[i] - 2.0 * w[i]) < eps);
         }
     }
 
