@@ -27,12 +27,11 @@ add_library(pdt
     src/core/anomaly.cpp
 
     src/signal/dft.cpp
-    src/signal/peak_detection.cpp
-    src/signal/wav_reader.cpp
     src/signal/fft.cpp
+    src/signal/peak_detection.cpp
+    src/signal/spectrum_output.cpp
+    src/signal/wav_reader.cpp
     src/signal/window.cpp
-    src/signal/csv_spectrum_export.cpp
-    src/signal/spectrum_report.cpp
 )
 target_include_directories(pdt PUBLIC include)
 
