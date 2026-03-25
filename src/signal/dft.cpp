@@ -5,12 +5,13 @@
 namespace pdt {
 
 std::vector<std::complex<double>> compute_dft(std::span<const double> signal) {
+    // N = number of input samples (DFT size)
     const std::size_t N = signal.size();
 
     // Result vector of complex spectral coefficients X[k]
     std::vector<std::complex<double>> output(N);
 
-    // Outer loop iterates over frequency bins k
+    // Outer loop iterates over frequency bins k (DFT output indices)
     for (std::size_t k = 0; k < N; ++k) {
 
         // Accumulator for the k-th spectral coefficient
@@ -20,7 +21,7 @@ std::vector<std::complex<double>> compute_dft(std::span<const double> signal) {
         for (std::size_t n = 0; n < N; ++n) {
 
             /*
-             * Complex exponential:
+             * Complex exponential (DFT kernel):
              *
              * exp(-j*2*pi*k*n/N)
              *
@@ -29,6 +30,7 @@ std::vector<std::complex<double>> compute_dft(std::span<const double> signal) {
              */
             const double angle = -2.0 * std::numbers::pi_v<double> * static_cast<double>(k) * static_cast<double>(n) / static_cast<double>(N);
 
+            // Twiddle factor W_N^(k*n)
             const std::complex<double> twiddle{ std::cos(angle), std::sin(angle) };
 
             // Accumulate contribution of sample x[n]
@@ -48,8 +50,8 @@ Spectrum compute_single_sided_spectrum(std::span<const double> signal, double sa
 
     const std::size_t N = signal.size();
 
-    // For real-valued signals the spectrum is symmetric.
-    // Only the first half (positive frequencies) is needed.
+    // For real-valued signals the DFT is symmetric.
+    // Only non-negative frequencies (0 .. Fs/2) are kept.
     const std::size_t half = N / 2;
 
     Spectrum spectrum{};
@@ -63,10 +65,12 @@ Spectrum compute_single_sided_spectrum(std::span<const double> signal, double sa
          * Frequency corresponding to bin k:
          *
          * f_k = k * Fs / N
+         *
+         * where Fs is the sampling rate
          */
         const double frequency = static_cast<double>(k) * sample_rate / static_cast<double>(N);
 
-        //Magnitude of the complex spectral coefficient
+        // Magnitude of the complex spectral coefficient |X[k]|
         const double magnitude = std::abs(dft[k]);
 
         spectrum.frequencies.push_back(frequency);

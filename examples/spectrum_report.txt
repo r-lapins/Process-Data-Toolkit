@@ -1,0 +1,26 @@
+Input file   : examples/HDSDR_20230515_072359Z_15047kHz_AF.wav
+Sample rate  : 48000 Hz
+Channels     : 1
+Samples      : 949760
+From sample  : 0
+Window size  : 1024
+Window       : hamming
+Algorithm    : fft
+Threshold    : 0.01
+Peak mode    : threshold-only
+Detected peaks: 89 | showing top 15
+  1. f = 7546.88 Hz    |X| = 8.33    bin = 161
+  2. f = 7500.00 Hz    |X| = 5.80    bin = 160
+  3. f = 7593.75 Hz    |X| = 5.43    bin = 162
+  4. f = 7359.38 Hz    |X| = 3.52    bin = 157
+  5. f = 7312.50 Hz    |X| = 2.67    bin = 156
+  6. f = 7640.62 Hz    |X| = 2.66    bin = 163
+  7. f = 7734.38 Hz    |X| = 2.29    bin = 165
+  8. f = 7406.25 Hz    |X| = 2.26    bin = 158
+  9. f = 7687.50 Hz    |X| = 2.07    bin = 164
+ 10. f = 7781.25 Hz    |X| = 1.85    bin = 166
+ 11. f = 7875.00 Hz    |X| = 1.64    bin = 168
+ 12. f = 7125.00 Hz    |X| = 1.59    bin = 152
+ 13. f = 7265.62 Hz    |X| = 1.56    bin = 155
+ 14. f = 7921.88 Hz    |X| = 1.40    bin = 169
+ 15. f = 7171.88 Hz    |X| = 1.32    bin = 153
