@@ -4,6 +4,7 @@
 
 #include <ostream>
 #include <string>
+#include <cstddef>
 
 namespace pdt {
 
@@ -23,14 +24,12 @@ struct ReportContext {
     std::size_t top_n{10};
 };
 
-void write_json_report(std::ostream& os,
-                       const ReportContext& ctx,
-                       const Stats& stats,
+std::string format_anomaly_line(const Anomaly& anomaly, std::size_t displayIndex, AnomalyMethod method);
+
+void write_json_report(std::ostream& os, const ReportContext& ctx, const Stats& stats,
                        const std::optional<AnomalySummary>& global_anomalies);
 
-void write_json_report(std::ostream& os,
-                       const ReportContext& ctx,
-                       const std::map<std::string, Stats>& per_sensor,
-                       const std::optional<std::map<std::string, AnomalySummary>>& per_sensor_anomalies);
+void write_json_report(std::ostream& os, const ReportContext& ctx, const std::map<std::string, Stats>& perSensor,
+                       const std::optional<std::map<std::string, AnomalySummary>>& perSensorAnomalies);
 
 } // namespace pdt

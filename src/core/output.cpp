@@ -1,4 +1,4 @@
-#include "pdt/core/report.h"
+#include "pdt/core/output.h"
 
 #include <chrono>
 #include <iomanip>
@@ -71,14 +71,42 @@ void write_anomaly_summary(std::ostream& os, const pdt::AnomalySummary& s, int i
     os << sp << "}";
 }
 
+std::string anomaly_score_label(pdt::AnomalyMethod method) {
+    using enum pdt::AnomalyMethod;
+
+    switch (method) {
+    case ZScore: return "z";
+    case IQR:    return "iqr";
+    case MAD:    return "mad";
+    }
+
+    return "score";
+}
+
+std::string format_date_time(std::chrono::sys_seconds ts) {
+    using namespace std::chrono;
+
+    const auto dp = floor<days>(ts);
+    const year_month_day ymd{dp};
+    const auto time = hh_mm_ss{ts - dp};
+
+    std::ostringstream oss;
+    oss << std::setw(4) << std::setfill('0') << int(ymd.year()) << "-"
+        << std::setw(2) << unsigned(ymd.month()) << "-"
+        << std::setw(2) << unsigned(ymd.day()) << "  "
+        << std::setw(2) << time.hours().count() << ":"
+        << std::setw(2) << time.minutes().count() << ":"
+        << std::setw(2) << time.seconds().count();
+
+    return oss.str();
+}
+
 } // namespace
 
 namespace pdt {
 
-void write_json_report(std::ostream& os,
-                       const ReportContext& ctx,
-                       const Stats& stats,
-                       const std::optional<AnomalySummary>& global_anomalies) {
+void write_json_report(std::ostream& os, const ReportContext& ctx, const Stats& stats,
+                       const std::optional<AnomalySummary>& globalAnomalies) {
     os << "{\n";
 
     os << "  \"mode\": \"" << (ctx.sensor ? "sensor" : "global") << "\",\n";
@@ -126,8 +154,8 @@ void write_json_report(std::ostream& os,
         os << "    \"mode\": \"global\",\n";
         os << "    \"global\": ";
 
-        if (global_anomalies) {
-            write_anomaly_summary(os, *global_anomalies, 4);
+        if (globalAnomalies) {
+            write_anomaly_summary(os, *globalAnomalies, 4);
             os << '\n';
         }
         else { os << "{ \"count\": 0, \"top\": [] }\n"; }
@@ -139,10 +167,8 @@ void write_json_report(std::ostream& os,
     os << "}\n";
 }
 
-void write_json_report(std::ostream& os,
-                       const ReportContext& ctx,
-                       const std::map<std::string, Stats>& per_sensor,
-                       const std::optional<std::map<std::string, AnomalySummary>>& per_sensor_anomalies) {
+void write_json_report(std::ostream& os, const ReportContext& ctx, const std::map<std::string, Stats>& perSensor,
+                       const std::optional<std::map<std::string, AnomalySummary>>& perSensorAnomalies) {
     os << "{\n";
 
     os << "  \"mode\": \"per_sensor\",\n";
@@ -174,10 +200,10 @@ void write_json_report(std::ostream& os,
 
     os << "  \"stats_by_sensor\": {\n";
 
-    bool first_sensor = true;
-    for (const auto& [name, st] : per_sensor) {
-        if (!first_sensor) { os << ",\n"; }
-        first_sensor = false;
+    bool firstSensor = true;
+    for (const auto& [name, st] : perSensor) {
+        if (!firstSensor) { os << ",\n"; }
+        firstSensor = false;
 
         os << "    \"" << name << "\": {\n";
         os << "      \"count\": " << st.count << ",\n";
@@ -199,12 +225,12 @@ void write_json_report(std::ostream& os,
         os << "    \"mode\": \"per_sensor\",\n";
         os << "    \"per_sensor\": {\n";
 
-        if (per_sensor_anomalies && !per_sensor_anomalies->empty()) {
+        if (perSensorAnomalies && !perSensorAnomalies->empty()) {
             std::size_t i = 0;
-            for (const auto& [sensor, summary] : *per_sensor_anomalies) {
+            for (const auto& [sensor, summary] : *perSensorAnomalies) {
                 os << "      \"" << sensor << "\": ";
                 write_anomaly_summary(os, summary, 6);
-                os << (++i < per_sensor_anomalies->size() ? ",\n" : "\n");
+                os << (++i < perSensorAnomalies->size() ? ",\n" : "\n");
             }
         }
 
@@ -214,6 +240,22 @@ void write_json_report(std::ostream& os,
     else { os << '\n'; }
 
     os << "}\n";
+}
+
+std::string format_anomaly_line(const Anomaly& anomaly, std::size_t displayIndex, AnomalyMethod method)
+{
+    std::ostringstream oss;
+
+    oss << std::fixed << std::setprecision(2);
+
+    oss << std::setw(3) << std::setfill(' ') << displayIndex << ". ";
+    oss << "  |  " << format_date_time(anomaly.timestamp)
+        << "  |  " << anomaly.sensor
+        << "  |  value = " << anomaly.value
+        << "  |  " << anomaly_score_label(method)
+        << " = " << anomaly.score;
+
+    return oss.str();
 }
 
 } // namespace pdt

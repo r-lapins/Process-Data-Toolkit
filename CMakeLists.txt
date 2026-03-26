@@ -23,7 +23,7 @@ add_library(pdt
     src/core/csv_reader.cpp
     src/core/time.cpp
     src/core/dataset.cpp
-    src/core/report.cpp
+    src/core/output.cpp
     src/core/anomaly.cpp
 
     src/signal/dft.cpp

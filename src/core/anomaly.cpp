@@ -159,15 +159,16 @@ AnomalySummary detect_mad_for_samples(std::span<const Sample> samples, double th
     std::vector<Anomaly> anomalies;
     anomalies.reserve((samples.size() / 10) + 1);
 
-    for (const auto& sample : samples) {
+    for (std::size_t i = 0; i < samples.size(); ++i) {
+        const auto& sample = samples[i];
         const double score = (sample.value - median) / mad;
 
         if (std::abs(score) >= threshold) {
-            anomalies.push_back(Anomaly{
-                .timestamp = sample.timestamp,
-                .sensor = sample.sensor,
-                .value = sample.value,
-                .score = score
+            anomalies.push_back(Anomaly{.timestamp = sample.timestamp,
+                                        .sensor = sample.sensor,
+                                        .value = sample.value,
+                                        .score = score,
+                                        .index = i
             });
         }
     }

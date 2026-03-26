@@ -1,4 +1,4 @@
-#include "pdt/core/report.h"
+#include "pdt/core/output.h"
 
 #include <cassert>
 #include <map>
