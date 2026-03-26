@@ -33,6 +33,7 @@ struct SpectrumReport {
 
 bool write_spectrum_report(std::ostream& out, const SpectrumReport& report);
 bool write_spectrum_csv(std::ostream& out, const Spectrum& spectrum);
+std::string format_peak_line(const Peak& peak, std::size_t display_index);
 std::string to_string(const SpectrumReport& report);
 
 } // namespace pdt

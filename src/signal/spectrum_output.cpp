@@ -33,17 +33,22 @@ bool write_spectrum_report(std::ostream &out, const SpectrumReport &report)
 
     for (std::size_t i = 0; i < report.top_peaks.size(); ++i) {
         const auto& peak = report.top_peaks[i];
-
-        out << std::setfill(' ') << std::setw(3) << (i + 1) << ". "
-            << "f = " << std::fixed << std::setprecision(2) << peak.frequency
-            << " Hz"
-            << "    |X| = " << peak.magnitude
-            << std::defaultfloat
-            << "    bin = " << peak.index << "\n";
+        out << format_peak_line(peak, i + 1) << '\n';
     }
-    // out << "\n";
 
     return static_cast<bool>(out);
+}
+
+std::string format_peak_line(const Peak& peak, std::size_t display_index)
+{
+    std::ostringstream out;
+    out << std::setfill(' ') << std::setw(3) << display_index << ". "
+        << "f = " << std::fixed << std::setprecision(2) << peak.frequency
+        << " Hz"
+        << "    |X| = " << peak.magnitude
+        << std::defaultfloat
+        << "    bin = " << peak.index;
+    return out.str();
 }
 
 bool write_spectrum_csv(std::ostream& out, const Spectrum& spectrum) {
