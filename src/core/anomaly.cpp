@@ -4,6 +4,7 @@
 #include <cmath>
 #include <map>
 #include <span>
+#include <utility>
 #include <vector>
 
 namespace pdt {
@@ -27,20 +28,6 @@ double median_sorted(const std::vector<double>& values) {
     return values[mid];
 }
 
-DataSet make_dataset(std::span<const Sample> samples) {
-    return DataSet{std::vector<Sample>{samples.begin(), samples.end()}};
-}
-
-void sort_and_trim(std::vector<Anomaly>& anomalies, std::size_t top_n) {
-    std::ranges::sort(anomalies, [](const Anomaly& a, const Anomaly& b) {
-        return std::abs(a.score) > std::abs(b.score);
-    });
-
-    if (anomalies.size() > top_n) {
-        anomalies.resize(top_n);
-    }
-}
-
 std::map<std::string, std::vector<Sample>> group_by_sensor(std::span<const Sample> samples) {
     std::map<std::string, std::vector<Sample>> groups;
 
@@ -51,16 +38,14 @@ std::map<std::string, std::vector<Sample>> group_by_sensor(std::span<const Sampl
     return groups;
 }
 
+DataSet make_dataset(std::span<const Sample> samples) {
+    return DataSet{std::vector<Sample>{samples.begin(), samples.end()}};
+}
+
 AnomalySummary make_summary(std::vector<Anomaly> anomalies, std::size_t top_n) {
     AnomalySummary summary{};
-
-    // count stores the total number of detected anomalies before trimming,
-    // while top contains at most top_n anomalies sorted by score magnitude.
-    summary.count = anomalies.size();
-
-    sort_and_trim(anomalies, top_n);
-    summary.top = std::move(anomalies);
-
+    summary.all = std::move(anomalies);
+    summary.top = select_top_anomalies(summary.all, top_n);
     return summary;
 }
 
@@ -77,15 +62,16 @@ AnomalySummary detect_zscore_for_samples(std::span<const Sample> samples, double
     std::vector<Anomaly> anomalies;
     anomalies.reserve((samples.size() / 10) + 1); // assuming number of anomalies 10 % of number of samples
 
-    for (const auto& sample : samples) {
+    for (std::size_t i = 0; i < samples.size(); ++i) {
+        const auto& sample = samples[i];
         const double z = (sample.value - stats.mean) / stats.stddev;
 
         if (std::abs(z) >= threshold) {
-            anomalies.push_back(Anomaly{
-                .timestamp = sample.timestamp,
-                .sensor = sample.sensor,
-                .value = sample.value,
-                .score = z
+            anomalies.push_back(Anomaly{.timestamp = sample.timestamp,
+                                        .sensor = sample.sensor,
+                                        .value = sample.value,
+                                        .score = z,
+                                        .index = i
             });
         }
     }
@@ -117,20 +103,22 @@ AnomalySummary detect_iqr_for_samples(std::span<const Sample> samples, double th
 
     std::vector<Anomaly> anomalies;
 
-    for (const auto& sample : samples) {
+    for (std::size_t i = 0; i < samples.size(); ++i) {
+        const auto& sample = samples[i];
+
         if (sample.value < lower) {
-            anomalies.push_back(Anomaly{
-                .timestamp = sample.timestamp,
-                .sensor = sample.sensor,
-                .value = sample.value,
-                .score = (sample.value - lower) / iqr
+            anomalies.push_back(Anomaly{.timestamp = sample.timestamp,
+                                        .sensor = sample.sensor,
+                                        .value = sample.value,
+                                        .score = (sample.value - lower) / iqr,
+                                        .index = i
             });
         } else if (sample.value > upper) {
-            anomalies.push_back(Anomaly{
-                .timestamp = sample.timestamp,
-                .sensor = sample.sensor,
-                .value = sample.value,
-                .score = (sample.value - upper) / iqr
+            anomalies.push_back(Anomaly{.timestamp = sample.timestamp,
+                                        .sensor = sample.sensor,
+                                        .value = sample.value,
+                                        .score = (sample.value - upper) / iqr,
+                                        .index = i
             });
         }
     }
@@ -254,6 +242,20 @@ std::map<std::string, AnomalySummary> detect_anomalies_per_sensor(const DataSet&
     }
 
     return {};
+}
+
+std::vector<Anomaly> select_top_anomalies(std::span<const Anomaly> anomalies, std::size_t max_count)
+{
+    if (max_count == 0 || anomalies.empty()) { return {}; }
+
+    std::vector<Anomaly> result(anomalies.begin(), anomalies.end());
+    const auto k = static_cast<std::ptrdiff_t>(std::min(max_count, result.size()));
+
+    std::ranges::partial_sort(result, result.begin() + k, std::ranges::greater{},
+                              [](const Anomaly& a) { return std::abs(a.score); });
+
+    result.resize(k);
+    return result;
 }
 
 } // namespace pdt

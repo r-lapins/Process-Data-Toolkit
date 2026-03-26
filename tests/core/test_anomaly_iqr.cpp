@@ -35,14 +35,14 @@ int main() {
 
     const auto summary = detect_anomalies_global(ds, IQR, 1.5, 5);
 
-    assert(summary.count == 1);
+    assert(summary.all.size() == 1);
     assert(summary.top.size() == 1);
     assert(summary.top[0].sensor == "S1");
     assert(summary.top[0].value == 100.0);
     assert(summary.top[0].score > 0.0);
 
     const auto unified = detect_anomalies_global(ds, IQR, 1.5, 5);
-    assert(unified.count == 1);
+    assert(unified.all.size() == 1);
     assert(unified.top.size() == 1);
     assert(unified.top[0].value == 100.0);
 

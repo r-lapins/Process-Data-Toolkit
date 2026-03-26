@@ -26,13 +26,13 @@ int main() {
     }};
 
     auto sum = detect_anomalies_global(ds, ZScore, 1.5, 10);
-    assert(sum.count >= 1);
+    assert(sum.all.size() >= 1);
     assert(!sum.top.empty());
     assert(sum.top[0].value == 100.0);
 
     auto per = detect_anomalies_per_sensor(ds, ZScore, 1.5, 10);
     assert(per.size() == 1);
-    assert(per.at("S1").count >= 1);
+    assert(per.at("S1").all.size() >= 1);
     assert(per.at("S1").top[0].value == 100.0);
 
     return 0;

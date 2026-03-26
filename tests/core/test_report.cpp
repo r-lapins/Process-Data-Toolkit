@@ -58,8 +58,8 @@ int main() {
         st.count = 2;
 
         AnomalySummary an{};
-        an.count = 1;
-        an.top.push_back(Anomaly{std::chrono::sys_seconds{}, "S1", 123.0, 4.2});
+        an.all.push_back(Anomaly{.timestamp = std::chrono::sys_seconds{}, .sensor = "S1", .value = 123.0, .score = 4.2, .index = 0});
+        an.top.push_back(Anomaly{.timestamp = std::chrono::sys_seconds{}, .sensor = "S1", .value = 123.0, .score = 4.2, .index = 0});
 
         std::stringstream ss;
         write_json_report(ss, ctx, st, an);
@@ -82,20 +82,19 @@ int main() {
         per_ctx.top_n = 10;
 
         std::map<std::string, Stats> per_stats;
-        per_stats["S1"] = Stats{2.0, 1.0, 3.0, 1.0, 2};
-        per_stats["S2"] = Stats{15.0, 10.0, 20.0, 5.0, 3};
+        per_stats["S1"] = Stats{.mean = 2.0, .min = 1.0, .max = 3.0, .stddev = 1.0, .count = 2};
+        per_stats["S2"] = Stats{.mean = 15.0, .min = 10.0, .max = 20.0, .stddev = 5.0, .count = 3};
 
         std::map<std::string, AnomalySummary> per_anoms;
 
         AnomalySummary s1_sum{};
-        s1_sum.count = 1;
-        s1_sum.top.push_back(
-            Anomaly{std::chrono::sys_seconds{}, "S1", 123.0, 4.5});
+        s1_sum.top.push_back(Anomaly{.timestamp = std::chrono::sys_seconds{}, .sensor = "S1", .value = 123.0, .score = 4.2, .index = 0});
+        s1_sum.top.push_back(Anomaly{.timestamp = std::chrono::sys_seconds{}, .sensor = "S1", .value = 123.0, .score = 4.5, .index = 1});
 
         AnomalySummary s2_sum{};
-        s2_sum.count = 2;
-        s2_sum.top.push_back(
-            Anomaly{std::chrono::sys_seconds{}, "S2", 999.0, -5.0});
+        s2_sum.top.push_back(Anomaly{.timestamp = std::chrono::sys_seconds{}, .sensor = "S1", .value = 123.0, .score = 4.2, .index = 0});
+        s2_sum.top.push_back(Anomaly{.timestamp = std::chrono::sys_seconds{}, .sensor = "S1", .value = 123.0, .score = 4.5, .index = 1});
+        s2_sum.top.push_back(Anomaly{.timestamp = std::chrono::sys_seconds{}, .sensor = "S2", .value = 999.0, .score = -5.0, .index = 2});
 
         per_anoms["S1"] = s1_sum;
         per_anoms["S2"] = s2_sum;

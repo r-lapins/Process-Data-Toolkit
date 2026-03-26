@@ -36,14 +36,14 @@ int main() {
 
         const auto summary = detect_anomalies_global(ds, MAD, 3.0, 5);
 
-        assert(summary.count == 1);
+        assert(summary.all.size() == 1);
         assert(summary.top.size() == 1);
         assert(summary.top[0].sensor == "S1");
         assert(summary.top[0].value == 100.0);
         assert(summary.top[0].score > 0.0);
 
         const auto unified = detect_anomalies_global(ds, MAD, 3.0, 5);
-        assert(unified.count == 1);
+        assert(unified.all.size() == 1);
         assert(unified.top.size() == 1);
         assert(unified.top[0].value == 100.0);
     }
@@ -67,10 +67,10 @@ int main() {
         assert(per_sensor.contains("S1"));
         assert(per_sensor.contains("S2"));
 
-        assert(per_sensor.at("S1").count == 0);
+        assert(per_sensor.at("S1").all.size() == 0);
         assert(per_sensor.at("S1").top.empty());
 
-        assert(per_sensor.at("S2").count == 1);
+        assert(per_sensor.at("S2").all.size() == 1);
         assert(per_sensor.at("S2").top.size() == 1);
         assert(per_sensor.at("S2").top[0].sensor == "S2");
         assert(per_sensor.at("S2").top[0].value == 100.0);
@@ -80,8 +80,8 @@ int main() {
         assert(unified.size() == 2);
         assert(unified.contains("S1"));
         assert(unified.contains("S2"));
-        assert(unified.at("S1").count == 0);
-        assert(unified.at("S2").count == 1);
+        assert(unified.at("S1").all.size() == 0);
+        assert(unified.at("S2").all.size() == 1);
         assert(unified.at("S2").top.size() == 1);
         assert(unified.at("S2").top[0].value == 100.0);
     }
@@ -97,7 +97,7 @@ int main() {
 
         const auto summary = detect_anomalies_global(ds, MAD, 3.0, 5);
 
-        assert(summary.count == 0);
+        assert(summary.all.size() == 0);
         assert(summary.top.empty());
     }
 
@@ -113,7 +113,7 @@ int main() {
 
         const auto summary = detect_anomalies_global(ds, MAD, 3.0, 1);
 
-        assert(summary.count == 2);
+        assert(summary.all.size() == 2);
         assert(summary.top.size() == 1);
     }
 
@@ -125,7 +125,7 @@ int main() {
 
         const auto summary = detect_anomalies_global(ds, MAD, 3.0, 5);
 
-        assert(summary.count == 0);
+        assert(summary.all.size() == 0);
         assert(summary.top.empty());
     }
 
@@ -140,11 +140,11 @@ int main() {
         }};
 
         const auto summary_invalid_threshold = detect_anomalies_global(ds, MAD, 0.0, 5);
-        assert(summary_invalid_threshold.count == 0);
+        assert(summary_invalid_threshold.all.size() == 0);
         assert(summary_invalid_threshold.top.empty());
 
         const auto summary_zero_top_n = detect_anomalies_global(ds, MAD, 3.0, 0);
-        assert(summary_zero_top_n.count == 0);
+        assert(summary_zero_top_n.all.size() == 0);
         assert(summary_zero_top_n.top.empty());
     }
 

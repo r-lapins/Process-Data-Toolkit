@@ -6,6 +6,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <cstddef>
 
 namespace pdt {
 
@@ -20,12 +21,15 @@ struct Anomaly {
     std::string sensor;
     double value{};
     double score{}; // generic anomaly score
+    std::size_t index{}; // index in original dataset (or filtered view)
 };
 
 struct AnomalySummary {
-    std::size_t count{};
+    std::vector<Anomaly> all;
     std::vector<Anomaly> top; // sorted descending by |score|
 };
+
+std::vector<Anomaly> select_top_anomalies(std::span<const Anomaly> anomalies, std::size_t max_count);
 
 // unified API
 AnomalySummary detect_anomalies_global(const DataSet& ds, AnomalyMethod method, double threshold, std::size_t top_n);

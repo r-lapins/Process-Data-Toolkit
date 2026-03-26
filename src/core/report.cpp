@@ -54,12 +54,12 @@ void write_anomaly_summary(std::ostream& os, const pdt::AnomalySummary& s, int i
     const std::string sp(indent, ' ');
 
     if (s.top.empty()) {
-        os << "{ \"count\": " << s.count << ", \"top\": [] }";
+        os << "{ \"count\": " << s.all.size() << ", \"top\": [] }";
         return;
     }
 
     os << "{\n";
-    os << sp << "  \"count\": " << s.count << ",\n";
+    os << sp << "  \"count\": " << s.all.size() << ",\n";
     os << sp << "  \"top\": [\n";
 
     for (std::size_t i = 0; i < s.top.size(); ++i) {
