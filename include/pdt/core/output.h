@@ -5,6 +5,8 @@
 #include <ostream>
 #include <string>
 #include <cstddef>
+#include <ostream>
+#include <span>
 
 namespace pdt {
 
@@ -31,5 +33,11 @@ void write_json_report(std::ostream& os, const ReportContext& ctx, const Stats& 
 
 void write_json_report(std::ostream& os, const ReportContext& ctx, const std::map<std::string, Stats>& perSensor,
                        const std::optional<std::map<std::string, AnomalySummary>>& perSensorAnomalies);
+
+bool write_csv(std::ostream& os, const DataSet& dataSet);
+
+// saves the dataset and, after each row that is an anomaly from the `anomalies` list,
+// adds an extra line: anomaly;
+bool write_csv_with_anomaly_markers(std::ostream& os, const DataSet& dataSet, std::span<const Anomaly> anomalies);
 
 } // namespace pdt

@@ -1,12 +1,13 @@
 #include "pdt/core/output.h"
 
-#include <chrono>
-#include <iomanip>
-#include <map>
 #include <optional>
+#include <iomanip>
+#include <chrono>
 #include <ostream>
 #include <sstream>
 #include <string>
+#include <map>
+#include <set>
 
 namespace {
 
@@ -94,6 +95,25 @@ std::string format_date_time(std::chrono::sys_seconds ts) {
     oss << std::setw(4) << std::setfill('0') << int(ymd.year()) << "-"
         << std::setw(2) << unsigned(ymd.month()) << "-"
         << std::setw(2) << unsigned(ymd.day()) << "  "
+        << std::setw(2) << time.hours().count() << ":"
+        << std::setw(2) << time.minutes().count() << ":"
+        << std::setw(2) << time.seconds().count();
+
+    return oss.str();
+}
+
+std::string to_iso8601(std::chrono::sys_seconds ts)
+{
+    using namespace std::chrono;
+
+    const auto dp = floor<days>(ts);
+    const std::chrono::year_month_day ymd{dp};
+    const auto time = hh_mm_ss{ts - dp};
+
+    std::ostringstream oss;
+    oss << std::setw(4) << std::setfill('0') << int(ymd.year()) << "-"
+        << std::setw(2) << unsigned(ymd.month()) << "-"
+        << std::setw(2) << unsigned(ymd.day()) << "T"
         << std::setw(2) << time.hours().count() << ":"
         << std::setw(2) << time.minutes().count() << ":"
         << std::setw(2) << time.seconds().count();
@@ -256,6 +276,46 @@ std::string format_anomaly_line(const Anomaly& anomaly, std::size_t displayIndex
         << " = " << anomaly.score;
 
     return oss.str();
+}
+
+bool write_csv(std::ostream &os, const DataSet &dataSet)
+{
+    if (!os) { return false; }
+
+    os << "timestamp,sensor,value\n";
+
+    for (const auto& sample : dataSet.samples()) {
+        os << to_iso8601(sample.timestamp) << ','
+           << sample.sensor << ','
+           << sample.value << '\n';
+    }
+
+    return static_cast<bool>(os);
+}
+
+bool write_csv_with_anomaly_markers(std::ostream &os, const DataSet &dataSet, std::span<const Anomaly> anomalies)
+{
+    if (!os) { return false; }
+
+    os << "timestamp,sensor,value\n";
+
+    std::set<std::size_t> anomalyIndices;
+    for (const auto& anomaly : anomalies) { anomalyIndices.insert(anomaly.index); }
+
+    const auto samples = dataSet.samples();
+    for (std::size_t i = 0; i < samples.size(); ++i) {
+        const auto& sample = samples[i];
+
+        os << to_iso8601(sample.timestamp) << ','
+           << sample.sensor << ','
+           << sample.value << '\n';
+
+        if (anomalyIndices.contains(i)) {
+            os << "anomaly\n";
+        }
+    }
+
+    return static_cast<bool>(os);
 }
 
 } // namespace pdt
