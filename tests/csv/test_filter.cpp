@@ -15,11 +15,10 @@ std::chrono::sys_seconds must_parse(std::string_view ts) {
     return *parsed;
 }
 
-pdt::Sample mk(std::string_view ts, std::string sensor, double v) {
-    return pdt::Sample{
-        .timestamp = must_parse(ts),
-        .sensor = std::move(sensor),
-        .value = v
+pdt::Sample make_sample(std::string_view ts, std::string sensor, double v) {
+    return pdt::Sample{.timestamp = must_parse(ts),
+                       .sensor = std::move(sensor),
+                       .value = v
     };
 }
 
@@ -61,15 +60,15 @@ int main() {
     // Note: values are treated as sample ‘IDs’ in tests.
     // This makes it easy to check the order and completeness of results.
     pdt::DataSet ds{std::vector<pdt::Sample>{
-        mk("2026-02-18T10:00:00", "S1", 1.0),
-        mk("2026-02-18T10:30:00", "S2", 2.0),
-        mk("2026-02-18T11:00:00", "S1", 3.0),
-        mk("2026-02-18T11:30:00", "S2", 4.0),
-        mk("2026-02-18T12:00:00", "S1", 5.0),
-        mk("2026-02-18T12:30:00", "S3", 6.0),
+        make_sample("2026-02-18T10:00:00", "S1", 1.0),
+        make_sample("2026-02-18T10:30:00", "S2", 2.0),
+        make_sample("2026-02-18T11:00:00", "S1", 3.0),
+        make_sample("2026-02-18T11:30:00", "S2", 4.0),
+        make_sample("2026-02-18T12:00:00", "S1", 5.0),
+        make_sample("2026-02-18T12:30:00", "S3", 6.0),
     }};
 
-           // 1) No options => everything, without changing the order
+        // 1) No options => everything, without changing the order
     {
         pdt::FilterOptions o{};
         auto out = ds.filter(o);
@@ -77,33 +76,33 @@ int main() {
         assert_same_order_by_value(out, {1,2,3,4,5,6});
     }
 
-           // 2) Sensor only (matches)
+        // 2) Sensor only (matches)
     {
         auto out = ds.filter(opt_sensor("S1"));
         assert_same_order_by_value(out, {1,3,5});
     }
 
-           // 3) Sensor only (no matches)
+        // 3) Sensor only (no matches)
     {
         auto out = ds.filter(opt_sensor("NOPE"));
         assert(out.empty());
     }
 
-           // 4) 'from' only (inclusive)
+        // 4) 'from' only (inclusive)
     {
         auto out = ds.filter(opt_from("2026-02-18T11:00:00"));
         // od 11:00:00 włącznie => 3,4,5,6
         assert_same_order_by_value(out, {3,4,5,6});
     }
 
-           // 5) 'to' only (inclusive)
+        // 5) 'to' only (inclusive)
     {
         auto out = ds.filter(opt_to("2026-02-18T11:00:00"));
         // do 11:00:00 włącznie => 1,2,3
         assert_same_order_by_value(out, {1,2,3});
     }
 
-           // 6) from + to (time window, inclusive)
+        // 6) from + to (time window, inclusive)
     {
         pdt::FilterOptions o{};
         o.from = must_parse("2026-02-18T10:30:00");
@@ -113,7 +112,7 @@ int main() {
         assert_same_order_by_value(out, {2,3,4,5});
     }
 
-           // 7) sensor + from + to (combined)
+        // 7) sensor + from + to (combined)
     {
         pdt::FilterOptions o{};
         o.sensor = std::string{"S2"};
@@ -125,7 +124,7 @@ int main() {
         assert_same_order_by_value(out, {2,4});
     }
 
-           // 8) Bounds: exactly one point in time (from==to)
+        // 8) Bounds: exactly one point in time (from==to)
     {
         pdt::FilterOptions o{};
         o.from = must_parse("2026-02-18T11:30:00");
@@ -135,7 +134,7 @@ int main() {
         assert_same_order_by_value(out, {4});
     }
 
-           // 9) Edge-case: from > to => sensible behaviour: empty
+        // 9) Edge-case: from > to => sensible behaviour: empty
     {
         pdt::FilterOptions o{};
         o.from = must_parse("2026-02-18T12:00:00");
@@ -144,7 +143,7 @@ int main() {
         assert(out.empty());
     }
 
-           // 10) Verify that filtering does not mutate the input
+        // 10) Verify that filtering does not mutate the input
     {
         auto before = ds.size();
         auto out = ds.filter(opt_sensor("S3"));

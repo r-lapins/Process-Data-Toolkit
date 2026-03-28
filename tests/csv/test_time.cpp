@@ -12,10 +12,10 @@ int main() {
     assert(!bad1.has_value());
 
     auto bad2 = parse_iso8601("2026-13-18T12:34:56");   // invalid month
-    assert(!bad1.has_value());
+    assert(!bad2.has_value());
 
     auto bad3 = parse_iso8601("2026-02-30T12:34:56");   // invalid day
-    assert(!bad1.has_value());
+    assert(!bad3.has_value());
 
     return 0;
 }

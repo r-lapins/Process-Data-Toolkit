@@ -7,10 +7,10 @@
 namespace {
 using namespace pdt;
 
-Sample mk(const char* ts, const char* sensor, double v) {
+Sample make_sample(const char* ts, const char* sensor, double v) {
     auto t = parse_iso8601(ts);
     assert(t);
-    return Sample{*t, std::string{sensor}, v};
+    return Sample{.timestamp=*t, .sensor=std::string{sensor}, .value=v};
 }
 } // namespace
 
@@ -18,11 +18,11 @@ int main() {
     using namespace pdt;
 
     DataSet ds{std::vector<Sample>{
-        mk("2026-02-18T10:00:00", "S1", 1.0),
-        mk("2026-02-18T11:00:00", "S2", 10.0),
-        mk("2026-02-18T12:00:00", "S1", 3.0),
-        mk("2026-02-18T13:00:00", "S2", 20.0),
-        mk("2026-02-18T14:00:00", "S3", -5.0),
+        make_sample("2026-02-18T10:00:00", "S1", 1.0),
+        make_sample("2026-02-18T11:00:00", "S2", 10.0),
+        make_sample("2026-02-18T12:00:00", "S1", 3.0),
+        make_sample("2026-02-18T13:00:00", "S2", 20.0),
+        make_sample("2026-02-18T14:00:00", "S3", -5.0),
     }};
 
     auto m = ds.stats_by_sensor();

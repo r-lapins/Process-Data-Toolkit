@@ -11,10 +11,9 @@ pdt::Sample make_sample(std::string_view ts, std::string sensor, double value) {
     auto parsed = pdt::parse_iso8601(ts);
     assert(parsed.has_value());
 
-    return pdt::Sample{
-        .timestamp = *parsed,
-        .sensor = std::move(sensor),
-        .value = value
+    return pdt::Sample{.timestamp = *parsed,
+                       .sensor = std::move(sensor),
+                       .value = value
     };
 }
 
