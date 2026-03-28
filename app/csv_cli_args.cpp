@@ -71,7 +71,7 @@ bool parse_args(int argc, const char* const* argv, CliOptions& out, std::ostream
         if (a == "--sensor") {
             const auto v = args.value();
             if (!v) { err << "Missing value for --sensor\n"; return false; }
-            out.sensor = std::string{*v};
+            out.filter.sensor = std::string{*v};
             continue;
         }
 
@@ -90,7 +90,7 @@ bool parse_args(int argc, const char* const* argv, CliOptions& out, std::ostream
                 return false;
             }
 
-            out.from = *ts;
+            out.filter.from = *ts;
             continue;
         }
 
@@ -104,7 +104,7 @@ bool parse_args(int argc, const char* const* argv, CliOptions& out, std::ostream
                 return false;
             }
 
-            out.to = *ts;
+            out.filter.to = *ts;
             continue;
         }
 

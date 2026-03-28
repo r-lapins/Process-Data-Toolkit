@@ -27,10 +27,10 @@ void write_anomaly(std::ostream& os, const pdt::Anomaly& a, int indent) {
     const std::string sp(indent, ' ');
 
     os << sp << "{"
-       << "\"timestamp\":\"" << pdt::format_iso8601(a.timestamp) << "\","
-       << "\"sensor\":\"" << a.sensor << "\","
-       << "\"value\":" << a.value << ","
-       << "\"score\":" << a.score
+       << "\"timestamp\":\""    << pdt::format_iso8601(a.timestamp) << "\","
+       << "\"sensor\":\""       << a.sensor << "\","
+       << "\"value\":"          << a.value << ","
+       << "\"score\":"          << a.score
        << "}";
 }
 
@@ -75,11 +75,11 @@ void write_json_report(std::ostream& os, const ReportContext& ctx, const Stats& 
                        const std::optional<AnomalySummary>& globalAnomalies) {
     os << "{\n";
 
-    os << "  \"mode\": \"" << (ctx.sensor ? "sensor" : "global") << "\",\n";
+    os << "  \"mode\": \""      << (ctx.filter.sensor? "sensor" : "global") << "\",\n";
 
     os << "  \"import\": {\n";
     os << "    \"parsed_ok\": " << ctx.parsed_ok << ",\n";
-    os << "    \"skipped\": " << ctx.skipped << "\n";
+    os << "    \"skipped\": "   << ctx.skipped << "\n";
     os << "  },\n";
 
     os << "  \"filter\": {\n";
@@ -91,32 +91,32 @@ void write_json_report(std::ostream& os, const ReportContext& ctx, const Stats& 
         os << "    \"" << key << "\": \"" << value << "\"";
     };
 
-    if (ctx.sensor) { field("sensor", *ctx.sensor); }
-    if (ctx.from) { field("from", format_iso8601(*ctx.from)); }
-    if (ctx.to) { field("to", format_iso8601(*ctx.to)); }
+    if (ctx.filter.sensor)  { field("sensor", *ctx.filter.sensor); }
+    if (ctx.filter.from)    { field("from", format_iso8601(*ctx.filter.from)); }
+    if (ctx.filter.to)      { field("to", format_iso8601(*ctx.filter.to)); }
 
     if (!first) { os << '\n'; }
     os << "  },\n";
 
     os << "  \"data\": {\n";
-    os << "    \"total\": " << ctx.total << ",\n";
-    os << "    \"filtered\": " << ctx.filtered << "\n";
+    os << "    \"total\": "     << ctx.total << ",\n";
+    os << "    \"filtered\": "  << ctx.filtered << "\n";
     os << "  },\n";
 
     os << "  \"stats\": {\n";
-    os << "    \"count\": " << stats.count << ",\n";
-    os << "    \"min\": " << stats.min << ",\n";
-    os << "    \"max\": " << stats.max << ",\n";
-    os << "    \"mean\": " << stats.mean << ",\n";
-    os << "    \"stddev\": " << stats.stddev << "\n";
+    os << "    \"count\": "     << stats.count << ",\n";
+    os << "    \"min\": "       << stats.min << ",\n";
+    os << "    \"max\": "       << stats.max << ",\n";
+    os << "    \"mean\": "      << stats.mean << ",\n";
+    os << "    \"stddev\": "    << stats.stddev << "\n";
     os << "  }";
 
     if (ctx.anomaly_threshold && ctx.anomaly_method) {
         os << ",\n";
         os << "  \"anomalies\": {\n";
-        os << "    \"method\": \"" << anomaly_method_to_string(*ctx.anomaly_method) << "\",\n";
+        os << "    \"method\": \""  << anomaly_method_to_string(*ctx.anomaly_method) << "\",\n";
         os << "    \"threshold\": " << *ctx.anomaly_threshold << ",\n";
-        os << "    \"top_n\": " << ctx.top_n << ",\n";
+        os << "    \"top_n\": "     << ctx.top_n << ",\n";
         os << "    \"mode\": \"global\",\n";
         os << "    \"global\": ";
 
@@ -141,7 +141,7 @@ void write_json_report(std::ostream& os, const ReportContext& ctx, const std::ma
 
     os << "  \"import\": {\n";
     os << "    \"parsed_ok\": " << ctx.parsed_ok << ",\n";
-    os << "    \"skipped\": " << ctx.skipped << "\n";
+    os << "    \"skipped\": "   << ctx.skipped << "\n";
     os << "  },\n";
 
     os << "  \"filter\": {\n";
@@ -153,15 +153,15 @@ void write_json_report(std::ostream& os, const ReportContext& ctx, const std::ma
         os << "    \"" << key << "\": \"" << value << "\"";
     };
 
-    if (ctx.from) { field("from", format_iso8601(*ctx.from)); }
-    if (ctx.to) { field("to", format_iso8601(*ctx.to)); }
+    if (ctx.filter.from)    { field("from", format_iso8601(*ctx.filter.from)); }
+    if (ctx.filter.to)      { field("to", format_iso8601(*ctx.filter.to)); }
 
     if (!first) { os << '\n'; }
     os << "  },\n";
 
     os << "  \"data\": {\n";
-    os << "    \"total\": " << ctx.total << ",\n";
-    os << "    \"filtered\": " << ctx.filtered << "\n";
+    os << "    \"total\": "     << ctx.total << ",\n";
+    os << "    \"filtered\": "  << ctx.filtered << "\n";
     os << "  },\n";
 
     os << "  \"stats_by_sensor\": {\n";
@@ -171,12 +171,12 @@ void write_json_report(std::ostream& os, const ReportContext& ctx, const std::ma
         if (!firstSensor) { os << ",\n"; }
         firstSensor = false;
 
-        os << "    \"" << name << "\": {\n";
-        os << "      \"count\": " << st.count << ",\n";
-        os << "      \"min\": " << st.min << ",\n";
-        os << "      \"max\": " << st.max << ",\n";
-        os << "      \"mean\": " << st.mean << ",\n";
-        os << "      \"stddev\": " << st.stddev << "\n";
+        os << "    \""              << name << "\": {\n";
+        os << "      \"count\": "   << st.count << ",\n";
+        os << "      \"min\": "     << st.min << ",\n";
+        os << "      \"max\": "     << st.max << ",\n";
+        os << "      \"mean\": "    << st.mean << ",\n";
+        os << "      \"stddev\": "  << st.stddev << "\n";
         os << "    }";
     }
 
@@ -185,16 +185,16 @@ void write_json_report(std::ostream& os, const ReportContext& ctx, const std::ma
     if (ctx.anomaly_threshold && ctx.anomaly_method) {
         os << ",\n";
         os << "  \"anomalies\": {\n";
-        os << "    \"method\": \"" << anomaly_method_to_string(*ctx.anomaly_method) << "\",\n";
+        os << "    \"method\": \""  << anomaly_method_to_string(*ctx.anomaly_method) << "\",\n";
         os << "    \"threshold\": " << *ctx.anomaly_threshold << ",\n";
-        os << "    \"top_n\": " << ctx.top_n << ",\n";
+        os << "    \"top_n\": "     << ctx.top_n << ",\n";
         os << "    \"mode\": \"per_sensor\",\n";
         os << "    \"per_sensor\": {\n";
 
         if (perSensorAnomalies && !perSensorAnomalies->empty()) {
             std::size_t i = 0;
             for (const auto& [sensor, summary] : *perSensorAnomalies) {
-                os << "      \"" << sensor << "\": ";
+                os << "      \""    << sensor << "\": ";
                 write_anomaly_summary(os, summary, 6);
                 os << (++i < perSensorAnomalies->size() ? ",\n" : "\n");
             }
@@ -215,11 +215,11 @@ std::string format_anomaly_line(const Anomaly& anomaly, std::size_t displayIndex
     oss << std::fixed << std::setprecision(2);
 
     oss << std::setw(3) << std::setfill(' ') << displayIndex << ". ";
-    oss << "  |  " << format_date_time(anomaly.timestamp)
-        << "  |  " << anomaly.sensor
-        << "  |  value = " << anomaly.value
-        << "  |  " << anomaly_score_label(method)
-        << " = " << anomaly.score;
+    oss << "  |  "          << format_date_time(anomaly.timestamp)
+        << "  |  "          << anomaly.sensor
+        << "  |  value = "  << anomaly.value
+        << "  |  "          << anomaly_score_label(method)
+        << " = "            << anomaly.score;
 
     return oss.str();
 }

@@ -13,7 +13,7 @@ int main() {
     ctx.skipped = 1;
     ctx.total = 3;
     ctx.filtered = 2;
-    ctx.sensor = std::string{"S1"};
+    ctx.filter.sensor = std::string{"S1"};
     ctx.anomaly_threshold = 3.0;
     ctx.anomaly_method = AnomalyMethod::ZScore;
     ctx.top_n = 10;
@@ -38,7 +38,7 @@ int main() {
     // 2) per-sensor stats
     {
         std::map<std::string, Stats> per;
-        per["S1"] = Stats{2, 1, 3, 1, 2};
+        per["S1"] = Stats{.mean=2, .min=1, .max=3, .stddev=1, .count=2};
 
         std::stringstream ss;
         write_json_report(ss, ctx, per, std::nullopt);

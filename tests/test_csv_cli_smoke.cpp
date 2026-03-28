@@ -23,9 +23,9 @@ int main() {
         bool ok = parse_args(9, argv, opt, err);
         assert(ok);
         assert(opt.input_path == "x.csv");
-        assert(opt.sensor && *opt.sensor == "S1");
-        assert(opt.from.has_value());
-        assert(opt.to.has_value());
+        assert(opt.filter.sensor && *opt.filter.sensor == "S1");
+        assert(opt.filter.from.has_value());
+        assert(opt.filter.to.has_value());
     }
 
     {
@@ -51,7 +51,7 @@ int main() {
         bool ok = parse_args(6, const_cast<char**>(argv), opt, err);
         assert(ok); // parse przejdzie
         // konflikt łapany w main -> tu można tylko sprawdzić, że oba ustawione
-        assert(opt.sensor.has_value());
+        assert(opt.filter.sensor.has_value());
         assert(opt.per_sensor);
     }
 

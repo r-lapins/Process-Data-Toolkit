@@ -1,6 +1,7 @@
 #pragma once
 
 #include "anomaly.h"
+#include "types.h"
 
 #include <ostream>
 #include <string>
@@ -8,7 +9,6 @@
 #include <ostream>
 #include <span>
 #include <map>
-#include <chrono>
 #include <optional>
 
 namespace pdt {
@@ -19,9 +19,7 @@ struct ReportContext {
     std::size_t total{};
     std::size_t filtered{};
 
-    std::optional<std::string> sensor;
-    std::optional<std::chrono::sys_seconds> from;
-    std::optional<std::chrono::sys_seconds> to;
+    FilterOptions filter;
 
     // anomaly settings
     std::optional<double> anomaly_threshold;

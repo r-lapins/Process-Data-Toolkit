@@ -2,7 +2,6 @@
 
 #include "pdt/csv/anomaly.h"
 
-#include <chrono>
 #include <optional>
 #include <ostream>
 #include <string>
@@ -12,9 +11,9 @@ namespace csv_app {
 
 struct CliOptions {
     std::string input_path;
-    std::optional<std::string> sensor;
-    std::optional<std::chrono::sys_seconds> from;
-    std::optional<std::chrono::sys_seconds> to;
+
+    pdt::FilterOptions filter;
+
     std::optional<std::string> output_path;
     std::optional<std::string> output_marked_csv_path;
 

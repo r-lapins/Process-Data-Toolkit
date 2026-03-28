@@ -34,12 +34,12 @@ int main(int argc, char** argv) {
 
     // validate CLI options
     {
-        if (opt.from && opt.to && *opt.from > *opt.to) {
+        if (opt.filter.from && opt.filter.to && *opt.filter.from > *opt.filter.to) {
             std::cerr << "Invalid time range: --from is later than --to\n";
             return 2;
         }
 
-        if (opt.per_sensor && opt.sensor) {
+        if (opt.per_sensor && opt.filter.sensor) {
             std::cerr << "Invalid arguments: --per-sensor cannot be used with --sensor\n";
             return 2;
         }
@@ -73,23 +73,22 @@ int main(int argc, char** argv) {
     pdt::DataSet ds = std::move(import.dataSet);
 
     // Filter
-    pdt::DataSet filtered = ds.filter({         // temporary FilterOptions object; 'opt' is a CliOptions object
-        .sensor = opt.per_sensor ? std::nullopt : opt.sensor,   // in case both are delivered
-        .from = opt.from,
-        .to = opt.to
+    pdt::DataSet filtered = ds.filter({.sensor = opt.per_sensor ? std::nullopt : opt.filter.sensor,
+                                       .from   = opt.filter.from,
+                                       .to     = opt.filter.to
     });
 
     pdt::ReportContext ctx{};
-    ctx.parsed_ok = import.parsed_ok;
-    ctx.skipped = import.skipped;
-    ctx.total = ds.size();
-    ctx.filtered = filtered.size();
-    ctx.sensor = opt.sensor;
-    ctx.from = opt.from;
-    ctx.to = opt.to;
-    ctx.anomaly_threshold = opt.anomaly_threshold;
-    ctx.anomaly_method = opt.anomaly_method;
-    ctx.top_n = opt.top;
+    ctx.parsed_ok           = import.parsed_ok;
+    ctx.skipped             = import.skipped;
+    ctx.total               = ds.size();
+    ctx.filtered            = filtered.size();
+    ctx.filter.sensor       = opt.filter.sensor;
+    ctx.filter.from         = opt.filter.from;
+    ctx.filter.to           = opt.filter.to;
+    ctx.anomaly_threshold   = opt.anomaly_threshold;
+    ctx.anomaly_method      = opt.anomaly_method;
+    ctx.top_n               = opt.top;
 
     // output
     std::ostream* out_stream = &std::cout;
