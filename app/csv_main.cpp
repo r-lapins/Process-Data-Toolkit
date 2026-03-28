@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
     }
 
     // DataSet
-    pdt::DataSet ds{std::move(import.samples)};
+    pdt::DataSet ds = std::move(import.dataSet);
 
     // Filter
     pdt::DataSet filtered = ds.filter({         // temporary FilterOptions object; 'opt' is a CliOptions object

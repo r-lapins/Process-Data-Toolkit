@@ -1,6 +1,6 @@
 #pragma once
 
-#include "types.h"
+#include "dataset.h"
 
 #include <istream>
 #include <vector>
@@ -15,7 +15,7 @@ struct SkippedRow {
 };
 
 struct CsvData {
-    std::vector<Sample> samples;
+    DataSet dataSet;
     std::size_t parsed_ok{};
     std::size_t skipped{};
     std::vector<SkippedRow> skipped_rows;

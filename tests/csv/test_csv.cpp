@@ -19,7 +19,7 @@ int main() {
     // aborts the program when false
     assert(r.parsed_ok == 2);
     assert(r.skipped == 3);
-    assert(r.samples.size() == 2);
+    assert(r.dataSet.size() == 2);
 
     return 0;
 }
