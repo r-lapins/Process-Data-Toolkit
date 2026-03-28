@@ -4,6 +4,7 @@
 
 #include <chrono>
 #include <map>
+#include <span>
 #include <string>
 #include <vector>
 #include <cstddef>

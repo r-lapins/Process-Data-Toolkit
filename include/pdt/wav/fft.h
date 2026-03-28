@@ -5,6 +5,7 @@
 #include <complex>
 #include <vector>
 #include <span>
+#include <cstddef>
 
 namespace pdt {
 

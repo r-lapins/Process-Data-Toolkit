@@ -4,7 +4,7 @@
 #include "pdt/wav/window.h"
 
 #include <cstddef>
-#include <iosfwd>
+#include <ostream>
 #include <string>
 
 namespace wav_app {
@@ -37,4 +37,4 @@ const char* to_string(pdt::WindowType type);
 const char* to_string(pdt::PeakDetectionMode mode);
 const char* to_string(SpectrumAlgorithm algorithm);
 
-} // namespace spectrum_app
+} // namespace wav_app

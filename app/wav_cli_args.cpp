@@ -44,13 +44,13 @@ void print_help(std::ostream& os) {
         << "  --top <count>                        Number of dominant peaks to print (default: 10)\n"
         << "  --algorithm <auto|dft|fft>           Spectrum algorithm (default: auto)\n"
         << "  --out <file.csv>                     Export computed spectrum to CSV\n"
-        << "  --out-r <file.txt>                   Export text report to file\n"
+        << "  --out-r <file.txt>                   Export text report to TXT file\n"
         << "  --help                               Show this help message\n";
 }
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity)
 bool parse_cli(int argc, const char* const* argv, CliOptions& options, std::ostream& err) {
-    cli_common::ArgReader args(argc, argv);
+    common_cli::ArgReader args(argc, argv);
 
     while (args.has_next()) {
         const std::string_view arg = args.next();
@@ -104,7 +104,7 @@ bool parse_cli(int argc, const char* const* argv, CliOptions& options, std::ostr
                 return false;
             }
 
-            if (!cli_common::parse_size_t(*value, options.from)) {
+            if (!common_cli::parse_size_t(*value, options.from)) {
                 err << "Invalid value for --from: " << *value << '\n';
                 return false;
             }
@@ -118,7 +118,7 @@ bool parse_cli(int argc, const char* const* argv, CliOptions& options, std::ostr
                 return false;
             }
 
-            if (!cli_common::parse_size_t(*value, options.windowSize) || options.windowSize == 0) {
+            if (!common_cli::parse_size_t(*value, options.windowSize) || options.windowSize == 0) {
                 err << "Invalid value for --window-size: " << *value << '\n';
                 return false;
             }
@@ -132,7 +132,7 @@ bool parse_cli(int argc, const char* const* argv, CliOptions& options, std::ostr
                 return false;
             }
 
-            if (!cli_common::parse_double(*value, options.threshold) ||
+            if (!common_cli::parse_double(*value, options.threshold) ||
                 options.threshold < 0.0 || options.threshold > 1.0) {
                 err << "Invalid value for --threshold: " << *value << '\n';
                 return false;
@@ -164,7 +164,7 @@ bool parse_cli(int argc, const char* const* argv, CliOptions& options, std::ostr
                 return false;
             }
 
-            if (!cli_common::parse_size_t(*value, options.top) || options.top == 0) {
+            if (!common_cli::parse_size_t(*value, options.top) || options.top == 0) {
                 err << "Invalid value for --top: " << *value << '\n';
                 return false;
             }
@@ -208,8 +208,8 @@ bool parse_cli(int argc, const char* const* argv, CliOptions& options, std::ostr
             continue;
         }
 
-        if (cli_common::is_option(arg)) {
-            return cli_common::fail_unknown_option(arg, err);
+        if (common_cli::is_option(arg)) {
+            return common_cli::fail_unknown_option(arg, err);
         }
 
         err << "Unexpected positional argument: " << arg << '\n';
@@ -256,4 +256,4 @@ const char* to_string(SpectrumAlgorithm algorithm) {
     return "unknown";
 }
 
-} // namespace spectrum_app
+} // namespace wav_app

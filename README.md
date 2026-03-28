@@ -27,7 +27,7 @@ Key aspects:
 
 ### CSV data processing
 
-Notes and instructions are available in [docs/CSV.md](docs/CSV.md).
+[Notes and instructions are available here: docs/CSV.md](docs/CSV.md).
 
 - CLI data processing tool for CSV files (`pdt_csv_cli`)
 - CSV parser with import summary (`parsed_ok`, `skipped`)
@@ -39,10 +39,11 @@ Notes and instructions are available in [docs/CSV.md](docs/CSV.md).
 - Per-sensor statistics mode (`--per-sensor`)
 - Configurable anomaly detection (`zscore`, `iqr`, `mad`) with threshold and top-N output (`--z`, `--method`, `--top`)
 - JSON report export (`--out`)
+- CSV export with anomaly markers for top detected anomalies (`--out-marked-csv`)
 
 ### WAV signal analysis
 
-Notes and instructions are available in [docs/WAV.md](docs/WAV.md).
+[Notes and instructions are available here: docs/WAV.md](docs/WAV.md).
 
 - CLI spectrum analysis tool for WAV files (`pdt_wav_cli`)
 - Discrete Fourier Transform (DFT)
@@ -57,6 +58,39 @@ Notes and instructions are available in [docs/WAV.md](docs/WAV.md).
 - CSV export of computed spectrum (`--out`)
 - Text report export (`--out-r`)
 - DFT vs FFT runtime benchmark tool (`fft_benchmark`)
+
+#### Example outputs
+
+CSV CLI can:
+- print import/skipped row summaries
+- generate JSON reports
+- export anomaly-marked CSV files
+
+WAV CLI can:
+- print spectral peak reports
+- export spectrum CSV
+- export text reports
+
+---
+
+## Quick start
+
+```
+cmake --preset debug
+cmake --build --preset debug
+```
+
+Run CSV CLI:
+
+```
+./build/debug/pdt_csv_cli --in examples/sample.csv
+```
+
+Run WAV CLI:
+
+```
+./build/debug/pdt_wav_cli --in examples/HDSDR_20230515_072359Z_15047kHz_AF.wav
+```
 
 ---
 
@@ -76,6 +110,11 @@ examples/           sample CSV and WAV inputs and outputs
 bench/              performance benchmarks
 .github/            CI workflows
 ```
+
+### Modules
+
+- `pdt/csv` — CSV parsing, filtering, statistics, anomaly detection, report/output helpers
+- `pdt/wav` — WAV parsing, windowing, DFT/FFT, spectrum computation, peak detection, spectrum export
 
 ---
 
@@ -156,7 +195,7 @@ Current implementation is `O(N²)` and serves as a reference implementation.
 
 #### - Fast Fourier Transform (FFT)
 
-The project implements a radix-2 Cooley–Tuk FFT algorithm.
+The project implements a radix-2 Cooley–Tukey FFT algorithm.
 
 The FFT recursively decomposes the DFT into even and odd indexed samples:
 

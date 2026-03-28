@@ -3,10 +3,7 @@
 
 #include <sstream>
 
-// public library namespace
 namespace pdt {
-
-// anonynmous namespace (internal linkage)
 namespace {
 
 bool parse_line(const std::string& line, Sample& out_sample) {

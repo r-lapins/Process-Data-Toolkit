@@ -5,7 +5,7 @@
 #include <optional>
 #include <ostream>
 
-namespace cli_common {
+namespace common_cli {
 
 class ArgReader {
   public:
@@ -37,11 +37,11 @@ class ArgReader {
     int index_;
 };
 
-bool is_option(std::string_view text);
+[[nodiscard]] bool is_option(std::string_view text);
 
-bool parse_size_t(std::string_view text, std::size_t& out);
-bool parse_double(std::string_view text, double& out);
+[[nodiscard]] bool parse_size_t(std::string_view text, std::size_t& out);
+[[nodiscard]] bool parse_double(std::string_view text, double& out);
 
 bool fail_unknown_option(std::string_view arg, std::ostream& err);
 
-} // namespace cli_common
+} // namespace common_cli

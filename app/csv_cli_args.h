@@ -6,6 +6,7 @@
 #include <optional>
 #include <ostream>
 #include <string>
+#include <cstddef>
 
 namespace csv_app {
 
@@ -15,6 +16,7 @@ struct CliOptions {
     std::optional<std::chrono::sys_seconds> from;
     std::optional<std::chrono::sys_seconds> to;
     std::optional<std::string> output_path;
+    std::optional<std::string> output_marked_csv_path;
 
     std::optional<double> anomaly_threshold;
     pdt::AnomalyMethod anomaly_method{pdt::AnomalyMethod::ZScore};
@@ -29,4 +31,4 @@ void print_help(std::ostream& os);
 bool parse_args(int argc, const char* const* argv, CliOptions& out, std::ostream& err);
 
 
-} // namespace pdt_app
+} // namespace csv_app

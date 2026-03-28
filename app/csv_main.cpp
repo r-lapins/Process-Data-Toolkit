@@ -32,14 +32,22 @@ int main(int argc, char** argv) {
         return 2;
     }
 
-    if (opt.from && opt.to && *opt.from > *opt.to) {
-        std::cerr << "Invalid time range: --from is later than --to\n";
-        return 2;
-    }
+    // validate CLI options
+    {
+        if (opt.from && opt.to && *opt.from > *opt.to) {
+            std::cerr << "Invalid time range: --from is later than --to\n";
+            return 2;
+        }
 
-    if (opt.per_sensor && opt.sensor) {
-        std::cerr << "Invalid arguments: --per-sensor cannot be used with --sensor\n";
-        return 2;
+        if (opt.per_sensor && opt.sensor) {
+            std::cerr << "Invalid arguments: --per-sensor cannot be used with --sensor\n";
+            return 2;
+        }
+
+        if (opt.per_sensor && opt.output_marked_csv_path) {
+            std::cerr << "Invalid arguments: --out-marked-csv cannot be used with --per-sensor\n";
+            return 2;
+        }
     }
 
     std::ifstream in(opt.input_path);
@@ -100,19 +108,46 @@ int main(int argc, char** argv) {
     std::optional<pdt::AnomalySummary> global_anoms;
     std::optional<std::map<std::string, pdt::AnomalySummary>> per_sensor_anoms;
 
-    // Stats & Anomalies & JSON report (function 'write_json_report' is overloaded)
     if (opt.per_sensor) {
-        auto st = filtered.stats_by_sensor();
+        const auto st = filtered.stats_by_sensor();
 
-        if (opt.anomaly_threshold) { per_sensor_anoms = pdt::detect_anomalies_per_sensor(filtered, opt.anomaly_method, *opt.anomaly_threshold, opt.top); }
+        if (opt.anomaly_threshold) {
+            per_sensor_anoms = pdt::detect_anomalies_per_sensor(filtered, opt.anomaly_method, *opt.anomaly_threshold, opt.top);
+        }
 
         pdt::write_json_report(*out_stream, ctx, st, per_sensor_anoms);
     } else {
-        auto st = filtered.stats();
+        const auto st = filtered.stats();
 
-        if (opt.anomaly_threshold) { global_anoms = pdt::detect_anomalies_global(filtered, opt.anomaly_method, *opt.anomaly_threshold, opt.top); }
+        if (opt.anomaly_threshold) {
+            global_anoms = pdt::detect_anomalies_global(filtered, opt.anomaly_method, *opt.anomaly_threshold, opt.top );
+        }
+
+        // Export filtered CSV dataset with anomaly markers
+        if (opt.output_marked_csv_path) {
+            std::ofstream marked_file(*opt.output_marked_csv_path);
+            if (!marked_file) {
+                std::cerr << "Cannot open marked CSV file: " << *opt.output_marked_csv_path << "\n";
+                return 2;
+            }
+
+            const auto anomalies = global_anoms ? global_anoms->top : std::vector<pdt::Anomaly>{};
+
+            if (!pdt::write_csv_with_anomaly_markers(marked_file, filtered, anomalies)) {
+                std::cerr << "Failed to write marked CSV: " << *opt.output_marked_csv_path << "\n";
+                return 2;
+            }
+
+            std::cout << "[OK] Filtered CSV with marked anomalies saved to: " << *opt.output_marked_csv_path << "\n";
+
+            if (!opt.output_path) { return 0; }
+        }
 
         pdt::write_json_report(*out_stream, ctx, st, global_anoms);
+    }
+
+    if (opt.output_path) {
+        std::cout << "[OK] Report saved to: " << *opt.output_path << "\n";
     }
 
     return 0;

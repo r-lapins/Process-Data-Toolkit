@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace cli_common {
+namespace common_cli {
 
 bool is_option(std::string_view text) {
     return !text.empty() && text.front() == '-';
@@ -42,4 +42,4 @@ bool fail_unknown_option(std::string_view arg, std::ostream& err) {
     return false;
 }
 
-} // namespace cli_common
+} // namespace common_cli

@@ -4,6 +4,8 @@
 
 #include <istream>
 #include <vector>
+#include <cstddef>
+#include <string>
 
 namespace pdt {
 

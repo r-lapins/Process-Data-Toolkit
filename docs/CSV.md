@@ -27,7 +27,7 @@ The CSV CLI supports three anomaly detection methods:
 - `iqr` — interquartile range based detection
 - `mad` — median absolute deviation based detection
 
-The threshold value is provided with `--z` and the method can be selected with `--method`.
+The anomaly threshold is provided with `--z`, and the detection method can be selected with `--method`.
 
 Examples:
 
@@ -63,9 +63,9 @@ Examples:
 
 Notes:
 
-- --z currently acts as the anomaly threshold parameter for all supported methods
-- --method defaults to zscore
-- --top limits the number of reported anomalies
+- `--z` currently acts as the anomaly threshold parameter for all supported methods
+- `--method` defaults to zscore
+- `--top` limits the number of reported anomalies
 
 #### Skipped rows (invalid input)
 
@@ -130,7 +130,27 @@ Example JSON report produced with `--out report.json`:
     }
   }
 }
+```
 
+#### CSV with marked anomalies export (example)
+
+```bash
+./build/debug/pdt_csv_cli \
+--in examples/sample.csv \
+--from 2026-02-18T10:00:00 \
+--to 2026-02-18T23:00:00 \
+--z 1.0 \
+--out-marked-csv examples/marked.csv
+```
+
+Output:
+
+```text
+timestamp,sensor,value
+2026-02-18T10:30:00,S3,5.3
+2026-02-18T10:45:00,S1,100
+anomaly
+2026-02-18T11:00:00,S2,24.2
 ```
 
 #### Input format
@@ -147,5 +167,5 @@ Notes:
 - Timestamp format: `YYYY-MM-DDTHH:MM:SS`
 - Invalid lines are skipped and reported
 - Time filtering is inclusive
-- Use `--skipped` to print invalid CSV rows with line numbers
-- Use `--method <zscore|iqr|mad>` to choose the anomaly detection strategy
+- `--skipped` prints invalid CSV rows with line numbers
+- `--method <zscore|iqr|mad>` chooses the anomaly detection strategy

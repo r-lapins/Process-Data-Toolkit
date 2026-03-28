@@ -1,4 +1,5 @@
 #include "pdt/csv/output.h"
+#include "pdt/csv/time.h"
 
 #include <optional>
 #include <iomanip>
@@ -22,29 +23,11 @@ std::string anomaly_method_to_string(pdt::AnomalyMethod method) {
     return "unknown";
 }
 
-std::string to_string(std::chrono::sys_seconds ts) {
-    using namespace std::chrono;
-
-    const auto dp = floor<days>(ts);
-    const year_month_day ymd{dp};
-    const auto time = hh_mm_ss{ts - dp};
-
-    std::ostringstream oss;
-    oss << std::setw(4) << std::setfill('0') << int(ymd.year()) << "-"
-        << std::setw(2) << unsigned(ymd.month()) << "-"
-        << std::setw(2) << unsigned(ymd.day()) << "T"
-        << std::setw(2) << time.hours().count() << ":"
-        << std::setw(2) << time.minutes().count() << ":"
-        << std::setw(2) << time.seconds().count();
-
-    return oss.str();
-}
-
 void write_anomaly(std::ostream& os, const pdt::Anomaly& a, int indent) {
     const std::string sp(indent, ' ');
 
     os << sp << "{"
-       << "\"timestamp\":\"" << to_string(a.timestamp) << "\","
+       << "\"timestamp\":\"" << pdt::format_iso8601(a.timestamp) << "\","
        << "\"sensor\":\"" << a.sensor << "\","
        << "\"value\":" << a.value << ","
        << "\"score\":" << a.score
@@ -84,43 +67,6 @@ std::string anomaly_score_label(pdt::AnomalyMethod method) {
     return "score";
 }
 
-std::string format_date_time(std::chrono::sys_seconds ts) {
-    using namespace std::chrono;
-
-    const auto dp = floor<days>(ts);
-    const year_month_day ymd{dp};
-    const auto time = hh_mm_ss{ts - dp};
-
-    std::ostringstream oss;
-    oss << std::setw(4) << std::setfill('0') << int(ymd.year()) << "-"
-        << std::setw(2) << unsigned(ymd.month()) << "-"
-        << std::setw(2) << unsigned(ymd.day()) << "  "
-        << std::setw(2) << time.hours().count() << ":"
-        << std::setw(2) << time.minutes().count() << ":"
-        << std::setw(2) << time.seconds().count();
-
-    return oss.str();
-}
-
-std::string to_iso8601(std::chrono::sys_seconds ts)
-{
-    using namespace std::chrono;
-
-    const auto dp = floor<days>(ts);
-    const std::chrono::year_month_day ymd{dp};
-    const auto time = hh_mm_ss{ts - dp};
-
-    std::ostringstream oss;
-    oss << std::setw(4) << std::setfill('0') << int(ymd.year()) << "-"
-        << std::setw(2) << unsigned(ymd.month()) << "-"
-        << std::setw(2) << unsigned(ymd.day()) << "T"
-        << std::setw(2) << time.hours().count() << ":"
-        << std::setw(2) << time.minutes().count() << ":"
-        << std::setw(2) << time.seconds().count();
-
-    return oss.str();
-}
-
 } // namespace
 
 namespace pdt {
@@ -146,8 +92,8 @@ void write_json_report(std::ostream& os, const ReportContext& ctx, const Stats& 
     };
 
     if (ctx.sensor) { field("sensor", *ctx.sensor); }
-    if (ctx.from) { field("from", to_string(*ctx.from)); }
-    if (ctx.to) { field("to", to_string(*ctx.to)); }
+    if (ctx.from) { field("from", format_iso8601(*ctx.from)); }
+    if (ctx.to) { field("to", format_iso8601(*ctx.to)); }
 
     if (!first) { os << '\n'; }
     os << "  },\n";
@@ -207,8 +153,8 @@ void write_json_report(std::ostream& os, const ReportContext& ctx, const std::ma
         os << "    \"" << key << "\": \"" << value << "\"";
     };
 
-    if (ctx.from) { field("from", to_string(*ctx.from)); }
-    if (ctx.to) { field("to", to_string(*ctx.to)); }
+    if (ctx.from) { field("from", format_iso8601(*ctx.from)); }
+    if (ctx.to) { field("to", format_iso8601(*ctx.to)); }
 
     if (!first) { os << '\n'; }
     os << "  },\n";
@@ -285,7 +231,7 @@ bool write_csv(std::ostream &os, const DataSet &dataSet)
     os << "timestamp,sensor,value\n";
 
     for (const auto& sample : dataSet.samples()) {
-        os << to_iso8601(sample.timestamp) << ','
+        os << format_iso8601(sample.timestamp) << ','
            << sample.sensor << ','
            << sample.value << '\n';
     }
@@ -306,7 +252,7 @@ bool write_csv_with_anomaly_markers(std::ostream &os, const DataSet &dataSet, st
     for (std::size_t i = 0; i < samples.size(); ++i) {
         const auto& sample = samples[i];
 
-        os << to_iso8601(sample.timestamp) << ','
+        os << format_iso8601(sample.timestamp) << ','
            << sample.sensor << ','
            << sample.value << '\n';
 

@@ -37,7 +37,19 @@ double quantile_sorted(std::span<const double> sorted_values, double q) {
     return lower + (fraction * (upper - lower));
 }
 
-Stats compute_stats_from_samples(std::span<const Sample> samples) {
+bool matches_filter(const Sample& s, const FilterOptions& opt) {
+    if (opt.sensor && s.sensor != *opt.sensor) { return false; }
+
+    if (opt.from && s.timestamp < *opt.from) { return false; }
+
+    if (opt.to && s.timestamp > *opt.to) { return false; }
+
+    return true;
+}
+
+} // namespace
+
+Stats compute_stats(std::span<const Sample> samples) {
     Stats result{};
 
     if (samples.empty()) {
@@ -77,18 +89,6 @@ Stats compute_stats_from_samples(std::span<const Sample> samples) {
     return result;
 }
 
-bool matches_filter(const Sample& s, const FilterOptions& opt) {
-    if (opt.sensor && s.sensor != *opt.sensor) { return false; }
-
-    if (opt.from && s.timestamp < *opt.from) { return false; }
-
-    if (opt.to && s.timestamp > *opt.to) { return false; }
-
-    return true;
-}
-
-} // namespace
-
 DataSet::DataSet(std::vector<Sample> samples) : samples_(std::move(samples)) {}
 
 std::span<const Sample> DataSet::samples() const noexcept { return samples_; }
@@ -111,20 +111,32 @@ DataSet DataSet::filter(const FilterOptions& opt) const {
 }
 
 Stats DataSet::stats() const {
-    return compute_stats_from_samples(samples_);
+    return compute_stats(samples_);
 }
 
-std::map<std::string, Stats> DataSet::stats_by_sensor() const {
-    // grouping -> calculating statistics on groups
-    std::map<std::string, std::vector<Sample>> grouped;
+std::map<std::string, Stats> DataSet::stats_by_sensor() const
+{
+    std::map<std::string, Stats> result;
 
-    for (const auto& s : samples_) {
-        grouped[s.sensor].push_back(s);
+    for (const auto& [sensor, dataSet] : split_by_sensor()) {
+        result.emplace(sensor, dataSet.stats());
     }
 
-    std::map<std::string, Stats> result;
-    for (const auto& [sensor, sensor_samples] : grouped) {
-        result.emplace(sensor, compute_stats_from_samples(sensor_samples));
+    return result;
+}
+
+std::map<std::string, DataSet> DataSet::split_by_sensor() const
+{
+    std::map<std::string, std::vector<Sample>> grouped;
+
+    for (const auto& sample : samples_) {
+        grouped[sample.sensor].push_back(sample);
+    }
+
+    std::map<std::string, DataSet> result;
+
+    for (auto& [sensor, sensorSamples] : grouped) {
+        result.emplace(sensor, DataSet{std::move(sensorSamples)});
     }
 
     return result;

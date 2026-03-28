@@ -33,6 +33,7 @@ Options:
     --from             Inclusive time lower bound, ISO: YYYY-MM-DDTHH:MM:SS
     --to               Inclusive time upper bound, ISO: YYYY-MM-DDTHH:MM:SS
     --out              Write JSON report to file
+    --out-marked-csv   Export filtered CSV dataset with anomaly markers
     --z <val>          Enable anomaly detection and set threshold
     --method           Anomaly method: zscore | iqr | mad (default: zscore)
     --top <N>          Max anomalies to list
@@ -42,7 +43,7 @@ Options:
 }
 
 bool parse_args(int argc, const char* const* argv, CliOptions& out, std::ostream& err) {
-    cli_common::ArgReader args(argc, argv);
+    common_cli::ArgReader args(argc, argv);
 
     while (args.has_next()) {
         const std::string_view a = args.next();
@@ -114,12 +115,19 @@ bool parse_args(int argc, const char* const* argv, CliOptions& out, std::ostream
             continue;
         }
 
+        if (a == "--out-marked-csv") {
+            const auto v = args.value();
+            if (!v) { err << "Missing value for --out-marked-csv\n"; return false; }
+            out.output_marked_csv_path = std::string{*v};
+            continue;
+        }
+
         if (a == "--z") {
             const auto v = args.value();
             if (!v) { err << "Missing value for --z\n"; return false; }
 
             double parsed{};
-            if (!cli_common::parse_double(*v, parsed) || parsed <= 0.0) {
+            if (!common_cli::parse_double(*v, parsed) || parsed <= 0.0) {
                 err << "Invalid value for --z\n";
                 return false;
             }
@@ -147,7 +155,7 @@ bool parse_args(int argc, const char* const* argv, CliOptions& out, std::ostream
             if (!v) { err << "Missing value for --top\n"; return false; }
 
             std::size_t n = 0;
-            if (!cli_common::parse_size_t(*v, n) || n > 25) {
+            if (!common_cli::parse_size_t(*v, n) || n > 25) {
                 err << "--top must be in range [0, 25]\n";
                 return false;
             }
@@ -161,10 +169,10 @@ bool parse_args(int argc, const char* const* argv, CliOptions& out, std::ostream
             continue;
         }
 
-        return cli_common::fail_unknown_option(a, err);
+        return common_cli::fail_unknown_option(a, err);
     }
 
     return true;
 }
 
-} // namespace pdt_app
+} // namespace csv_app

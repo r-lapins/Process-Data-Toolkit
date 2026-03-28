@@ -2,6 +2,8 @@
 
 #include <chrono>
 #include <string>
+#include <cstddef>
+#include <optional>
 
 namespace pdt {
 

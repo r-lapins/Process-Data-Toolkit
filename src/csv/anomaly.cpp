@@ -8,15 +8,12 @@
 #include <vector>
 
 namespace pdt {
-
 namespace {
 
 double median_sorted(const std::vector<double>& values) {
     // Expects values sorted in ascending order.
     // For even-sized input returns the arithmetic mean of the two middle values.
-    if (values.empty()) {
-        return 0.0;
-    }
+    if (values.empty()) {  return 0.0; }
 
     const std::size_t n = values.size();
     const std::size_t mid = n / 2;
@@ -28,20 +25,6 @@ double median_sorted(const std::vector<double>& values) {
     return values[mid];
 }
 
-std::map<std::string, std::vector<Sample>> group_by_sensor(std::span<const Sample> samples) {
-    std::map<std::string, std::vector<Sample>> groups;
-
-    for (const auto& sample : samples) {
-        groups[sample.sensor].push_back(sample);
-    }
-
-    return groups;
-}
-
-DataSet make_dataset(std::span<const Sample> samples) {
-    return DataSet{std::vector<Sample>{samples.begin(), samples.end()}};
-}
-
 AnomalySummary make_summary(std::vector<Anomaly> anomalies, std::size_t top_n) {
     AnomalySummary summary{};
     summary.all = std::move(anomalies);
@@ -50,14 +33,10 @@ AnomalySummary make_summary(std::vector<Anomaly> anomalies, std::size_t top_n) {
 }
 
 AnomalySummary detect_zscore_for_samples(std::span<const Sample> samples, double threshold, std::size_t top_n) {
-    if (samples.size() < 2 || threshold <= 0.0 || top_n == 0) {
-        return {};
-    }
+    if (samples.size() < 2 || threshold <= 0.0 || top_n == 0) { return {}; }
 
-    const auto stats = make_dataset(samples).stats();
-    if (!(stats.stddev > 0.0)) {
-        return {};
-    }
+    const auto stats = compute_stats(samples);
+    if (!(stats.stddev > 0.0)) { return {}; }
 
     std::vector<Anomaly> anomalies;
     anomalies.reserve((samples.size() / 10) + 1); // assuming number of anomalies 10 % of number of samples
@@ -84,19 +63,15 @@ AnomalySummary detect_iqr_for_samples(std::span<const Sample> samples, double th
     // lower = Q1 - threshold * IQR
     // upper = Q3 + threshold * IQR
     // score expresses how far the value is beyond the violated bound, normalized by IQR.
-    if (samples.size() < 4 || threshold <= 0.0 || top_n == 0) {
-        return {};
-    }
+    if (samples.size() < 4 || threshold <= 0.0 || top_n == 0) { return {}; }
 
-    const auto stats = make_dataset(samples).stats();
+    const auto stats = compute_stats(samples);
 
     const double q1 = stats.q1;
     const double q3 = stats.q3;
     const double iqr = q3 - q1;
 
-    if (!(iqr > 0.0)) {
-        return {};
-    }
+    if (!(iqr > 0.0)) { return {}; }
 
     const double lower = q1 - (threshold * iqr);
     const double upper = q3 + (threshold * iqr);
@@ -139,7 +114,7 @@ AnomalySummary detect_mad_for_samples(std::span<const Sample> samples, double th
         return {};
     }
 
-    const auto stats = make_dataset(samples).stats();
+    const auto stats = compute_stats(samples);
     const double median = stats.median;
 
     std::vector<double> abs_deviations;
@@ -177,13 +152,12 @@ AnomalySummary detect_mad_for_samples(std::span<const Sample> samples, double th
 }
 
 template <typename Detector>
-std::map<std::string, AnomalySummary> run_per_sensor_detector(std::span<const Sample> samples, double threshold, std::size_t top_n, Detector detector) {
+std::map<std::string, AnomalySummary> run_per_sensor_detector(const DataSet& dataSet, double threshold, std::size_t top_n, Detector detector) {
     // Applies the same detector independently to samples grouped by sensor.
     std::map<std::string, AnomalySummary> result;
-    const auto groups = group_by_sensor(samples);
 
-    for (const auto& [sensor, sensor_samples] : groups) {
-        result.emplace(sensor, detector(sensor_samples, threshold, top_n));
+    for (const auto& [sensor, sensorDataSet] : dataSet.split_by_sensor()) {
+        result.emplace(sensor, detector(sensorDataSet.samples(), threshold, top_n));
     }
 
     return result;
@@ -194,7 +168,7 @@ AnomalySummary detect_zscore_global(const DataSet& ds, double threshold, std::si
 }
 
 std::map<std::string, AnomalySummary> detect_zscore_per_sensor(const DataSet &ds, double threshold, std::size_t top_n) {
-    return run_per_sensor_detector(ds.samples(), threshold, top_n, detect_zscore_for_samples);
+    return run_per_sensor_detector(ds, threshold, top_n, detect_zscore_for_samples);
 }
 
 AnomalySummary detect_iqr_global(const DataSet& ds, double threshold, std::size_t top_n) {
@@ -202,7 +176,7 @@ AnomalySummary detect_iqr_global(const DataSet& ds, double threshold, std::size_
 }
 
 std::map<std::string, AnomalySummary> detect_iqr_per_sensor(const DataSet& ds, double threshold, std::size_t top_n) {
-    return run_per_sensor_detector(ds.samples(), threshold, top_n, detect_iqr_for_samples);
+    return run_per_sensor_detector(ds, threshold, top_n, detect_iqr_for_samples);
 }
 
 AnomalySummary detect_mad_global(const DataSet& ds, double threshold, std::size_t top_n) {
@@ -210,7 +184,7 @@ AnomalySummary detect_mad_global(const DataSet& ds, double threshold, std::size_
 }
 
 std::map<std::string, AnomalySummary> detect_mad_per_sensor(const DataSet& ds, double threshold, std::size_t top_n) {
-    return run_per_sensor_detector(ds.samples(), threshold, top_n, detect_mad_for_samples);
+    return run_per_sensor_detector(ds, threshold, top_n, detect_mad_for_samples);
 }
 
 } // namespace
@@ -219,12 +193,9 @@ AnomalySummary detect_anomalies_global(const DataSet& ds, AnomalyMethod method, 
     using enum AnomalyMethod;
 
     switch (method) {
-    case ZScore:
-        return detect_zscore_global(ds, threshold, top_n);
-    case IQR:
-        return detect_iqr_global(ds, threshold, top_n);
-    case MAD:
-        return detect_mad_global(ds, threshold, top_n);
+    case ZScore:    return detect_zscore_global(ds, threshold, top_n);
+    case IQR:       return detect_iqr_global(ds, threshold, top_n);
+    case MAD:       return detect_mad_global(ds, threshold, top_n);
     }
 
     return {};
@@ -234,12 +205,9 @@ std::map<std::string, AnomalySummary> detect_anomalies_per_sensor(const DataSet&
     using enum AnomalyMethod;
 
     switch (method) {
-    case ZScore:
-        return detect_zscore_per_sensor(ds, threshold, top_n);
-    case IQR:
-        return detect_iqr_per_sensor(ds, threshold, top_n);
-    case MAD:
-        return detect_mad_per_sensor(ds, threshold, top_n);
+    case ZScore:    return detect_zscore_per_sensor(ds, threshold, top_n);
+    case IQR:       return detect_iqr_per_sensor(ds, threshold, top_n);
+    case MAD:       return detect_mad_per_sensor(ds, threshold, top_n);
     }
 
     return {};
