@@ -5,6 +5,8 @@
 #include <sstream>
 #include <string>
 
+// NOLINTBEGIN(modernize-avoid-c-arrays)
+
 int main() {
     using namespace wav_app;
 
@@ -280,3 +282,5 @@ int main() {
 
     return 0;
 }
+
+// NOLINTEND(modernize-avoid-c-arrays)

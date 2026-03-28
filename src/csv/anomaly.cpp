@@ -67,8 +67,8 @@ AnomalySummary detect_iqr_for_samples(std::span<const Sample> samples, double th
 
     const auto stats = compute_stats(samples);
 
-    const double q1 = stats.q1;
-    const double q3 = stats.q3;
+    const double q1  = stats.q1;
+    const double q3  = stats.q3;
     const double iqr = q3 - q1;
 
     if (!(iqr > 0.0)) { return {}; }
@@ -127,9 +127,7 @@ AnomalySummary detect_mad_for_samples(std::span<const Sample> samples, double th
     std::ranges::sort(abs_deviations);
     const double mad = median_sorted(abs_deviations);
 
-    if (!(mad > 0.0)) {
-        return {};
-    }
+    if (!(mad > 0.0)) { return {}; }
 
     std::vector<Anomaly> anomalies;
     anomalies.reserve((samples.size() / 10) + 1);

@@ -14,21 +14,14 @@ double quantile_sorted(std::span<const double> sorted_values, double q) {
     // debug build
     assert(q >= 0.0 && q <= 1.0);
 
-    if (sorted_values.empty()) {
-        return 0.0;
-    }
-
-    if (sorted_values.size() == 1) {
-        return sorted_values.front();
-    }
+    if (sorted_values.empty())      { return 0.0; }
+    if (sorted_values.size() == 1)  { return sorted_values.front(); }
 
     const double position = q * static_cast<double>(sorted_values.size() - 1);
     const auto lower_index = static_cast<std::size_t>(std::floor(position));
     const auto upper_index = static_cast<std::size_t>(std::ceil(position));
 
-    if (lower_index == upper_index) {
-        return sorted_values[lower_index];
-    }
+    if (lower_index == upper_index) { return sorted_values[lower_index]; }
 
     const double fraction = position - static_cast<double>(lower_index);
     const double lower = sorted_values[lower_index];
@@ -39,9 +32,7 @@ double quantile_sorted(std::span<const double> sorted_values, double q) {
 
 bool matches_filter(const Sample& s, const FilterOptions& opt) {
     if (opt.sensor && s.sensor != *opt.sensor) { return false; }
-
     if (opt.from && s.timestamp < *opt.from) { return false; }
-
     if (opt.to && s.timestamp > *opt.to) { return false; }
 
     return true;
@@ -52,16 +43,12 @@ bool matches_filter(const Sample& s, const FilterOptions& opt) {
 Stats compute_stats(std::span<const Sample> samples) {
     Stats result{};
 
-    if (samples.empty()) {
-        return result;
-    }
+    if (samples.empty()) { return result; }
 
     std::vector<double> values;
     values.reserve(samples.size());
 
-    for (const auto& s : samples) {
-        values.push_back(s.value);
-    }
+    for (const auto& s : samples) { values.push_back(s.value); }
 
     result.count = values.size();
 

@@ -71,20 +71,20 @@ std::optional<std::chrono::sys_seconds> parse_iso8601(std::string_view s)
     int h{};
     int mi{};
     int sec{};
-    if (!parse_4(s, 0, y)) { return std::nullopt; }
-    if (!parse_2(s, 5, mo)) { return std::nullopt; }
-    if (!parse_2(s, 8, d)) { return std::nullopt; }
-    if (!parse_2(s, 11, h)) { return std::nullopt; }
-    if (!parse_2(s, 14, mi)) { return std::nullopt; }
-    if (!parse_2(s, 17, sec)) { return std::nullopt; }
+    if (!parse_4(s, 0, y))      { return std::nullopt; }
+    if (!parse_2(s, 5, mo))     { return std::nullopt; }
+    if (!parse_2(s, 8, d))      { return std::nullopt; }
+    if (!parse_2(s, 11, h))     { return std::nullopt; }
+    if (!parse_2(s, 14, mi))    { return std::nullopt; }
+    if (!parse_2(s, 17, sec))   { return std::nullopt; }
 
     using namespace std::chrono;
 
     // Range checks
-    if (mo < 1 || mo > 12) { return std::nullopt; }
-    if (h < 0 || h > 23) { return std::nullopt; }
-    if (mi < 0 || mi > 59) { return std::nullopt; }
-    if (sec < 0 || sec > 59) { return std::nullopt; }
+    if (mo < 1 || mo > 12)      { return std::nullopt; }
+    if (h < 0 || h > 23)        { return std::nullopt; }
+    if (mi < 0 || mi > 59)      { return std::nullopt; }
+    if (sec < 0 || sec > 59)    { return std::nullopt; }
 
     year_month_day ymd{year{y}, month{static_cast<unsigned>(mo)}, day{static_cast<unsigned>(d)}};
     if (!ymd.ok()) { return std::nullopt; }
