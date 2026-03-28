@@ -2,7 +2,7 @@
 
 ![CI](https://github.com/r-lapins/Process-Data-Toolkit/actions/workflows/ci.yml/badge.svg)
 
-Modern C++20 library and CLI tools for time-series processing and signal analysis.
+Modern C++20 library and CLI tools for CSV time-series processing and WAV signal analysis.
 
 ---
 
@@ -25,10 +25,11 @@ Key aspects:
 
 ## Features
 
-### Core data processing
+### CSV data processing
 
-Notes and instructions are available in [docs/CORE.md](docs/CORE.md).
+Notes and instructions are available in [docs/CSV.md](docs/CSV.md).
 
+- CLI data processing tool for CSV files (`pdt_csv_cli`)
 - CSV parser with import summary (`parsed_ok`, `skipped`)
 - Optional display of skipped CSV rows with line numbers (`--skipped`)
 - ISO 8601 timestamp parsing using `std::chrono`
@@ -39,10 +40,11 @@ Notes and instructions are available in [docs/CORE.md](docs/CORE.md).
 - Configurable anomaly detection (`zscore`, `iqr`, `mad`) with threshold and top-N output (`--z`, `--method`, `--top`)
 - JSON report export (`--out`)
 
-### Signal analysis
+### WAV signal analysis
 
-Notes and instructions are available in [docs/SIGNAL.md](docs/SIGNAL.md).
+Notes and instructions are available in [docs/WAV.md](docs/WAV.md).
 
+- CLI spectrum analysis tool for WAV files (`pdt_wav_cli`)
 - Discrete Fourier Transform (DFT)
 - Radix-2 Fast Fourier Transform (FFT)
 - Automatic DFT / FFT selection depending on segment length
@@ -51,8 +53,7 @@ Notes and instructions are available in [docs/SIGNAL.md](docs/SIGNAL.md).
 - Spectral peak detection (`ThresholdOnly`, `LocalMaxima`)
 - Detection of peaks and selection of the dominant peak separately
 - WAV reader (RIFF/WAVE PCM16 mono)
-- CLI spectrum analysis tool for WAV files (`spectrum_cli`)
-- Synthetic signal spectrum analysis demo (`spectrum_synth_demo`)
+- Synthetic signal spectrum analysis demo (`pdt_wav_synth_demo`)
 - CSV export of computed spectrum (`--out`)
 - Text report export (`--out-r`)
 - DFT vs FFT runtime benchmark tool (`fft_benchmark`)
@@ -62,18 +63,18 @@ Notes and instructions are available in [docs/SIGNAL.md](docs/SIGNAL.md).
 ## Project structure
 
 ```
-include/pdt/          public API
-include/pdt/core/     core data processing API
-include/pdt/signal/   signal processing API
+include/pdt/        public API
+include/pdt/csv/    CSV data processing API
+include/pdt/wav/    WAV signal processing API
 
-src/core/             core implementation
-src/signal/           signal processing implementation
+src/csv/            CSV data processing implementation
+src/wav/            WAV signal processing implementation
 
-app/                  CLI applications
-tests/                unit tests
-examples/             sample CSV and WAV inputs
-bench/                performance benchmarks
-.github/              CI workflows
+app/                CLI applications
+tests/              unit tests
+examples/           sample CSV and WAV inputs and outputs
+bench/              performance benchmarks
+.github/            CI workflows
 ```
 
 ---
@@ -103,7 +104,7 @@ Development notes and CI instructions are available in [docs/DEVELOPMENT.md](doc
 
 ### Anomaly detection methods:
 
-The core CLI supports three anomaly detection methods:
+The CSV CLI supports three anomaly detection methods:
 
 ####  - Z-score
 
@@ -143,7 +144,7 @@ score = (x - median(x)) / MAD
 
 Samples with `|score| > threshold` are reported as anomalies.
 
-### Signal processing methods:
+### WAV signal processing methods:
 
 #### - Discrete Fourier Transform (DFT)
 
@@ -195,8 +196,8 @@ X[i] > X[i-1] && X[i] > X[i+1]
 Example:
 
 ```cpp
-#include <pdt/core/dataset.h>
-#include <pdt/core/csv_reader.h>
+#include <pdt/csv/dataset.h>
+#include <pdt/csv/csv_reader.h>
 
 #include <fstream>
 

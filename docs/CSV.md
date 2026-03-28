@@ -1,17 +1,17 @@
-# Core data processing
+# CSV data processing
 
 ## CLI usage
 
 Basic (global statistics):
 
 ```bash
-./build/debug/pdt_cli --in examples/sample.csv
+./build/debug/pdt_csv_cli --in examples/sample.csv
 ```
 
 Filter by sensor and export JSON report:
 
 ```bash
-./build/debug/pdt_cli \
+./build/debug/pdt_csv_cli \
   --in examples/sample.csv \
   --per-sensor \
   --from 2026-02-18T10:00:00 \
@@ -21,50 +21,50 @@ Filter by sensor and export JSON report:
 
 #### Anomaly detection
 
-The CLI supports three anomaly detection methods:
+The CSV CLI supports three anomaly detection methods:
 
 - `zscore` — standard score relative to mean and standard deviation
 - `iqr` — interquartile range based detection
 - `mad` — median absolute deviation based detection
 
-The threshold value is provided with `--z` and the method can be selected with `--anomaly-method`.
+The threshold value is provided with `--z` and the method can be selected with `--method`.
 
 Examples:
 
 **Z-score**
 ```bash
-./build/debug/pdt_cli \
+./build/debug/pdt_csv_cli \
   --in examples/sample.csv \
   --sensor S1 \
   --z 2.5 \
-  --anomaly-method zscore \
+  --method zscore \
   --top 5
 ```
 
 **IQR**
 ```bash
-./build/debug/pdt_cli \
+./build/debug/pdt_csv_cli \
   --in examples/sample.csv \
   --sensor S1 \
   --z 1.5 \
-  --anomaly-method iqr \
+  --method iqr \
   --top 5
 ```
 
 **MAD**
 ```bash
-./build/debug/pdt_cli \
+./build/debug/pdt_csv_cli \
   --in examples/sample.csv \
   --sensor S1 \
   --z 3.0 \
-  --anomaly-method mad \
+  --method mad \
   --top 5
 ```
 
 Notes:
 
 - --z currently acts as the anomaly threshold parameter for all supported methods
-- --anomaly-method defaults to zscore
+- --method defaults to zscore
 - --top limits the number of reported anomalies
 
 #### Skipped rows (invalid input)
@@ -72,7 +72,7 @@ Notes:
 Display CSV rows that failed to parse:
 
 ```bash
-./build/debug/pdt_cli \
+./build/debug/pdt_csv_cli \
   --in examples/sample.csv \
   --skipped
 ```

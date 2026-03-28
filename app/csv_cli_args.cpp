@@ -21,10 +21,10 @@ std::optional<pdt::AnomalyMethod> parse_anomaly_method(std::string_view v) {
 
 void print_help(std::ostream& os) {
     os <<
-        R"(Proces Data Toolkit
+        R"(Process Data Toolkit
 
 Usage:
-    pdt_cli --in <file.csv> [--sensor <name>] [--from <ISO>] [--to <ISO>]
+    pdt_csv_cli --in <file.csv> [--sensor <name>] [--from <ISO>] [--to <ISO>]
 
 Options:
     --in               Path to CSV file (required)

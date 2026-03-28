@@ -44,8 +44,8 @@ cmake --build --preset release
 Build and run the CLI:
 
 ```bash
-./build/release/pdt_cli --in examples/sample.csv
-./build/release/spectrum_cli --in examples/file.wav
+./build/release/pdt_csv_cli --in examples/sample.csv
+./build/release/pdt_wav_cli --in examples/file.wav
 ```
 
 ---
@@ -75,7 +75,7 @@ Use a debug build to inspect program execution with GDB.
 Without sanitizers:
 
 ```bash
-gdb ./build/debug-nosan/spectrum_cli
+gdb ./build/debug-nosan/pdt_wav_cli
 ```
 
 Example debugging session:
@@ -103,13 +103,13 @@ AddressSanitizer and Valgrind should not be used in the same build configuration
 
 ```bash
 valgrind --leak-check=full --track-origins=yes \
-./build/debug-nosan/pdt_cli --in examples/sample.csv \
+./build/debug-nosan/pdt_csv_cli --in examples/sample.csv \
 --per-sensor
 ```
 
 ```bash
 valgrind --leak-check=full --track-origins=yes \
-./build/debug-nosan/spectrum_cli \
+./build/debug-nosan/pdt_wav_cli \
 --in examples/HDSDR_20230515_072359Z_15047kHz_AF.wav \
 --threshold 0.01 --window hamming --from 4096 --window-size 2048
 ```

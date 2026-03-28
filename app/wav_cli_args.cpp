@@ -33,7 +33,7 @@ std::optional<SpectrumAlgorithm> parse_algorithm(std::string_view value) {
 void print_help(std::ostream& os) {
     os
         << "Usage:\n"
-        << "  spectrum_cli [options]\n\n"
+        << "  pdt_wav_cli [options]\n\n"
         << "Options:\n"
         << "  --in <file.wav>                      Read input signal from WAV file (required)\n"
         << "  --window <none|hann|hamming>         Window function to apply (default: hann)\n"

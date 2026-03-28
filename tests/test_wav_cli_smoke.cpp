@@ -9,7 +9,7 @@ int main() {
     using namespace wav_app;
 
     {
-        const char* argv[] = {"spectrum_cli", "--help"};
+        const char* argv[] = {"pdt_wav_cli", "--help"};
         CliOptions opt{};
         std::stringstream err;
 
@@ -22,7 +22,7 @@ int main() {
 
     {
         const char* argv[] = {
-            "spectrum_cli",
+            "pdt_wav_cli",
             "--window", "hamming",
             "--from", "128",
             "--window-size", "2048",
@@ -56,7 +56,7 @@ int main() {
     }
 
     {
-        const char* argv[] = {"spectrum_cli", "--window", "none", "--in", "input.wav"};
+        const char* argv[] = {"pdt_wav_cli", "--window", "none", "--in", "input.wav"};
         CliOptions opt{};
         std::stringstream err;
 
@@ -69,7 +69,7 @@ int main() {
     }
 
     {
-        const char* argv[] = {"spectrum_cli", "--in", "input.wav"};
+        const char* argv[] = {"pdt_wav_cli", "--in", "input.wav"};
         CliOptions opt{};
         std::stringstream err;
 
@@ -90,7 +90,7 @@ int main() {
     }
 
     {
-        const char* argv[] = {"spectrum_cli", "--in"};
+        const char* argv[] = {"pdt_wav_cli", "--in"};
         CliOptions opt{};
         std::stringstream err;
 
@@ -101,7 +101,7 @@ int main() {
     }
 
     {
-        const char* argv[] = {"spectrum_cli", "--unknown"};
+        const char* argv[] = {"pdt_wav_cli", "--unknown"};
         CliOptions opt{};
         std::stringstream err;
 
@@ -112,7 +112,7 @@ int main() {
     }
 
     {
-        const char* argv[] = {"spectrum_cli", "--window"};
+        const char* argv[] = {"pdt_wav_cli", "--window"};
         CliOptions opt{};
         std::stringstream err;
 
@@ -123,7 +123,7 @@ int main() {
     }
 
     {
-        const char* argv[] = {"spectrum_cli", "--window", "blackman", "--in", "input.wav"};
+        const char* argv[] = {"pdt_wav_cli", "--window", "blackman", "--in", "input.wav"};
         CliOptions opt{};
         std::stringstream err;
 
@@ -134,7 +134,7 @@ int main() {
     }
 
     {
-        const char* argv[] = {"spectrum_cli", "--from", "-1", "--in", "input.wav"};
+        const char* argv[] = {"pdt_wav_cli", "--from", "-1", "--in", "input.wav"};
         CliOptions opt{};
         std::stringstream err;
 
@@ -145,7 +145,7 @@ int main() {
     }
 
     {
-        const char* argv[] = {"spectrum_cli", "--window-size", "0", "--in", "input.wav"};
+        const char* argv[] = {"pdt_wav_cli", "--window-size", "0", "--in", "input.wav"};
         CliOptions opt{};
         std::stringstream err;
 
@@ -156,7 +156,7 @@ int main() {
     }
 
     {
-        const char* argv[] = {"spectrum_cli", "--threshold", "-0.1", "--in", "input.wav"};
+        const char* argv[] = {"pdt_wav_cli", "--threshold", "-0.1", "--in", "input.wav"};
         CliOptions opt{};
         std::stringstream err;
 
@@ -167,7 +167,7 @@ int main() {
     }
 
     {
-        const char* argv[] = {"spectrum_cli", "--threshold", "1.1", "--in", "input.wav"};
+        const char* argv[] = {"pdt_wav_cli", "--threshold", "1.1", "--in", "input.wav"};
         CliOptions opt{};
         std::stringstream err;
 
@@ -178,7 +178,7 @@ int main() {
     }
 
     {
-        const char* argv[] = {"spectrum_cli", "--threshold", "abc", "--in", "input.wav"};
+        const char* argv[] = {"pdt_wav_cli", "--threshold", "abc", "--in", "input.wav"};
         CliOptions opt{};
         std::stringstream err;
 
@@ -189,7 +189,7 @@ int main() {
     }
 
     {
-        const char* argv[] = {"spectrum_cli", "--mode", "bad-mode", "--in", "input.wav"};
+        const char* argv[] = {"pdt_wav_cli", "--mode", "bad-mode", "--in", "input.wav"};
         CliOptions opt{};
         std::stringstream err;
 
@@ -200,7 +200,7 @@ int main() {
     }
 
     {
-        const char* argv[] = {"spectrum_cli", "--top", "0", "--in", "input.wav"};
+        const char* argv[] = {"pdt_wav_cli", "--top", "0", "--in", "input.wav"};
         CliOptions opt{};
         std::stringstream err;
 
@@ -211,7 +211,7 @@ int main() {
     }
 
     {
-        const char* argv[] = {"spectrum_cli", "--algorithm", "gpu", "--in", "input.wav"};
+        const char* argv[] = {"pdt_wav_cli", "--algorithm", "gpu", "--in", "input.wav"};
         CliOptions opt{};
         std::stringstream err;
 
@@ -222,7 +222,7 @@ int main() {
     }
 
     {
-        const char* argv[] = {"spectrum_cli", "--in", "a.wav", "--in", "b.wav"};
+        const char* argv[] = {"pdt_wav_cli", "--in", "a.wav", "--in", "b.wav"};
         CliOptions opt{};
         std::stringstream err;
 
@@ -233,7 +233,7 @@ int main() {
     }
 
     {
-        const char* argv[] = {"spectrum_cli"};
+        const char* argv[] = {"pdt_wav_cli"};
         CliOptions opt{};
         std::stringstream err;
 
@@ -244,7 +244,7 @@ int main() {
     }
 
     {
-        const char* argv[] = {"spectrum_cli", "input.wav"};
+        const char* argv[] = {"pdt_wav_cli", "input.wav"};
         CliOptions opt{};
         std::stringstream err;
 
@@ -272,7 +272,7 @@ int main() {
         const std::string text = out.str();
 
         assert(text.find("Usage:") != std::string::npos);
-        assert(text.find("spectrum_cli [options]") != std::string::npos);
+        assert(text.find("pdt_wav_cli [options]") != std::string::npos);
         assert(text.find("--in <file.wav>") != std::string::npos);
         assert(text.find("--window <none|hann|hamming>") != std::string::npos);
         assert(text.find("--algorithm <auto|dft|fft>") != std::string::npos);

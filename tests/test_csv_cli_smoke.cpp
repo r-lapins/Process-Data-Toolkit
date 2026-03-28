@@ -7,7 +7,7 @@ int main() {
     using namespace csv_app;
 
     {
-        const char* argv[] = {"pdt_cli", "--help"};
+        const char* argv[] = {"pdt_csv_cli", "--help"};
         CliOptions opt{};
         std::stringstream err;
         bool ok = parse_args(2, argv, opt, err);
@@ -16,7 +16,7 @@ int main() {
     }
 
     {
-        const char* argv[] = {"pdt_cli", "--in", "x.csv", "--sensor", "S1",
+        const char* argv[] = {"pdt_csv_cli", "--in", "x.csv", "--sensor", "S1",
                               "--from", "2026-02-18T10:00:00", "--to", "2026-02-18T12:00:00"};
         CliOptions opt{};
         std::stringstream err;
@@ -29,7 +29,7 @@ int main() {
     }
 
     {
-        const char* argv[] = {"pdt_cli", "--from", "bad"};
+        const char* argv[] = {"pdt_csv_cli", "--from", "bad"};
         CliOptions opt{};
         std::stringstream err;
         bool ok = parse_args(3, argv, opt, err);
@@ -37,7 +37,7 @@ int main() {
     }
 
     {
-        const char* argv[] = {"pdt_cli", "--unknown"};
+        const char* argv[] = {"pdt_csv_cli", "--unknown"};
         CliOptions opt{};
         std::stringstream err;
         bool ok = parse_args(2, argv, opt, err);
@@ -45,7 +45,7 @@ int main() {
     }
 
     {
-        const char* argv[] = {"pdt_cli", "--in", "x.csv", "--sensor", "S1", "--per-sensor"};
+        const char* argv[] = {"pdt_csv_cli", "--in", "x.csv", "--sensor", "S1", "--per-sensor"};
         CliOptions opt{};
         std::stringstream err;
         bool ok = parse_args(6, const_cast<char**>(argv), opt, err);
@@ -56,7 +56,7 @@ int main() {
     }
 
     {
-        const char* argv[] = {"pdt_cli", "--z", "abc"};
+        const char* argv[] = {"pdt_csv_cli", "--z", "abc"};
         CliOptions opt{};
         std::stringstream err;
         bool ok = parse_args(3, argv, opt, err);
@@ -64,7 +64,7 @@ int main() {
     }
 
     {
-        const char* argv[] = {"pdt_cli", "--top", "26"};
+        const char* argv[] = {"pdt_csv_cli", "--top", "26"};
         CliOptions opt{};
         std::stringstream err;
         bool ok = parse_args(3, argv, opt, err);

@@ -1,4 +1,4 @@
-# Signal processing
+# WAV signal processing
 
 The project includes a signal processing module for basic spectral analysis implemented in modern C++.
 
@@ -8,19 +8,19 @@ The project includes a signal processing module for basic spectral analysis impl
 Signal (WAV / synthetic) → Segment Selection → Optional Windowing → DFT / FFT → Single-Sided Spectrum → Peak Detection → Dominant Spectral Components
 ```
 
-### Spectrum CLI (WAV input)
+### WAV CLI
 
 Run:
 
 ```
-./build/debug/spectrum_cli --in input.wav
-./build/debug/spectrum_cli --in examples/HDSDR_20230515_072359Z_15047kHz_AF.wav
+./build/debug/pdt_wav_cli --in input.wav
+./build/debug/pdt_wav_cli --in examples/HDSDR_20230515_072359Z_15047kHz_AF.wav
 ```
 
 Example with explicit options:
 
 ```
-./build/debug/spectrum_cli \
+./build/debug/pdt_wav_cli \
   --in input.wav \
   --window hann \
   --from 0 \
@@ -49,7 +49,7 @@ Supported options:
 --out-r <file.txt>
 ```
 
-What the spectrum CLI does:
+What the WAV CLI does:
 
 1. Reads a WAV file
 2. Decodes PCM16 mono samples
@@ -99,12 +99,12 @@ Exported files can be opened in:
 - MATLAB for CSV
 - Any text editor for the report
 
-### Spectrum demo (synthetic signal)
+### Synthetic signal demo
 
 The project also includes a small synthetic-signal demo:
 
 ```
-./build/debug/spectrum_synth_demo
+./build/debug/pdt_wav_synth_demo
 ```
 
 The demo:
