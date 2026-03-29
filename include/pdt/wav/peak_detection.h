@@ -8,15 +8,15 @@
 
 namespace pdt {
 
+enum class PeakDetectionMode {
+    ThresholdOnly,
+    LocalMaxima
+};
+
 struct Peak {
     std::size_t index;
     double frequency;
     double magnitude;
-};
-
-enum class PeakDetectionMode {
-    ThresholdOnly,
-    LocalMaxima
 };
 
 std::vector<Peak> find_peaks(const Spectrum& spectrum,

@@ -7,6 +7,7 @@
 namespace pdt {
 
 enum class WindowType {
+    None,
     Hann,
     Hamming
 };
