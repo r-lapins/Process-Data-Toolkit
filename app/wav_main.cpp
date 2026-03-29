@@ -4,7 +4,7 @@
 #include "pdt/wav/fft.h"
 #include "pdt/wav/peak_detection.h"
 #include "pdt/wav/spectrum.h"
-#include "pdt/wav/spectrum_output.h"
+#include "pdt/wav/wav_output.h"
 #include "pdt/wav/wav_reader.h"
 #include "pdt/wav/window.h"
 
@@ -94,23 +94,21 @@ int main(int argc, char* argv[]) {
     const auto all_peaks = find_peaks(spectrum, options.threshold, options.peak_mode);
     const auto dominant_peaks = select_dominant_peaks(all_peaks, options.top);
 
-    pdt::SpectrumReport report{
-        .spectrum = spectrum,
-        .all_peaks = all_peaks,
-        .top_peaks = dominant_peaks,
-        .meta = {
-            .input_path = options.input_path,
-            .sample_rate = static_cast<double>(wav->sample_rate),
-            .channels = wav->channels,
-            .total_samples = wav->samples.size(),
-            .from = options.from,
-            .windowSize = segment.size(),
-            .window = options.use_window ? to_string(options.window) : "none",
-            .algorithm = to_string(used_algorithm),
-            .threshold = options.threshold,
-            .peak_mode = to_string(options.peak_mode),
-            .top = options.top
-        }
+    pdt::SpectrumReport report{.spectrum = spectrum,
+                               .all_peaks = all_peaks,
+                               .top_peaks = dominant_peaks,
+                               .meta = {.input_path = options.input_path,
+                                        .sample_rate = static_cast<double>(wav->sample_rate),
+                                        .channels = wav->channels,
+                                        .total_samples = wav->samples.size(),
+                                        .from = options.from,
+                                        .windowSize = segment.size(),
+                                        .window = options.window,
+                                        .algorithm = used_algorithm,
+                                        .peak_mode = options.peak_mode,
+                                        .threshold = options.threshold,
+                                        .top = options.top
+                               }
     };
 
     if (!pdt::write_spectrum_report(std::cout, report)) {

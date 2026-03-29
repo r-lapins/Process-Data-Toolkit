@@ -10,21 +10,21 @@ namespace wav_app {
 namespace {
 
 std::optional<pdt::WindowType> parse_window_type(std::string_view value) {
-    if (value == "hann") { return pdt::WindowType::Hann; }
+    if (value == "hann")    { return pdt::WindowType::Hann; }
     if (value == "hamming") { return pdt::WindowType::Hamming; }
     return std::nullopt;
 }
 
 std::optional<pdt::PeakDetectionMode> parse_peak_mode(std::string_view value) {
-    if (value == "threshold-only") { return pdt::PeakDetectionMode::ThresholdOnly; }
-    if (value == "local-maxima") { return pdt::PeakDetectionMode::LocalMaxima; }
+    if (value == "threshold-only")  { return pdt::PeakDetectionMode::ThresholdOnly; }
+    if (value == "local-maxima")    { return pdt::PeakDetectionMode::LocalMaxima; }
     return std::nullopt;
 }
 
-std::optional<SpectrumAlgorithm> parse_algorithm(std::string_view value) {
-    if (value == "auto") { return SpectrumAlgorithm::Auto; }
-    if (value == "dft") { return SpectrumAlgorithm::Dft; }
-    if (value == "fft") { return SpectrumAlgorithm::Fft; }
+std::optional<pdt::SpectrumAlgorithm> parse_algorithm(std::string_view value) {
+    if (value == "auto")    { return pdt::SpectrumAlgorithm::Auto; }
+    if (value == "dft")     { return pdt::SpectrumAlgorithm::Dft; }
+    if (value == "fft")     { return pdt::SpectrumAlgorithm::Fft; }
     return std::nullopt;
 }
 
@@ -222,38 +222,6 @@ bool parse_cli(int argc, const char* const* argv, CliOptions& options, std::ostr
     }
 
     return true;
-}
-
-const char* to_string(pdt::WindowType type) {
-    switch (type) {
-    case pdt::WindowType::Hann:
-        return "hann";
-    case pdt::WindowType::Hamming:
-        return "hamming";
-    }
-    return "unknown";
-}
-
-const char* to_string(pdt::PeakDetectionMode mode) {
-    switch (mode) {
-    case pdt::PeakDetectionMode::ThresholdOnly:
-        return "threshold-only";
-    case pdt::PeakDetectionMode::LocalMaxima:
-        return "local-maxima";
-    }
-    return "unknown";
-}
-
-const char* to_string(SpectrumAlgorithm algorithm) {
-    switch (algorithm) {
-    case SpectrumAlgorithm::Auto:
-        return "auto";
-    case SpectrumAlgorithm::Dft:
-        return "dft";
-    case SpectrumAlgorithm::Fft:
-        return "fft";
-    }
-    return "unknown";
 }
 
 } // namespace wav_app

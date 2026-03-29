@@ -9,12 +9,6 @@
 
 namespace wav_app {
 
-enum class SpectrumAlgorithm {
-    Auto,
-    Dft,
-    Fft
-};
-
 struct CliOptions {
     std::string input_path;
     pdt::WindowType window{pdt::WindowType::Hann};
@@ -24,7 +18,7 @@ struct CliOptions {
     double threshold{0.4};
     pdt::PeakDetectionMode peak_mode{pdt::PeakDetectionMode::LocalMaxima};
     std::size_t top{10};
-    SpectrumAlgorithm algorithm{SpectrumAlgorithm::Auto};
+    pdt::SpectrumAlgorithm algorithm{pdt::SpectrumAlgorithm::Auto};
     bool help_requested{false};
     std::string output_csv_path;
     std::string output_report_path;
@@ -35,6 +29,6 @@ bool parse_cli(int argc, const char* const* argv, CliOptions& options, std::ostr
 
 const char* to_string(pdt::WindowType type);
 const char* to_string(pdt::PeakDetectionMode mode);
-const char* to_string(SpectrumAlgorithm algorithm);
+const char* to_string(pdt::SpectrumAlgorithm algorithm);
 
 } // namespace wav_app

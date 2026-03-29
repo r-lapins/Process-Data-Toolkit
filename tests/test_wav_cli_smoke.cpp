@@ -53,7 +53,7 @@ int main() {
         assert(std::abs(opt.threshold - 0.75) < 1e-12);
         assert(opt.peak_mode == pdt::PeakDetectionMode::ThresholdOnly);
         assert(opt.top == std::size_t{5});
-        assert(opt.algorithm == SpectrumAlgorithm::Fft);
+        assert(opt.algorithm == pdt::SpectrumAlgorithm::Fft);
         assert(!opt.help_requested);
     }
 
@@ -87,7 +87,7 @@ int main() {
         assert(opt.threshold == 0.4);
         assert(opt.peak_mode == pdt::PeakDetectionMode::LocalMaxima);
         assert(opt.top == 10);
-        assert(opt.algorithm == SpectrumAlgorithm::Auto);
+        assert(opt.algorithm == pdt::SpectrumAlgorithm::Auto);
         assert(!opt.help_requested);
     }
 
@@ -254,18 +254,6 @@ int main() {
 
         assert(!ok);
         assert(err.str().find("Unexpected positional argument: input.wav") != std::string::npos);
-    }
-
-    {
-        assert(std::string{to_string(pdt::WindowType::Hann)} == "hann");
-        assert(std::string{to_string(pdt::WindowType::Hamming)} == "hamming");
-
-        assert(std::string{to_string(pdt::PeakDetectionMode::ThresholdOnly)} == "threshold-only");
-        assert(std::string{to_string(pdt::PeakDetectionMode::LocalMaxima)} == "local-maxima");
-
-        assert(std::string{to_string(SpectrumAlgorithm::Auto)} == "auto");
-        assert(std::string{to_string(SpectrumAlgorithm::Dft)} == "dft");
-        assert(std::string{to_string(SpectrumAlgorithm::Fft)} == "fft");
     }
 
     {
