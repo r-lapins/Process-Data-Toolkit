@@ -23,6 +23,12 @@ Key aspects:
 
 ---
 
+## Development
+
+[Development notes and CI instructions are available here: docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
+
+---
+
 ## Features
 
 ### CSV data processing
@@ -124,12 +130,6 @@ bench/              performance benchmarks
 - Ninja
 - C++20 compatible compiler
 - Linux environment is recommended
-
----
-
-## Development
-
-Development notes and CI instructions are available in [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
 ---
 

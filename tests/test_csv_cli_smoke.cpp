@@ -6,6 +6,7 @@
 int main() {
     using namespace csv_app;
 
+    // NOLINTBEGIN(modernize-avoid-c-arrays)
     {
         const char* argv[] = {"pdt_csv_cli", "--help"};
         CliOptions opt{};
@@ -73,3 +74,4 @@ int main() {
 
     return 0;
 }
+// NOLINTEND(modernize-avoid-c-arrays)
