@@ -6,6 +6,19 @@ Modern C++20 library and CLI tools for CSV time-series processing and WAV signal
 
 ---
 
+## Related project
+
+This library powers a desktop application:
+
+👉 [Process Data Viewer (Qt)](https://github.com/r-lapins/Process-Data-Viewer-Qt)
+
+The viewer provides an interactive GUI for:
+- CSV anomaly analysis
+- WAV signal and spectrum analysis
+- visualization and export tools
+
+---
+
 ## Project goals
 
 This project demonstrates modern C++ development practices and serves as a portfolio example.
