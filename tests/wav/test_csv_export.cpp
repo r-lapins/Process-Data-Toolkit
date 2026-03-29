@@ -1,4 +1,4 @@
-#include "pdt/wav/spectrum_output.h"
+#include "pdt/wav/wav_output.h"
 
 #include <cassert>
 #include <sstream>

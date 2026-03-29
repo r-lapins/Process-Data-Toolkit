@@ -1,7 +1,7 @@
 #include "pdt/csv/csv_reader.h"
 #include "pdt/csv/anomaly.h"
 #include "pdt/csv/dataset.h"
-#include "pdt/csv/output.h"
+#include "pdt/csv/csv_output.h"
 #include "csv_cli_args.h"
 
 #include <iostream>

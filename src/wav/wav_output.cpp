@@ -1,4 +1,4 @@
-#include "pdt/wav/spectrum_output.h"
+#include "pdt/wav/wav_output.h"
 
 #include <sstream>
 #include <iomanip>
@@ -19,10 +19,10 @@ bool write_spectrum_report(std::ostream &out, const SpectrumReport &report)
     out << "Samples      : " << m.total_samples << '\n';
     out << "From sample  : " << m.from << '\n';
     out << "Window size  : " << m.windowSize << '\n';
-    out << "Window       : " << m.window << '\n';
-    out << "Algorithm    : " << m.algorithm << '\n';
+    out << "Window       : " << to_string(m.window) << '\n';
+    out << "Algorithm    : " << to_string(m.algorithm) << '\n';
     out << "Threshold    : " << m.threshold << '\n';
-    out << "Peak mode    : " << m.peak_mode << '\n';
+    out << "Peak mode    : " << to_string(m.peak_mode) << '\n';
     out << "Detected peaks: " << report.all_peaks.size()
         << " | showing top " << m.top << '\n';
 
@@ -42,12 +42,10 @@ bool write_spectrum_report(std::ostream &out, const SpectrumReport &report)
 std::string format_peak_line(const Peak& peak, std::size_t display_index)
 {
     std::ostringstream out;
-    out << std::setfill(' ') << std::setw(3) << display_index << ". "
-        << "f = " << std::fixed << std::setprecision(2) << peak.frequency
-        << " Hz"
-        << "    |X| = " << peak.magnitude
-        << std::defaultfloat
-        << "    bin = " << peak.index;
+    out << std::setfill(' ') << std::setw(4) << display_index << "."
+        << " f = "      << std::fixed << std::setprecision(2) << std::setw(8) << peak.frequency << " Hz"
+        << "  |X| = "   << std::setw(7) << peak.magnitude << std::defaultfloat
+        << "  bin = "   << std::setw(6) << peak.index;
     return out.str();
 }
 
@@ -76,6 +74,38 @@ std::string to_string(const SpectrumReport &report)
         return {};
     }
     return out.str();
+}
+
+const char* to_string(pdt::WindowType type) {
+    using enum pdt::WindowType;
+
+    switch (type) {
+    case Hann:    return "hann";
+    case Hamming: return "hamming";
+    }
+    return "unknown";
+}
+
+const char* to_string(pdt::SpectrumAlgorithm algorithm) {
+    using enum pdt::SpectrumAlgorithm;
+
+    switch (algorithm) {
+    case Dft: return  "dft";
+    case Fft: return  "fft";
+    case Auto: return "auto";
+        break;
+    }
+    return "unknown";
+}
+
+const char* to_string(pdt::PeakDetectionMode mode) {
+    using enum pdt::PeakDetectionMode;
+
+    switch (mode) {
+    case ThresholdOnly: return "threshold";
+    case LocalMaxima:   return "local_maxima";
+    }
+    return "unknown";
 }
 
 } // namespace pdt

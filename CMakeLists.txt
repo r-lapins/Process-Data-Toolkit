@@ -21,15 +21,15 @@ endif()
 
 add_library(pdt
     src/csv/csv_reader.cpp
+    src/csv/csv_output.cpp
     src/csv/time.cpp
     src/csv/dataset.cpp
-    src/csv/output.cpp
     src/csv/anomaly.cpp
 
     src/wav/dft.cpp
     src/wav/fft.cpp
     src/wav/peak_detection.cpp
-    src/wav/spectrum_output.cpp
+    src/wav/wav_output.cpp
     src/wav/wav_reader.cpp
     src/wav/window.cpp
 )

@@ -1,4 +1,4 @@
-#include "pdt/csv/output.h"
+#include "pdt/csv/csv_output.h"
 #include "pdt/csv/time.h"
 
 #include <optional>
@@ -12,6 +12,7 @@
 
 namespace {
 
+// NOLINTBEGIN(modernize-raw-string-literal)
 std::string anomaly_method_to_string(pdt::AnomalyMethod method) {
     using enum pdt::AnomalyMethod;
     switch (method) {
@@ -213,13 +214,12 @@ std::string format_anomaly_line(const Anomaly& anomaly, std::size_t displayIndex
     std::ostringstream oss;
 
     oss << std::fixed << std::setprecision(2);
-
-    oss << std::setw(3) << std::setfill(' ') << displayIndex << ". ";
-    oss << "  |  "          << format_date_time(anomaly.timestamp)
-        << "  |  "          << anomaly.sensor
-        << "  |  value = "  << anomaly.value
-        << "  |  "          << anomaly_score_label(method)
-        << " = "            << anomaly.score;
+    oss << format_date_time(anomaly.timestamp)
+        << " | "         << anomaly.sensor
+        << " | value = " << std::setw(7) << anomaly.value
+        << " | "         << std::setw(3) << anomaly_score_label(method)
+        << " = "         << std::setw(6) << anomaly.score;
+    oss << " | index = " << std::setw(5) << std::setfill(' ') << displayIndex << ".";
 
     return oss.str();
 }
@@ -265,3 +265,4 @@ bool write_csv_with_anomaly_markers(std::ostream &os, const DataSet &dataSet, st
 }
 
 } // namespace pdt
+// NOLINTEND(modernize-raw-string-literal)
