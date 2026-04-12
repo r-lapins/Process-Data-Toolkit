@@ -5,11 +5,8 @@
 
 namespace pdt {
 
-bool write_spectrum_report(std::ostream &out, const SpectrumReport &report)
-{
-    if (!out) {
-        return false;
-    }
+bool write_spectrum_report(std::ostream &out, const SpectrumReport &report) {
+    if (!out) { return false; }
 
     const auto& m = report.meta;
 
@@ -23,24 +20,23 @@ bool write_spectrum_report(std::ostream &out, const SpectrumReport &report)
     out << "Algorithm    : " << to_string(m.algorithm) << '\n';
     out << "Threshold    : " << m.threshold << '\n';
     out << "Peak mode    : " << to_string(m.peak_mode) << '\n';
-    out << "Detected peaks: " << report.all_peaks.size()
+    out << "Detected peaks: " << report.analysis.all_peaks.size()
         << " | showing top " << m.top << '\n';
 
-    if (report.all_peaks.empty()) {
+    if (report.analysis.all_peaks.empty()) {
         out << "No peaks detected.\n";
         return static_cast<bool>(out);
     }
 
-    for (std::size_t i = 0; i < report.top_peaks.size(); ++i) {
-        const auto& peak = report.top_peaks[i];
+    for (std::size_t i = 0; i < report.analysis.top_peaks.size(); ++i) {
+        const auto& peak = report.analysis.top_peaks[i];
         out << format_peak_line(peak, i + 1) << '\n';
     }
 
     return static_cast<bool>(out);
 }
 
-std::string format_peak_line(const Peak& peak, std::size_t display_index)
-{
+std::string format_peak_line(const Peak& peak, std::size_t display_index) {
     std::ostringstream out;
     out << std::setfill(' ') << std::setw(4) << display_index << "."
         << " f = "      << std::fixed << std::setprecision(2) << std::setw(8) << peak.frequency << " Hz"
@@ -50,13 +46,9 @@ std::string format_peak_line(const Peak& peak, std::size_t display_index)
 }
 
 bool write_spectrum_csv(std::ostream& out, const Spectrum& spectrum) {
-    if (!out) {
-        return false;
-    }
+    if (!out) { return false; }
 
-    if (spectrum.frequencies.size() != spectrum.magnitudes.size()) {
-        return false;
-    }
+    if (spectrum.frequencies.size() != spectrum.magnitudes.size()) { return false; }
 
     out << "frequency_hz,magnitude\n";
 
@@ -70,9 +62,7 @@ bool write_spectrum_csv(std::ostream& out, const Spectrum& spectrum) {
 std::string to_string(const SpectrumReport &report)
 {
     std::ostringstream out;
-    if (!write_spectrum_report(out, report)) {
-        return {};
-    }
+    if (!write_spectrum_report(out, report)) { return {}; }
     return out.str();
 }
 
@@ -82,6 +72,7 @@ const char* to_string(pdt::WindowType type) {
     switch (type) {
     case Hann:    return "hann";
     case Hamming: return "hamming";
+    case None:    return "none";
     }
     return "unknown";
 }

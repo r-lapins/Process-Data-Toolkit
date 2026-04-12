@@ -11,14 +11,14 @@ namespace wav_app {
 
 struct CliOptions {
     std::string input_path;
-    pdt::WindowType window{pdt::WindowType::Hann};
-    bool use_window{true};
     std::size_t from{0};
     std::size_t windowSize{1024};
-    double threshold{0.4};
-    pdt::PeakDetectionMode peak_mode{pdt::PeakDetectionMode::LocalMaxima};
-    std::size_t top{10};
+    pdt::WindowType window{pdt::WindowType::Hann};
     pdt::SpectrumAlgorithm algorithm{pdt::SpectrumAlgorithm::Auto};
+    pdt::PeakDetectionMode peak_mode{pdt::PeakDetectionMode::LocalMaxima};
+    double threshold{0.4};
+    std::size_t top{10};
+    bool use_window{true};
     bool help_requested{false};
     std::string output_csv_path;
     std::string output_report_path;

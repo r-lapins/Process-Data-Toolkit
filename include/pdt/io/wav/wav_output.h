@@ -3,9 +3,9 @@
 #include "pdt/dsp/peak_detection.h"
 #include "pdt/dsp/spectrum.h"
 #include "pdt/dsp/window.h"
+#include "pdt/pipeline/spectrum_engine.h"
 
 #include <string>
-#include <vector>
 #include <ostream>
 #include <cstddef>
 
@@ -26,9 +26,7 @@ struct SpectrumMetadata {
 };
 
 struct SpectrumReport {
-    Spectrum spectrum;
-    std::vector<Peak> all_peaks;
-    std::vector<Peak> top_peaks;    // dominant
+    SpectrumAnalysisResult analysis;
     SpectrumMetadata meta;
 };
 

@@ -1,17 +1,14 @@
 #include "wav_cli_args.h"
 
-#include "pdt/dsp/dft.h"
-#include "pdt/dsp/fft.h"
-#include "pdt/dsp/peak_detection.h"
-#include "pdt/dsp/spectrum.h"
+#include "pdt/compute/cpu_fft_backend.h"
 #include "pdt/io/wav/wav_output.h"
 #include "pdt/io/wav/wav_reader.h"
-#include "pdt/dsp/window.h"
+#include "pdt/pipeline/spectrum_engine.h"
 
 #include <algorithm>
-#include <iostream>
-#include <fstream>
 #include <cstddef>
+#include <fstream>
+#include <iostream>
 #include <vector>
 
 int main(int argc, char* argv[]) {
@@ -42,7 +39,8 @@ int main(int argc, char* argv[]) {
     }
 
     if (options.from + options.windowSize > wav->samples.size()) {
-        std::cerr << "Last " << options.from + options.windowSize - wav->samples.size() << " samples are out of range.\n";
+        std::cerr << "Last " << options.from + options.windowSize - wav->samples.size()
+                  << " samples are out of range.\n";
         return 1;
     }
 
@@ -59,44 +57,19 @@ int main(int argc, char* argv[]) {
         wav->samples.begin() + static_cast<std::ptrdiff_t>(options.from + segment_size)
         );
 
-    if (options.use_window) {
-        segment = apply_window(segment, options.window);
-    }
+    CpuFftBackend backend;
+    SpectrumEngine engine{backend};
 
-    Spectrum spectrum{};
-    SpectrumAlgorithm used_algorithm = options.algorithm;
+    SpectrumAnalysisOptions analysis_options{.sample_rate = static_cast<double>(wav->sample_rate),
+                                             .window = options.use_window ? options.window : WindowType::None,
+                                             .peak_mode = options.peak_mode,
+                                             .threshold = options.threshold,
+                                             .top = options.top
+    };
 
-    using enum SpectrumAlgorithm;
-    switch (options.algorithm) {
-    case Auto:
-        if (is_power_of_two(segment.size())) {
-            spectrum = compute_single_sided_spectrum_fft(segment, wav->sample_rate);
-            used_algorithm = Fft;
-        } else {
-            spectrum = compute_single_sided_spectrum(segment, wav->sample_rate);
-            used_algorithm = Dft;
-        }
-        break;
+    const auto analysis = engine.process(segment, analysis_options);
 
-    case Dft:
-        spectrum = compute_single_sided_spectrum(segment, wav->sample_rate);
-        break;
-
-    case Fft:
-        if (!is_power_of_two(segment.size())) {
-            std::cerr << "FFT requires number of bins to be a power of two.\n";
-            return 1;
-        }
-        spectrum = compute_single_sided_spectrum_fft(segment, wav->sample_rate);
-        break;
-    }
-
-    const auto all_peaks = find_peaks(spectrum, options.threshold, options.peak_mode);
-    const auto dominant_peaks = select_dominant_peaks(all_peaks, options.top);
-
-    pdt::SpectrumReport report{.spectrum = spectrum,
-                               .all_peaks = all_peaks,
-                               .top_peaks = dominant_peaks,
+    pdt::SpectrumReport report{.analysis = analysis,
                                .meta = {.input_path = options.input_path,
                                         .sample_rate = static_cast<double>(wav->sample_rate),
                                         .channels = wav->channels,
@@ -104,7 +77,7 @@ int main(int argc, char* argv[]) {
                                         .from = options.from,
                                         .windowSize = segment.size(),
                                         .window = options.window,
-                                        .algorithm = used_algorithm,
+                                        .algorithm = analysis.algorithm,
                                         .peak_mode = options.peak_mode,
                                         .threshold = options.threshold,
                                         .top = options.top
@@ -123,7 +96,7 @@ int main(int argc, char* argv[]) {
             return 1;
         }
 
-        if (!write_spectrum_csv(out_file, spectrum)) {
+        if (!write_spectrum_csv(out_file, report.analysis.spectrum)) {
             std::cerr << "Failed to write spectrum CSV.\n";
             return 1;
         }

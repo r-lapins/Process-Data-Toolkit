@@ -34,6 +34,8 @@ add_library(pdt_dsp
     src/dsp/fft.cpp
     src/dsp/peak_detection.cpp
     src/dsp/window.cpp
+    src/compute/cpu_fft_backend.cpp
+    src/pipeline/spectrum_engine.cpp
 )
 target_include_directories(pdt_dsp PUBLIC include)
 

@@ -7,7 +7,8 @@ namespace pdt {
 enum class SpectrumAlgorithm {
     Auto,
     Dft,
-    Fft
+    Fft,
+    cuFft
 };
 
 struct Spectrum {

@@ -4,9 +4,7 @@
 
 namespace pdt {
 
-std::vector<Peak> find_peaks(const Spectrum& spectrum,
-                             double threshold_ratio,
-                             PeakDetectionMode mode) {
+std::vector<Peak> find_peaks(const Spectrum& spectrum, double threshold_ratio, PeakDetectionMode mode) {
     std::vector<Peak> peaks{};
 
     if (spectrum.frequencies.size() != spectrum.magnitudes.size()) { return peaks; }
