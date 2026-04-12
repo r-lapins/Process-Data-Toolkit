@@ -11,6 +11,7 @@ option(PDT_BUILD_WAV "Build WAV CLI and demos" ON)
 option(PDT_BUILD_TESTS "Build tests" ON)
 option(PDT_BUILD_BENCH "Build benchmarks" ON)
 option(PDT_ENABLE_SANITIZERS "Enable sanitizers" ON)
+option(PDT_ENABLE_CUDA "Enable CUDA FFT backend" ON)
 
 # Sanitizers (ASAN/UBSAN)
 if(PDT_ENABLE_SANITIZERS AND CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -38,6 +39,13 @@ add_library(pdt_dsp
     src/pipeline/spectrum_engine.cpp
 )
 target_include_directories(pdt_dsp PUBLIC include)
+
+if(PDT_ENABLE_CUDA)
+    find_package(CUDAToolkit REQUIRED)
+    target_sources(pdt_dsp PRIVATE src/compute/cuda_fft_backend.cpp)
+    target_link_libraries(pdt_dsp PRIVATE CUDA::cudart CUDA::cufft)
+    target_compile_definitions(pdt_dsp PRIVATE PDT_ENABLE_CUDA)
+endif()
 
 add_library(pdt_io_wav
     src/io/wav/wav_output.cpp

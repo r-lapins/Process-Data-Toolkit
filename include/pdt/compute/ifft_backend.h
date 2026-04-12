@@ -17,8 +17,8 @@ class IFftBackend {
   public:
     virtual ~IFftBackend() = default;
 
-    virtual const char* name() const noexcept = 0;
-    virtual bool is_gpu() const noexcept = 0;
+    virtual const char* name()  const noexcept = 0;
+    virtual bool is_gpu()       const noexcept = 0;
 
     virtual FftComputationResult compute_spectrum(std::span<const double> signal, double sample_rate, WindowType window) = 0;
 };

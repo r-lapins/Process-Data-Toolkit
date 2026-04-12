@@ -13,7 +13,7 @@ std::vector<double> make_window(WindowType type, std::size_t size)
 
     window.reserve(size);
 
-           // For size == 1, return a neutral window.
+    // For size == 1, return a neutral window.
     if (size == 1) {
         window.push_back(1.0);
         return window;

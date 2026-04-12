@@ -34,6 +34,16 @@
         "CMAKE_BUILD_TYPE": "Debug",
         "PDT_ENABLE_SANITIZERS": "OFF"
       }
+    },
+    {
+      "name": "debug-qt",
+      "displayName": "debug-qt",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/debug-qt",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "PDT_ENABLE_SANITIZERS": "ON"
+      }
     }
   ],
   "buildPresets": [
@@ -48,6 +58,10 @@
     {
       "name": "debug-nosan",
       "configurePreset": "debug-nosan"
+    },
+    {
+      "name": "debug-qt",
+      "configurePreset": "debug-qt"
     }
   ],
   "testPresets": [

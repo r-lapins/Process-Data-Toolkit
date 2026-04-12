@@ -36,3 +36,7 @@ add_test(NAME csv_cli_smoke COMMAND test_csv_cli_smoke)
 add_executable(test_wav_cli_smoke test_wav_cli_smoke.cpp)
 target_link_libraries(test_wav_cli_smoke PRIVATE pdt_wav_cli_args)
 add_test(NAME wav_cli_smoke COMMAND test_wav_cli_smoke)
+
+add_executable(test_cuda_smoke test_cuda_smoke.cpp)
+target_link_libraries(test_cuda_smoke PRIVATE CUDA::cudart CUDA::cufft)
+add_test(NAME cuda_smoke COMMAND test_cuda_smoke)
