@@ -1,5 +1,5 @@
-#include "pdt/wav/dft.h"
-#include "pdt/wav/peak_detection.h"
+#include "pdt/dsp/dft.h"
+#include "pdt/dsp/peak_detection.h"
 
 #include <algorithm>
 #include <cassert>

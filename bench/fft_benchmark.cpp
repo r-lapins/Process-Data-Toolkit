@@ -1,5 +1,5 @@
-#include "pdt/wav/dft.h"
-#include "pdt/wav/fft.h"
+#include "pdt/dsp/dft.h"
+#include "pdt/dsp/fft.h"
 
 #include <chrono>
 #include <cmath>

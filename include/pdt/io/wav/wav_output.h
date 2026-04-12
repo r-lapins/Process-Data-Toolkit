@@ -1,8 +1,8 @@
 #pragma once
 
-#include "peak_detection.h"
-#include "spectrum.h"
-#include "window.h"
+#include "pdt/dsp/peak_detection.h"
+#include "pdt/dsp/spectrum.h"
+#include "pdt/dsp/window.h"
 
 #include <string>
 #include <vector>

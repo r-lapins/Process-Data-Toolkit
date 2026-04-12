@@ -1,4 +1,4 @@
-#include "pdt/wav/peak_detection.h"
+#include "pdt/dsp/peak_detection.h"
 
 #include <cassert>
 #include <vector>

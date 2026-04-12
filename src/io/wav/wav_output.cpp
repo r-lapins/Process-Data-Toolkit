@@ -1,4 +1,4 @@
-#include "pdt/wav/wav_output.h"
+#include "pdt/io/wav/wav_output.h"
 
 #include <sstream>
 #include <iomanip>

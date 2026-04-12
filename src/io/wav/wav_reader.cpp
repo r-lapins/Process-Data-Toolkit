@@ -1,4 +1,4 @@
-#include "pdt/wav/wav_reader.h"
+#include "pdt/io/wav/wav_reader.h"
 
 #include <array>
 #include <cstring>

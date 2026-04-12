@@ -1,5 +1,5 @@
-#include "csv_cli_args.h"
 #include "common_cli.h"
+#include "csv_cli_args.h"
 #include "pdt/csv/time.h"
 
 #include <string>
@@ -11,9 +11,9 @@ namespace {
 
 std::optional<pdt::AnomalyMethod> parse_anomaly_method(std::string_view v) {
     using enum pdt::AnomalyMethod;
-    if (v == "zscore") return ZScore;
-    if (v == "iqr")    return IQR;
-    if (v == "mad")    return MAD;
+    if (v == "zscore") { return ZScore; }
+    if (v == "iqr")    { return IQR; }
+    if (v == "mad")    { return MAD; }
     return std::nullopt;
 }
 
@@ -21,24 +21,22 @@ std::optional<pdt::AnomalyMethod> parse_anomaly_method(std::string_view v) {
 
 void print_help(std::ostream& os) {
     os <<
-        R"(Process Data Toolkit
-
-Usage:
-    pdt_csv_cli --in <file.csv> [--sensor <name>] [--from <ISO>] [--to <ISO>]
+R"(Usage:
+  pdt_csv_cli [options]
 
 Options:
-    --in               Path to CSV file (required)
-    --sensor           Filter by exact sensor name
-    --per-sensor       Output per-sensor statistics (mutually exclusive with --sensor)
-    --from             Inclusive time lower bound, ISO: YYYY-MM-DDTHH:MM:SS
-    --to               Inclusive time upper bound, ISO: YYYY-MM-DDTHH:MM:SS
-    --out              Write JSON report to file
-    --out-marked-csv   Export filtered CSV dataset with anomaly markers
-    --z <val>          Enable anomaly detection and set threshold
-    --method           Anomaly method: zscore | iqr | mad (default: zscore)
-    --top <N>          Max anomalies to list
-    --skipped          Print skipped CSV rows to stderr
-    --help             Show this help
+  --in               Path to CSV file (required)
+  --sensor           Filter by exact sensor name
+  --per-sensor       Output per-sensor statistics (mutually exclusive with --sensor)
+  --from             Inclusive time lower bound, ISO: YYYY-MM-DDTHH:MM:SS
+  --to               Inclusive time upper bound, ISO: YYYY-MM-DDTHH:MM:SS
+  --out              Write JSON report to file
+  --out-marked-csv   Export filtered CSV dataset with anomaly markers
+  --z <val>          Enable anomaly detection and set threshold
+  --method           Anomaly method: zscore | iqr | mad (default: zscore)
+  --top <N>          Max anomalies to list
+  --skipped          Print skipped CSV rows to stderr
+  --help             Show this help
 )";
 }
 

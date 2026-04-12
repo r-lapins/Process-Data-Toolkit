@@ -1,6 +1,14 @@
 function(add_pdt_test name source)
     add_executable(${name} ${source})
-    target_link_libraries(${name} PRIVATE pdt)
+
+    if(source MATCHES "^csv/")
+        target_link_libraries(${name} PRIVATE pdt_csv)
+    elseif(source MATCHES "^wav/")
+        target_link_libraries(${name} PRIVATE pdt_dsp pdt_io_wav)
+    else()
+        message(FATAL_ERROR "Unknown test source group for ${source}")
+    endif()
+
     add_test(NAME ${name} COMMAND ${name})
 endfunction()
 

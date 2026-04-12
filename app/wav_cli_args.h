@@ -1,7 +1,7 @@
 #pragma once
 
-#include "pdt/wav/peak_detection.h"
-#include "pdt/wav/window.h"
+#include "pdt/dsp/peak_detection.h"
+#include "pdt/dsp/window.h"
 
 #include <cstddef>
 #include <ostream>

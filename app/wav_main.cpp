@@ -1,12 +1,12 @@
 #include "wav_cli_args.h"
 
-#include "pdt/wav/dft.h"
-#include "pdt/wav/fft.h"
-#include "pdt/wav/peak_detection.h"
-#include "pdt/wav/spectrum.h"
-#include "pdt/wav/wav_output.h"
-#include "pdt/wav/wav_reader.h"
-#include "pdt/wav/window.h"
+#include "pdt/dsp/dft.h"
+#include "pdt/dsp/fft.h"
+#include "pdt/dsp/peak_detection.h"
+#include "pdt/dsp/spectrum.h"
+#include "pdt/io/wav/wav_output.h"
+#include "pdt/io/wav/wav_reader.h"
+#include "pdt/dsp/window.h"
 
 #include <algorithm>
 #include <iostream>

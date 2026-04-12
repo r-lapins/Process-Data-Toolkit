@@ -1,8 +1,8 @@
+#include "csv_cli_args.h"
 #include "pdt/csv/csv_reader.h"
 #include "pdt/csv/anomaly.h"
 #include "pdt/csv/dataset.h"
 #include "pdt/csv/csv_output.h"
-#include "csv_cli_args.h"
 
 #include <iostream>
 #include <fstream>
@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
     }
 
     if (opt.input_path.empty()) {
-        std::cerr << "Missing required --in <file.csv>\n\n";
+        std::cerr << "Missing required option --in <file.csv>\n";
         print_help(std::cerr);
         return 2;
     }

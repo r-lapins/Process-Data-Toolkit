@@ -5,48 +5,60 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-option(PDT_ENABLE_SANITIZERS "Enable sanitizers" ON)
-
-option(PDT_BUILD_CSV "Build CLI apps" ON)
-option(PDT_BUILD_WAV "Build demos" ON)
+# Build options
+option(PDT_BUILD_CSV "Build CSV CLI" ON)
+option(PDT_BUILD_WAV "Build WAV CLI and demos" ON)
 option(PDT_BUILD_TESTS "Build tests" ON)
 option(PDT_BUILD_BENCH "Build benchmarks" ON)
+option(PDT_ENABLE_SANITIZERS "Enable sanitizers" ON)
 
-# Sanitizers (ASAN/UBSAN) – apply to *all* targets that link with pdt
+# Sanitizers (ASAN/UBSAN)
 if(PDT_ENABLE_SANITIZERS AND CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_library(pdt_sanitizers INTERFACE)
     target_compile_options(pdt_sanitizers INTERFACE -fsanitize=address,undefined)
     target_link_options(pdt_sanitizers INTERFACE -fsanitize=address,undefined)
 endif()
 
-add_library(pdt
+# Core libraries
+add_library(pdt_csv
     src/csv/csv_reader.cpp
     src/csv/csv_output.cpp
     src/csv/time.cpp
     src/csv/dataset.cpp
     src/csv/anomaly.cpp
-
-    src/wav/dft.cpp
-    src/wav/fft.cpp
-    src/wav/peak_detection.cpp
-    src/wav/wav_output.cpp
-    src/wav/wav_reader.cpp
-    src/wav/window.cpp
 )
-target_include_directories(pdt PUBLIC include)
+target_include_directories(pdt_csv PUBLIC include)
 
+add_library(pdt_dsp
+    src/dsp/dft.cpp
+    src/dsp/fft.cpp
+    src/dsp/peak_detection.cpp
+    src/dsp/window.cpp
+)
+target_include_directories(pdt_dsp PUBLIC include)
+
+add_library(pdt_io_wav
+    src/io/wav/wav_output.cpp
+    src/io/wav/wav_reader.cpp
+)
+target_include_directories(pdt_io_wav PUBLIC include)
+target_link_libraries(pdt_io_wav PUBLIC pdt_dsp)
+
+# Sanitizers
 if(TARGET pdt_sanitizers)
-    target_link_libraries(pdt PUBLIC pdt_sanitizers)
+    target_link_libraries(pdt_csv PUBLIC pdt_sanitizers)
+    target_link_libraries(pdt_dsp PUBLIC pdt_sanitizers)
+    target_link_libraries(pdt_io_wav PUBLIC pdt_sanitizers)
 endif()
 
+# CLI helpers
 add_library(pdt_common_cli STATIC app/common_cli.cpp)
 target_include_directories(pdt_common_cli PUBLIC app)
-target_link_libraries(pdt_common_cli PUBLIC pdt)
 
 if(PDT_BUILD_CSV)
     add_library(pdt_csv_cli_args STATIC app/csv_cli_args.cpp)
     target_include_directories(pdt_csv_cli_args PUBLIC app)
-    target_link_libraries(pdt_csv_cli_args PUBLIC pdt_common_cli)
+    target_link_libraries(pdt_csv_cli_args PUBLIC pdt_common_cli pdt_csv)
 
     add_executable(pdt_csv_cli app/csv_main.cpp)
     target_link_libraries(pdt_csv_cli PRIVATE pdt_csv_cli_args)
@@ -55,27 +67,23 @@ endif()
 if(PDT_BUILD_WAV)
     add_library(pdt_wav_cli_args STATIC app/wav_cli_args.cpp)
     target_include_directories(pdt_wav_cli_args PUBLIC app)
-    target_link_libraries(pdt_wav_cli_args PUBLIC pdt_common_cli)
+    target_link_libraries(pdt_wav_cli_args PUBLIC pdt_common_cli pdt_dsp)
 
     add_executable(pdt_wav_cli app/wav_main.cpp)
-    target_link_libraries(pdt_wav_cli PRIVATE pdt_wav_cli_args)
+    target_link_libraries(pdt_wav_cli PRIVATE pdt_wav_cli_args pdt_io_wav)
 
     add_executable(pdt_wav_synth_demo app/wav_synth_demo.cpp)
-    target_link_libraries(pdt_wav_synth_demo PRIVATE pdt_common_cli)
+    target_link_libraries(pdt_wav_synth_demo PRIVATE pdt_common_cli pdt_dsp)
 endif()
 
+# Tests
 if(PDT_BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
 endif()
 
+# Benchmarks
 if(PDT_BUILD_BENCH)
     add_executable(fft_benchmark bench/fft_benchmark.cpp)
-    target_link_libraries(fft_benchmark PRIVATE pdt)
+    target_link_libraries(fft_benchmark PRIVATE pdt_dsp)
 endif()
-
-# include(GNUInstallDirs)
-# install(TARGETS process_data_toolkit
-#     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-#     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-# )

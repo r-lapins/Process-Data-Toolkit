@@ -1,4 +1,4 @@
-#include "pdt/wav/window.h"
+#include "pdt/dsp/window.h"
 
 #include <cassert>
 #include <cmath>

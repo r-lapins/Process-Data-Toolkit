@@ -1,5 +1,5 @@
-#include "pdt/wav/fft.h"
-#include "pdt/wav/peak_detection.h"
+#include "pdt/dsp/fft.h"
+#include "pdt/dsp/peak_detection.h"
 
 #include <cmath>
 #include <iostream>
