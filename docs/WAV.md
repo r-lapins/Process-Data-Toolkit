@@ -50,16 +50,17 @@ Example with explicit options:
 Supported options:
 
 ```bash
---in <file.wav>
---window <none|hann|hamming>
---from <index>
+--in          <file.wav>
+--window      <none|hann|hamming>
+--algorithm   <auto|dft|fft|cufft>
+--from        <index>
 --window-size <count>
---threshold <0..1>
---mode <threshold-only|local-maxima>
---top <count>
---algorithm <auto|dft|fft>
---out <file.csv>
---out-r <file.txt>
+--list-sizes
+--threshold   <0..1>
+--mode        <threshold-only|local-maxima>
+--top         <count>
+--out         <file.csv>
+--out-r       <file.txt>
 ```
 
 What the WAV CLI does:
@@ -76,16 +77,17 @@ What the WAV CLI does:
 Example text report:
 
 ```md
-Input file   : examples/HDSDR_20230515_072359Z_15047kHz_AF.wav
-Sample rate  : 48000 Hz
-Channels     : 1
-Samples      : 949760
-From sample  : 4736
-Window size  : 512
-Window       : hamming
-Algorithm    : fft
-Threshold    : 0.2
-Peak mode    : threshold-only
+Input file    : examples/HDSDR_20230515_072359Z_15047kHz_AF.wav
+Sample rate   : 48000 Hz
+Channels      : 1
+Samples       : 949760
+From sample   : 4736
+Window size   : 512
+Window        : hamming
+Algorithm     : fft
+Total time    : 38.3 ms
+Threshold     : 0.2
+Peak mode     : threshold-only
 Detected peaks: 89 | showing top 15
   1. f = 7546.88 Hz    |X| = 8.33    bin = 161
   2. f = 7500.00 Hz    |X| = 5.80    bin = 160

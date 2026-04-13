@@ -50,36 +50,28 @@ Key aspects:
 [Notes and instructions are available here: docs/CSV.md](docs/CSV.md).
 
 - CLI data processing tool for CSV files (`pdt_csv_cli`)
-- CSV parser with import summary (`parsed_ok`, `skipped`)
-- Optional display of skipped CSV rows with line numbers (`--skipped`)
-- ISO 8601 timestamp parsing using `std::chrono`
-- Data filtering by sensor and time range
-- Domain model based on `DataSet` class
-- Statistical analysis (`count`, `mean`, `min`, `max`, `stddev`)
-- Per-sensor statistics mode (`--per-sensor`)
-- Configurable anomaly detection (`zscore`, `iqr`, `mad`) with threshold and top-N output (`--z`, `--method`, `--top`)
-- JSON report export (`--out`)
-- CSV export with anomaly markers for top detected anomalies (`--out-marked-csv`)
+- Robust CSV parsing with error reporting and skipped row inspection
+- ISO 8601 timestamp parsing
+- Filtering by sensor and time range
+- Statistical analysis with optional per-sensor breakdown
+- Configurable anomaly detection (`zscore`, `iqr`, `mad`) with threshold and top-N selection
+- JSON and CSV export with anomaly highlighting
 
 ### WAV signal analysis
 
 [Notes and instructions are available here: docs/WAV.md](docs/WAV.md).
 
 - CLI spectrum analysis tool for WAV files (`pdt_wav_cli`)
-- Discrete Fourier Transform (DFT)
-- Radix-2 Fast Fourier Transform (FFT)
-- Backend abstraction for spectrum computation (CPU / CUDA)
-- Automatic DFT / FFT selection (CPU backend)
-- Optional CUDA acceleration using **cuFFT**
+- Spectrum computation using DFT / FFT with optional CUDA acceleration (**cuFFT**)
+- Backend abstraction for CPU / GPU spectrum computation
 - Single-sided spectrum computation
-- Window functions: Hann and Hamming
-- Spectral peak detection (`ThresholdOnly`, `LocalMaxima`)
-- Detection of peaks and selection of the dominant peak separately
+- Window functions: **Hann** and **Hamming**
+- Spectral peak detection and dominant peak selection
 - WAV reader (RIFF/WAVE PCM16 mono)
 - Synthetic signal spectrum analysis demo (`pdt_wav_synth_demo`)
-- CSV export of computed spectrum (`--out`)
-- Text report export (`--out-r`)
-- FFT benchmark tool (DFT vs CPU FFT vs CUDA FFT - `fft_benchmark`)
+- CSV and text report export (`--out`, `--out-r`)
+- Recommended FFT size listing for CPU/GPU (`--list-sizes`)
+- FFT benchmark tool (`fft_benchmark`)
 
 #### Example outputs
 
