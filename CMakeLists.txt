@@ -11,7 +11,7 @@ option(PDT_BUILD_WAV "Build WAV CLI and demos" ON)
 option(PDT_BUILD_TESTS "Build tests" ON)
 option(PDT_BUILD_BENCH "Build benchmarks" ON)
 option(PDT_ENABLE_SANITIZERS "Enable sanitizers" ON)
-option(PDT_ENABLE_CUDA "Enable CUDA FFT backend" ON)
+option(PDT_ENABLE_CUDA "Enable CUDA FFT backend" OFF)
 
 # Sanitizers (ASAN/UBSAN)
 if(PDT_ENABLE_SANITIZERS AND CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -93,7 +93,7 @@ if(PDT_BUILD_TESTS)
 endif()
 
 # Benchmarks
-if(PDT_BUILD_BENCH)
+if(PDT_BUILD_BENCH AND PDT_ENABLE_CUDA)
     add_executable(fft_benchmark bench/fft_benchmark.cpp)
     target_link_libraries(fft_benchmark PRIVATE pdt_dsp)
 endif()

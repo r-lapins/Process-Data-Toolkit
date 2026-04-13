@@ -12,27 +12,8 @@
       "binaryDir": "${sourceDir}/build/debug",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "PDT_ENABLE_SANITIZERS": "ON"
-      }
-    },
-    {
-      "name": "release",
-      "displayName": "Release",
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build/release",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release",
-        "PDT_ENABLE_SANITIZERS": "OFF"
-      }
-    },
-    {
-      "name": "debug-nosan",
-      "displayName": "Debug (no sanitizers)",
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build/debug-nosan",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug",
-        "PDT_ENABLE_SANITIZERS": "OFF"
+        "PDT_ENABLE_SANITIZERS": "ON",
+        "PDT_ENABLE_CUDA": "OFF"
       }
     },
     {
@@ -42,7 +23,52 @@
       "binaryDir": "${sourceDir}/build/debug-qt",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "PDT_ENABLE_SANITIZERS": "ON"
+        "PDT_ENABLE_SANITIZERS": "ON",
+        "PDT_ENABLE_CUDA": "ON"
+      }
+    },
+    {
+      "name": "debug-nosan",
+      "displayName": "Debug (no sanitizers)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/debug-nosan",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "PDT_ENABLE_SANITIZERS": "OFF",
+        "PDT_ENABLE_CUDA": "OFF"
+      }
+    },
+    {
+      "name": "debug-cuda-nosan",
+      "displayName": "Debug (CUDA, no sanitizers)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/debug-cuda-nosan",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "PDT_ENABLE_SANITIZERS": "OFF",
+        "PDT_ENABLE_CUDA": "ON"
+      }
+    },
+    {
+      "name": "release",
+      "displayName": "Release",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "PDT_ENABLE_SANITIZERS": "OFF",
+        "PDT_ENABLE_CUDA": "OFF"
+      }
+    },
+    {
+      "name": "release-cuda",
+      "displayName": "Release (CUDA)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/release-cuda",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "PDT_ENABLE_SANITIZERS": "OFF",
+        "PDT_ENABLE_CUDA": "ON"
       }
     }
   ],
@@ -52,16 +78,24 @@
       "configurePreset": "debug"
     },
     {
-      "name": "release",
-      "configurePreset": "release"
+      "name": "debug-qt",
+      "configurePreset": "debug-qt"
     },
     {
       "name": "debug-nosan",
       "configurePreset": "debug-nosan"
     },
     {
-      "name": "debug-qt",
-      "configurePreset": "debug-qt"
+      "name": "debug-cuda-nosan",
+      "configurePreset": "debug-cuda-nosan"
+    },
+    {
+      "name": "release",
+      "configurePreset": "release"
+    },
+    {
+      "name": "release-cuda",
+      "configurePreset": "release-cuda"
     }
   ],
   "testPresets": [
