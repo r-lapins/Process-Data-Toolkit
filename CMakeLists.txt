@@ -40,6 +40,7 @@ add_library(pdt_dsp
     src/compute/make_fft_backend.cpp
     src/compute/fft_size_policy.cpp
     src/pipeline/spectrum_engine.cpp
+    src/pipeline/wav_analysis_service.cpp
 )
 target_include_directories(pdt_dsp PUBLIC include)
 

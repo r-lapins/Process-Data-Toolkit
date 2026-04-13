@@ -29,9 +29,12 @@ add_pdt_test(test_csv_export wav/test_csv_export.cpp)
 add_pdt_test(test_window wav/test_window.cpp)
 add_pdt_test(test_dft wav/test_dft.cpp)
 add_pdt_test(test_fft wav/test_fft.cpp)
-add_pdt_test(test_make_fft_backend wav/test_make_fft_backend.cpp)
 
+add_pdt_test(test_make_fft_backend wav/test_make_fft_backend.cpp)
 target_link_libraries(test_make_fft_backend PRIVATE GTest::gtest_main)
+
+add_pdt_test(test_wav_analysis_service wav/test_wav_analysis_service.cpp)
+target_link_libraries(test_wav_analysis_service PRIVATE GTest::gtest_main)
 
 add_executable(test_csv_cli_smoke test_csv_cli_smoke.cpp)
 target_link_libraries(test_csv_cli_smoke PRIVATE pdt_csv_cli_args)
