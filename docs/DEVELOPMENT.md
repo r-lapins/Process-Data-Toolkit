@@ -4,15 +4,26 @@
 
 #### Fedora:
 
-```
+```bash
 sudo dnf install clang clang-tools-extra ninja-build cmake
 ```
 
 #### Ubuntu:
 
-```
+```bash
 sudo apt-get install clang clang-tidy ninja-build cmake
 ```
+
+### Optional (CUDA)
+
+#### Fedora:
+
+```bash
+sudo dnf install cuda cuda-toolkit
+```
+
+Follow NVIDIA CUDA installation guide:
+https://developer.nvidia.com/cuda-downloads
 
 ---
 
@@ -25,18 +36,34 @@ cmake --preset debug
 cmake --build --preset debug
 ```
 
-### Debug (no sanitizers — for Valgrind/GDB)
+### Debug (no sanitizers — for Valgrind/GDB and CUDA)
 
 ```bash
 cmake --preset debug-nosan
 cmake --build --preset debug-nosan
 ```
 
+### Debug (CUDA, no sanitizers)
+
+```bash
+cmake --preset debug-cuda-nosan
+cmake --build --preset debug-cuda-nosan
+```
+
+CUDA builds disable sanitizers (ASan/UBSan are not compatible with CUDA).
+
 ### Release
 
 ```bash
 cmake --preset release
 cmake --build --preset release
+```
+
+### Release (CUDA)
+
+```bash
+cmake --preset release-cuda
+cmake --build --preset release-cuda
 ```
 
 ### Run examples
@@ -120,13 +147,13 @@ valgrind --leak-check=full --track-origins=yes \
 
 Clean build directory:
 
-```
+```bash
 rm -rf build/debug
 ```
 
 Configure with clang and clang-tidy enabled:
 
-```
+```bash
 cmake --preset debug \
 -DCMAKE_C_COMPILER=clang \
 -DCMAKE_CXX_COMPILER=clang++ \
@@ -136,7 +163,7 @@ cmake --preset debug \
 
 Build project (clang-tidy will run automatically):
 
-```
+```bash
 cmake --build --preset debug
 ```
 
@@ -146,7 +173,7 @@ clang-format is used for consistent code style.
 
 Run:
 
-```
+```bash
 clang-format -i $(git ls-files '*.cpp' '*.h')
 ```
 
@@ -157,9 +184,23 @@ The CI pipeline runs three jobs:
 1. GCC build + tests
 2. Clang build + sanitizers
 3. clang-tidy static analysis
+4. CUDA build (compile-only)
+
+CUDA job verifies that the GPU backend compiles correctly.
+Runtime execution is not performed in CI.
 
 Workflow file:
 
-```
+```bash
 .github/workflows/ci.yml
+```
+
+## CUDA (optional)
+
+Install CUDA toolkit:
+
+### Fedora
+
+```bash
+sudo dnf install cuda cuda-toolkit
 ```

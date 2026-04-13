@@ -4,22 +4,35 @@ The project includes a signal processing module for basic spectral analysis impl
 
 ### Pipeline
 
+```md
+Signal (WAV / synthetic) → Segment Selection → Optional Windowing → FFT backend (CPU / CUDA) → Single-Sided Spectrum → Peak Detection → Dominant Spectral Components
 ```
-Signal (WAV / synthetic) → Segment Selection → Optional Windowing → DFT / FFT → Single-Sided Spectrum → Peak Detection → Dominant Spectral Components
-```
+
+### FFT backends
+
+The spectrum computation is implemented using a backend abstraction:
+
+- `CpuFftBackend`
+  - Uses internal DFT / FFT implementation
+  - Automatically selects DFT or FFT
+
+- `CudaFftBackend` (optional)
+  - Uses NVIDIA cuFFT
+  - Accelerates FFT on GPU
+  - Reuses plan and buffers for steady-state performance
 
 ### WAV CLI
 
 Run:
 
-```
+```bash
 ./build/debug/pdt_wav_cli --in input.wav
 ./build/debug/pdt_wav_cli --in examples/HDSDR_20230515_072359Z_15047kHz_AF.wav
 ```
 
 Example with explicit options:
 
-```
+```bash
 ./build/debug/pdt_wav_cli \
   --in input.wav \
   --window hann \
@@ -36,7 +49,7 @@ Example with explicit options:
 
 Supported options:
 
-```
+```bash
 --in <file.wav>
 --window <none|hann|hamming>
 --from <index>
@@ -62,7 +75,7 @@ What the WAV CLI does:
 
 Example text report:
 
-```
+```md
 Input file   : examples/HDSDR_20230515_072359Z_15047kHz_AF.wav
 Sample rate  : 48000 Hz
 Channels     : 1
@@ -82,7 +95,7 @@ The text report can be exported separately to a .txt file.
 
 Generated CSV format:
 
-```
+```md
 frequency_hz,magnitude
 0,0.0001
 46.875,0.0032
@@ -103,7 +116,7 @@ Exported files can be opened in:
 
 The project also includes a small synthetic-signal demo:
 
-```
+```bash
 ./build/debug/pdt_wav_synth_demo
 ```
 
@@ -127,29 +140,55 @@ Expected dominant spectral peaks:
 
 ## Benchmark
 
-The repository includes a simple benchmark comparing the runtime of the naive Discrete Fourier Transform and the radix-2 Fast Fourier Transform.
-
 Run:
 
-```
+```bash
 ./build/release/fft_benchmark
 ```
 
+The benchmark compares:
+- naive DFT
+- CPU FFT backend
+- CUDA FFT backend (cuFFT)
+
+Two scenarios are reported:
+
+**First-call latency**
+- includes FFT plan creation, GPU allocation and initialization  
+- represents user-visible delay (first run / size change)
+
+**Steady-state throughput**
+- measured after warmup (plan + buffer reuse)  
+- represents real performance for streaming / live processing (e.g. SDR)
+
 Example output:
 
+```md
+=== First-call latency ===
+       N      DFT [ms]      CPU [ms]     CUDA [ms]     Speedup
+--------------------------------------------------------------
+    1024         46.36          1.06          0.63        1.67
+    2048             -          2.24          0.74        3.05
+    4096             -          4.76          1.00        4.78
+    8192             -          9.79          1.55        6.32
+   16384             -         20.53          2.70        7.60
+   32768             -         42.85          5.17        8.29
+   65536             -         90.03          9.43        9.54
+
+=== Steady-state throughput ===
+       N      CPU [ms]     CUDA [ms]     Speedup
+------------------------------------------------
+    8192          9.69          1.03        9.40
+   16384         20.32          2.05        9.89
+   32768         42.49          4.02       10.57
+   65536         91.27          8.12       11.25
 ```
-N,DFT(ms),FFT(ms)
-64,0.08,0.01
-128,0.3,0.01
-256,1.16,0.03
-512,4.57,0.07
-1024,18.02,0.14
-2048,71.7,0.32
-```
+
+CUDA outperforms CPU for larger FFT sizes in steady-state.
 
 This demonstrates the expected complexity difference:
 
-```
+```md
 DFT  ~ O(N²)
 FFT  ~ O(N log N)
 ```
