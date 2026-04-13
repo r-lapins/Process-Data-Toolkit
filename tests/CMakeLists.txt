@@ -9,7 +9,8 @@ function(add_pdt_test name source)
         message(FATAL_ERROR "Unknown test source group for ${source}")
     endif()
 
-    add_test(NAME ${name} COMMAND ${name})
+    string(REGEX REPLACE "^test_" "" ctest_name "${name}")
+    add_test(NAME ${ctest_name} COMMAND ${name})
 endfunction()
 
 add_pdt_test(test_stats_by_sensor csv/test_stats_by_sensor.cpp)
@@ -28,6 +29,9 @@ add_pdt_test(test_csv_export wav/test_csv_export.cpp)
 add_pdt_test(test_window wav/test_window.cpp)
 add_pdt_test(test_dft wav/test_dft.cpp)
 add_pdt_test(test_fft wav/test_fft.cpp)
+add_pdt_test(test_make_fft_backend wav/test_make_fft_backend.cpp)
+
+target_link_libraries(test_make_fft_backend PRIVATE GTest::gtest_main)
 
 add_executable(test_csv_cli_smoke test_csv_cli_smoke.cpp)
 target_link_libraries(test_csv_cli_smoke PRIVATE pdt_csv_cli_args)

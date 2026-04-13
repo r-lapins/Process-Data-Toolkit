@@ -37,6 +37,7 @@ add_library(pdt_dsp
     src/dsp/peak_detection.cpp
     src/dsp/window.cpp
     src/compute/cpu_fft_backend.cpp
+    src/compute/make_fft_backend.cpp
     src/compute/fft_size_policy.cpp
     src/pipeline/spectrum_engine.cpp
 )
@@ -95,6 +96,7 @@ endif()
 # Tests
 if(PDT_BUILD_TESTS)
     enable_testing()
+    find_package(GTest REQUIRED)
     add_subdirectory(tests)
 endif()
 
