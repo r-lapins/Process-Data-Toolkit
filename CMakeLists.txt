@@ -41,6 +41,7 @@ add_library(pdt_dsp
     src/compute/fft_size_policy.cpp
     src/pipeline/spectrum_engine.cpp
     src/pipeline/wav_analysis_service.cpp
+    src/pipeline/wav_analysis_session.cpp
 )
 target_include_directories(pdt_dsp PUBLIC include)
 
