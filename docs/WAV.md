@@ -140,7 +140,7 @@ Expected dominant spectral peaks:
 
 ---
 
-## Benchmark
+## Benchmark (synthetic signal)
 
 Run:
 
@@ -149,19 +149,14 @@ Run:
 ```
 
 The benchmark compares:
-- naive DFT
-- CPU FFT backend
-- CUDA FFT backend (cuFFT)
+- DFT
+- CPU FFT
+- CUDA FFT (cuFFT)
 
-Two scenarios are reported:
+Measures:
 
-**First-call latency**
-- includes FFT plan creation, GPU allocation and initialization  
-- represents user-visible delay (first run / size change)
-
-**Steady-state throughput**
-- measured after warmup (plan + buffer reuse)  
-- represents real performance for streaming / live processing (e.g. SDR)
+- First-call → init (plan + alloc)
+- Steady-state → real performance
 
 Example output:
 
@@ -173,9 +168,6 @@ Example output:
     2048             -          2.24          0.74        3.05
     4096             -          4.76          1.00        4.78
     8192             -          9.79          1.55        6.32
-   16384             -         20.53          2.70        7.60
-   32768             -         42.85          5.17        8.29
-   65536             -         90.03          9.43        9.54
 
 === Steady-state throughput ===
        N      CPU [ms]     CUDA [ms]     Speedup
@@ -194,3 +186,48 @@ This demonstrates the expected complexity difference:
 DFT  ~ O(N²)
 FFT  ~ O(N log N)
 ```
+
+### WAV pipeline benchmark
+
+Run:
+
+```bash
+./build/debug-cuda-nosan/fft_benchmark_wav --in <file.wav>
+```
+
+It includes:
+
+- windowing
+- FFT backend (CPU / CUDA)
+- peak detection
+- full SpectrumEngine pipeline
+
+Unlike the synthetic FFT benchmark, this reflects real-world performance.
+
+Example output:
+
+```bash
+./build/debug-cuda-nosan/fft_benchmark_wav --in <file.wav> --sizes 1024,2048,2050
+```
+
+```md
+Backend   N         First [ms]      Avg engine [ms]   All peaks 
+--------------------------------------------------------------------------------
+CPU       1024      1.207           1.099             1         
+CUDA      1024      230.391         0.161             1         
+
+CPU       2048      2.367           2.286             5         
+CUDA      2048      0.956           0.317             5         
+
+CPU       2050      192.443         193.472           5         
+CUDA      2050      1.448           0.322             5         
+```
+
+Notes:
+
+- CPU backend falls back to DFT for non power-of-two sizes (e.g. 2050 → very slow)
+- CUDA (cuFFT) supports more sizes → remains fast
+- First-call includes: 
+    - cuFFT plan creation 
+    - GPU memory allocation
+- Avg engine [ms] reflects steady-state performance (important for SDR / streaming)
