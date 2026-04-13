@@ -102,4 +102,7 @@ endif()
 if(PDT_BUILD_BENCH AND PDT_ENABLE_CUDA)
     add_executable(fft_benchmark bench/fft_benchmark.cpp)
     target_link_libraries(fft_benchmark PRIVATE pdt_dsp)
+
+    add_executable(fft_benchmark_wav bench/fft_benchmark_wav.cpp)
+    target_link_libraries(fft_benchmark_wav PRIVATE pdt_dsp pdt_io_wav)
 endif()
