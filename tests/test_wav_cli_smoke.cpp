@@ -265,7 +265,8 @@ int main() {
         assert(text.find("pdt_wav_cli [options]") != std::string::npos);
         assert(text.find("--in <file.wav>") != std::string::npos);
         assert(text.find("--window <none|hann|hamming>") != std::string::npos);
-        assert(text.find("--algorithm <auto|dft|fft>") != std::string::npos);
+        assert(text.find("--algorithm <auto|dft|fft|cufft>") != std::string::npos);
+        assert(text.find("--list-sizes") != std::string::npos);
     }
 
     return 0;
