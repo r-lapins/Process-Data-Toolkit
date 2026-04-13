@@ -1,9 +1,15 @@
 #include "wav_cli_args.h"
 
 #include "pdt/compute/cpu_fft_backend.h"
+#include "pdt/compute/fft_size_policy.h"
 #include "pdt/io/wav/wav_output.h"
 #include "pdt/io/wav/wav_reader.h"
 #include "pdt/pipeline/spectrum_engine.h"
+
+#ifdef PDT_ENABLE_CUDA
+#include "pdt/compute/cuda_fft_backend.h"
+#include <memory>
+#endif
 
 #include <algorithm>
 #include <cstddef>
@@ -38,14 +44,38 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    const std::size_t available_samples = wav->samples.size() - options.from;
+
+    if (options.print_fft_sizes) {
+        std::vector<std::size_t> sizes;
+
+        if (options.algorithm == pdt::SpectrumAlgorithm::cuFft) {
+            sizes = pdt::best_cufft_sizes(available_samples);
+        } else {
+            sizes = pdt::best_fft_sizes(available_samples);
+        }
+
+        std::cout << "Available samples from --from: " << available_samples << "\n";
+        std::cout << "Recommended window sizes:\n";
+
+        for (auto n : sizes) {
+            if (n == options.windowSize) { std::cout << ">"; }
+            std::cout << n;
+            if (n == options.windowSize) { std::cout << "<"; }
+            std::cout << "  ";
+        }
+        std::cout << "\n";
+
+        return 0;
+    }
+
     if (options.from + options.windowSize > wav->samples.size()) {
         std::cerr << "Last " << options.from + options.windowSize - wav->samples.size()
                   << " samples are out of range.\n";
         return 1;
     }
 
-    const std::size_t available = wav->samples.size() - options.from;
-    const std::size_t segment_size = std::min(options.windowSize, available);
+    const std::size_t segment_size = std::min(options.windowSize, available_samples);
 
     if (segment_size == 0) {
         std::cerr << "Selected segment is empty.\n";
@@ -57,8 +87,28 @@ int main(int argc, char* argv[]) {
         wav->samples.begin() + static_cast<std::ptrdiff_t>(options.from + segment_size)
         );
 
-    CpuFftBackend backend;
-    SpectrumEngine engine{backend};
+    // CPU / GPU
+    std::unique_ptr<IFftBackend> backend;
+
+    switch (options.algorithm) {
+    case SpectrumAlgorithm::Auto:
+    case SpectrumAlgorithm::Dft:
+    case SpectrumAlgorithm::Fft:
+        backend = std::make_unique<CpuFftBackend>();
+        break;
+
+    case SpectrumAlgorithm::cuFft:
+        #ifdef PDT_ENABLE_CUDA
+        backend = std::make_unique<CudaFftBackend>();
+        #else
+        std::cerr << "This build does not include CUDA support.\n";
+        return 1;
+        #endif
+        break;
+    }
+
+    SpectrumEngine engine{*backend};
+    // ~CPU / GPU
 
     SpectrumAnalysisOptions analysis_options{.sample_rate = static_cast<double>(wav->sample_rate),
                                              .window = options.use_window ? options.window : WindowType::None,
@@ -67,7 +117,20 @@ int main(int argc, char* argv[]) {
                                              .top = options.top
     };
 
-    const auto analysis = engine.process(segment, analysis_options);
+    if (options.algorithm == SpectrumAlgorithm::cuFft && !is_cuda_supported_fft_size(segment.size())) {
+        std::cerr << "cuFFT does not support selected window size: "
+                  << segment.size() << '\n';
+        return 1;
+    }
+
+    SpectrumAnalysisResult analysis;
+
+    try {
+        analysis = engine.process(segment, analysis_options);
+    } catch (const std::exception& ex) {
+        std::cerr << "Spectrum analysis failed: " << ex.what() << '\n';
+        return 1;
+    }
 
     pdt::SpectrumReport report{.analysis = analysis,
                                .meta = {.input_path = options.input_path,

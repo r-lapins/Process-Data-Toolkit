@@ -25,6 +25,7 @@ std::optional<pdt::SpectrumAlgorithm> parse_algorithm(std::string_view value) {
     if (value == "auto")    { return pdt::SpectrumAlgorithm::Auto; }
     if (value == "dft")     { return pdt::SpectrumAlgorithm::Dft; }
     if (value == "fft")     { return pdt::SpectrumAlgorithm::Fft; }
+    if (value == "cufft")   { return pdt::SpectrumAlgorithm::cuFft; }
     return std::nullopt;
 }
 
@@ -39,10 +40,11 @@ void print_help(std::ostream& os) {
         << "  --window <none|hann|hamming>         Window function to apply (default: hann)\n"
         << "  --from <index>                       Start sample index (default: 0)\n"
         << "  --window-size <count>                Number of samples to analyze (default: 1024)\n"
+        << "  --list-sizes                         Print recommended CPU/GPU FFT sizes and exit\n"
         << "  --threshold <0..1>                   Peak detection threshold ratio (default: 0.4)\n"
         << "  --mode <threshold-only|local-maxima> Peak detection mode (default: local-maxima)\n"
         << "  --top <count>                        Number of dominant peaks to print (default: 10)\n"
-        << "  --algorithm <auto|dft|fft>           Spectrum algorithm (default: auto)\n"
+        << "  --algorithm <auto|dft|fft|cufft>     Spectrum algorithm (default: auto)\n"
         << "  --out <file.csv>                     Export computed spectrum to CSV\n"
         << "  --out-r <file.txt>                   Export text report to TXT file\n"
         << "  --help                               Show this help message\n";
@@ -122,6 +124,11 @@ bool parse_cli(int argc, const char* const* argv, CliOptions& options, std::ostr
                 err << "Invalid value for --window-size: " << *value << '\n';
                 return false;
             }
+            continue;
+        }
+
+        if (arg == "--list-sizes") {
+            options.print_fft_sizes = true;
             continue;
         }
 

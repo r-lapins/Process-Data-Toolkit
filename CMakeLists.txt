@@ -20,7 +20,7 @@ if(PDT_ENABLE_SANITIZERS AND CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_link_options(pdt_sanitizers INTERFACE -fsanitize=address,undefined)
 endif()
 
-# Core libraries
+# CSV libraries
 add_library(pdt_csv
     src/csv/csv_reader.cpp
     src/csv/csv_output.cpp
@@ -30,23 +30,27 @@ add_library(pdt_csv
 )
 target_include_directories(pdt_csv PUBLIC include)
 
+# DSP libraries
 add_library(pdt_dsp
     src/dsp/dft.cpp
     src/dsp/fft.cpp
     src/dsp/peak_detection.cpp
     src/dsp/window.cpp
     src/compute/cpu_fft_backend.cpp
+    src/compute/fft_size_policy.cpp
     src/pipeline/spectrum_engine.cpp
 )
 target_include_directories(pdt_dsp PUBLIC include)
 
+# CUDA
 if(PDT_ENABLE_CUDA)
     find_package(CUDAToolkit REQUIRED)
     target_sources(pdt_dsp PRIVATE src/compute/cuda_fft_backend.cpp)
     target_link_libraries(pdt_dsp PRIVATE CUDA::cudart CUDA::cufft)
-    target_compile_definitions(pdt_dsp PRIVATE PDT_ENABLE_CUDA)
+    target_compile_definitions(pdt_dsp PUBLIC PDT_ENABLE_CUDA)
 endif()
 
+# I/O
 add_library(pdt_io_wav
     src/io/wav/wav_output.cpp
     src/io/wav/wav_reader.cpp
@@ -65,6 +69,7 @@ endif()
 add_library(pdt_common_cli STATIC app/common_cli.cpp)
 target_include_directories(pdt_common_cli PUBLIC app)
 
+# CSV CLI
 if(PDT_BUILD_CSV)
     add_library(pdt_csv_cli_args STATIC app/csv_cli_args.cpp)
     target_include_directories(pdt_csv_cli_args PUBLIC app)
@@ -74,6 +79,7 @@ if(PDT_BUILD_CSV)
     target_link_libraries(pdt_csv_cli PRIVATE pdt_csv_cli_args)
 endif()
 
+# DSP-WAV CLI
 if(PDT_BUILD_WAV)
     add_library(pdt_wav_cli_args STATIC app/wav_cli_args.cpp)
     target_include_directories(pdt_wav_cli_args PUBLIC app)

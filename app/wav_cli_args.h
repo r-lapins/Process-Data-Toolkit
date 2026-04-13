@@ -22,6 +22,7 @@ struct CliOptions {
     bool help_requested{false};
     std::string output_csv_path;
     std::string output_report_path;
+    bool print_fft_sizes{false};
 };
 
 void print_help(std::ostream& os);
