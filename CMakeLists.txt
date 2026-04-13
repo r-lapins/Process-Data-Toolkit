@@ -98,7 +98,6 @@ endif()
 # Tests
 if(PDT_BUILD_TESTS)
     enable_testing()
-    find_package(GTest REQUIRED)
     add_subdirectory(tests)
 endif()
 

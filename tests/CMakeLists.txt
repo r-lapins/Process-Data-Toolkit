@@ -1,3 +1,5 @@
+find_package(GTest REQUIRED)
+
 function(add_pdt_test name source)
     add_executable(${name} ${source})
 
