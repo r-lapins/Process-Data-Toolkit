@@ -25,6 +25,7 @@ struct SpectrumAnalysisResult {
     std::vector<Peak> all_peaks;
     std::vector<Peak> top_peaks;
     SpectrumAlgorithm algorithm{SpectrumAlgorithm::Auto};
+    double total_time_ms{};
 };
 
 class SpectrumEngine {

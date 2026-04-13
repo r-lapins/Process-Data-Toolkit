@@ -10,16 +10,18 @@ bool write_spectrum_report(std::ostream &out, const SpectrumReport &report) {
 
     const auto& m = report.meta;
 
-    out << "Input file   : " << m.input_path << '\n';
-    out << "Sample rate  : " << m.sample_rate << " Hz\n";
-    out << "Channels     : " << m.channels << '\n';
-    out << "Samples      : " << m.total_samples << '\n';
-    out << "From sample  : " << m.from << '\n';
-    out << "Window size  : " << m.windowSize << '\n';
-    out << "Window       : " << to_string(m.window) << '\n';
-    out << "Algorithm    : " << to_string(m.algorithm) << '\n';
-    out << "Threshold    : " << m.threshold << '\n';
-    out << "Peak mode    : " << to_string(m.peak_mode) << '\n';
+    out << "Input file    : " << m.input_path << '\n';
+    out << "Sample rate   : " << m.sample_rate << " Hz\n";
+    out << "Channels      : " << m.channels << '\n';
+    out << "Samples       : " << m.total_samples << '\n';
+    out << "From sample   : " << m.from << '\n';
+    out << "Window size   : " << m.windowSize << '\n';
+    out << "Window        : " << to_string(m.window) << '\n';
+    out << "Algorithm     : " << to_string(m.algorithm) << '\n';
+    out << "Total time    : " << std::fixed << std::setprecision(1)
+        << report.analysis.total_time_ms << " ms\n";
+    out << "Threshold     : " << m.threshold << '\n';
+    out << "Peak mode     : " << to_string(m.peak_mode) << '\n';
     out << "Detected peaks: " << report.analysis.all_peaks.size()
         << " | showing top " << m.top << '\n';
 
@@ -81,9 +83,10 @@ const char* to_string(pdt::SpectrumAlgorithm algorithm) {
     using enum pdt::SpectrumAlgorithm;
 
     switch (algorithm) {
-    case Dft: return  "dft";
-    case Fft: return  "fft";
-    case Auto: return "auto";
+    case Dft:   return "dft";
+    case Fft:   return "fft";
+    case cuFft: return "cufft";
+    case Auto:  return "auto";
         break;
     }
     return "unknown";
