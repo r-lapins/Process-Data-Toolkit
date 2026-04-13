@@ -127,4 +127,27 @@ std::vector<std::size_t> best_cufft_sizes(std::size_t sample_count)
     return result;
 }
 
+std::vector<FftSizeOption> get_fft_size_options(SpectrumAlgorithm algorithm, std::size_t available_samples, bool include_advanced)
+{
+    std::vector<FftSizeOption> result;
+
+    const bool use_cuda = (algorithm == SpectrumAlgorithm::cuFft);
+    const auto sizes = use_cuda ? best_cufft_sizes(available_samples) : best_fft_sizes(available_samples);
+
+    result.reserve(sizes.size());
+
+    for (const auto n : sizes) {
+        const bool is_p2 = (n > 0) && ((n & (n - 1)) == 0);
+        const bool advanced = use_cuda && !is_p2;
+
+        if (!include_advanced && advanced) { continue; }
+
+        result.push_back(FftSizeOption{.size = n,
+                                       .recommended = is_p2,
+                                       .advanced = advanced});
+    }
+
+    return result;
+}
+
 } // namespace pdt

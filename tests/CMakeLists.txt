@@ -36,6 +36,9 @@ target_link_libraries(test_make_fft_backend PRIVATE GTest::gtest_main)
 add_pdt_test(test_wav_analysis_service wav/test_wav_analysis_service.cpp)
 target_link_libraries(test_wav_analysis_service PRIVATE GTest::gtest_main)
 
+add_pdt_test(test_fft_size_policy wav/test_fft_size_policy.cpp)
+target_link_libraries(test_fft_size_policy PRIVATE GTest::gtest_main)
+
 add_executable(test_csv_cli_smoke test_csv_cli_smoke.cpp)
 target_link_libraries(test_csv_cli_smoke PRIVATE pdt_csv_cli_args)
 add_test(NAME csv_cli_smoke COMMAND test_csv_cli_smoke)
