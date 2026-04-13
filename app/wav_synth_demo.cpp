@@ -10,10 +10,12 @@ int main() {
     using namespace pdt;
 
     // Signal parameters
-    const double fs = 1024.0;    // sampling frequency [Hz]
-    const double f0 = 50.0;      // first sinusoid frequency [Hz]
-    const double f1 = 120.0;     // second sinusoid frequency [Hz]
-    const std::size_t N = 1024;  // number of samples
+    const double fs = 48000.0;
+    const double f1 = 1000.0;
+    const double f2 = 3500.0;
+    const double f3 = 7200.0;
+    const double f4 = 15000.0;
+    const std::size_t N = 8192;  // number of samples
 
     // Generate a signal containing two sinusoids with different amplitudes
     std::vector<double> signal;
@@ -21,11 +23,11 @@ int main() {
 
     for (std::size_t n = 0; n < N; ++n) {
         const double t = static_cast<double>(n) / fs;
-
         const double sample =
-            std::sin(2.0 * std::numbers::pi_v<double> * f0 * t) +
-            (0.5 * std::sin(2.0 * std::numbers::pi_v<double> * f1 * t));
-
+            (1.0 * std::sin(2.0 * std::numbers::pi_v<double> * f1 * t)) +
+            (0.7 * std::sin(2.0 * std::numbers::pi_v<double> * f2 * t)) +
+            (0.5 * std::sin(2.0 * std::numbers::pi_v<double> * f3 * t)) +
+            (0.3 * std::sin(2.0 * std::numbers::pi_v<double> * f4 * t));
         signal.push_back(sample);
     }
 
@@ -45,11 +47,9 @@ int main() {
     }
 
     // Detect all bins above threshold
-    const auto threshold_peaks = find_peaks(
-        spectrum,
-        0.4,
-        PeakDetectionMode::ThresholdOnly
-        );
+    const auto threshold_peaks = find_peaks(spectrum,
+                                            0.4,
+                                            PeakDetectionMode::ThresholdOnly);
 
     std::cout << "\nThreshold-only peaks\n";
     std::cout << "-------------------------------------\n";
@@ -63,11 +63,10 @@ int main() {
     }
 
     // Detect local maxima above threshold
-    const auto local_maxima_peaks = find_peaks(
-        spectrum,
-        0.4,
-        PeakDetectionMode::LocalMaxima
-        );
+    const auto local_maxima_peaks = find_peaks(spectrum,
+                                               0.4,
+                                               PeakDetectionMode::LocalMaxima
+                                               );
 
     std::cout << "\nLocal-maxima peaks\n";
     std::cout << "-------------------------------------\n";
@@ -81,12 +80,10 @@ int main() {
     }
 
     // Detect dominant peaks sorted by descending magnitude
-    const auto dominant_peaks = detect_dominant_peaks(
-        spectrum,
-        0.4,
-        PeakDetectionMode::LocalMaxima,
-        5
-        );
+    const auto dominant_peaks = detect_dominant_peaks(spectrum,
+                                                      0.4,
+                                                      PeakDetectionMode::LocalMaxima,
+                                                      5);
 
     std::cout << "\nDominant peaks\n";
     std::cout << "-------------------------------------\n";
