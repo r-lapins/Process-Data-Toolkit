@@ -8,6 +8,21 @@
 #include <stdexcept>
 
 namespace pdt {
+namespace {
+
+pdt::WavAnalysisSettingsCache make_settings_snapshot(const pdt::WavAnalysisRequest& request)
+{
+    return pdt::WavAnalysisSettingsCache{.sample_rate = request.sample_rate,
+                                            .algorithm = request.algorithm,
+                                            .peak_mode = request.peak_mode,
+                                            .window = request.window,
+                                            .top_peaks = request.top_peaks,
+                                            .from = request.from,
+                                            .window_size = request.window_size,
+                                            .threshold = request.threshold};
+}
+
+} // namespace
 
 WavAnalysisResult analyze_wav(const WavAnalysisRequest& request)
 {
@@ -38,12 +53,10 @@ WavAnalysisResult analyze_wav(const WavAnalysisRequest& request)
 
     const auto analysis = engine.process(raw_segment, options);
 
-    return WavAnalysisResult{.raw_segment = std::move(raw_segment),
+    return WavAnalysisResult{.analysis = analysis,
+                             .raw_segment = std::move(raw_segment),
                              .processed_segment = std::move(processed_segment),
-                             .all_peaks = analysis.all_peaks,
-                             .dominant_peaks = analysis.top_peaks,
-                             .spectrum = analysis.spectrum,
-                             .total_time_ms = analysis.total_time_ms};
+                             .used_settings = make_settings_snapshot(request)};
 }
 
 } // namespace pdt

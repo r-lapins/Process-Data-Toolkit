@@ -43,10 +43,10 @@ TEST(WavAnalysisServiceTest, ReturnsSpectrumAndPeaks)
 
     const auto result = pdt::analyze_wav(request);
 
-    ASSERT_FALSE(result.spectrum.frequencies.empty());
-    ASSERT_FALSE(result.spectrum.magnitudes.empty());
-    ASSERT_FALSE(result.dominant_peaks.empty());
-    EXPECT_NEAR(result.dominant_peaks.front().frequency, 128.0, 1e-9);
+    ASSERT_FALSE(result.analysis.spectrum.frequencies.empty());
+    ASSERT_FALSE(result.analysis.spectrum.magnitudes.empty());
+    ASSERT_FALSE(result.analysis.top_peaks.empty());
+    EXPECT_NEAR(result.analysis.top_peaks.front().frequency, 128.0, 1e-9);
 }
 
 TEST(WavAnalysisServiceTest, ThrowsOnInvalidSampleRate)
