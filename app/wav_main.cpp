@@ -114,7 +114,7 @@ int main(int argc, char* argv[]) {
                                              .window = options.use_window ? options.window : WindowType::None,
                                              .peak_mode = options.peak_mode,
                                              .threshold = options.threshold,
-                                             .top = options.top
+                                             .max_peaks = options.max_peaks
     };
 
     if (options.algorithm == SpectrumAlgorithm::cuFft && !is_cuda_supported_fft_size(segment.size())) {
@@ -143,7 +143,7 @@ int main(int argc, char* argv[]) {
                                         .algorithm = analysis.algorithm,
                                         .peak_mode = options.peak_mode,
                                         .threshold = options.threshold,
-                                        .top = options.top
+                                        .max_peaks = options.max_peaks
                                }
     };
 

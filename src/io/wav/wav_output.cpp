@@ -23,7 +23,7 @@ bool write_spectrum_report(std::ostream &out, const SpectrumReport &report) {
     out << "Threshold     : " << m.threshold << '\n';
     out << "Peak mode     : " << to_string(m.peak_mode) << '\n';
     out << "Detected peaks: " << report.analysis.all_peaks.size()
-        << " | showing top " << m.top << '\n';
+        << " | showing top " << m.max_peaks << '\n';
 
     if (report.analysis.all_peaks.empty()) {
         out << "No peaks detected.\n";

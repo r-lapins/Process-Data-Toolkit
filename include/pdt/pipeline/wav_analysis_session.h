@@ -12,17 +12,17 @@ class WavAnalysisSession {
   public:
     WavAnalysisSession(std::span<const double> samples, double sample_rate);
 
-    const WavAnalysisResult& analyze(const WavAnalysisSettingsCache& key);
+    const WavAnalysisResult& analyze(const WavAnalysisSettings& settings);
     void clear();
 
   private:
-    [[nodiscard]] bool can_refresh_top_peaks_only(const WavAnalysisSettingsCache& current) const noexcept;
-    void refresh_top_peaks_only(const WavAnalysisSettingsCache& current);
+    [[nodiscard]] bool can_refresh_top_peaks_only(const WavAnalysisSettings& current) const noexcept;
+    void refresh_top_peaks_only(const WavAnalysisSettings& current);
 
     std::vector<double> samples_;
     double sample_rate_{};
 
-    std::optional<WavAnalysisSettingsCache> last_key_;
+    std::optional<WavAnalysisSettings> last_settings_;
     std::optional<WavAnalysisResult> last_result_;
 };
 

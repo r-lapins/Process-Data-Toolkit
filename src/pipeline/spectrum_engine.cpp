@@ -25,7 +25,7 @@ SpectrumAnalysisResult SpectrumEngine::process(std::span<const double> signal,
                                   options.peak_mode);
 
     result.top_peaks = select_dominant_peaks(result.all_peaks,
-                                             options.top);
+                                             options.max_peaks);
 
     const auto t1 = clock::now();
     result.total_time_ms = std::chrono::duration<double, std::milli>(t1 - t0).count();

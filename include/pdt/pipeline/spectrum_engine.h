@@ -17,7 +17,7 @@ struct SpectrumAnalysisOptions {
     WindowType window{WindowType::None};
     PeakDetectionMode peak_mode{PeakDetectionMode::LocalMaxima};
     double threshold{};
-    std::size_t top{10};
+    std::size_t max_peaks{10};
 };
 
 struct SpectrumAnalysisResult {

@@ -52,7 +52,7 @@ int main() {
         assert(opt.windowSize == std::size_t{2048});
         assert(std::abs(opt.threshold - 0.75) < 1e-12);
         assert(opt.peak_mode == pdt::PeakDetectionMode::ThresholdOnly);
-        assert(opt.top == std::size_t{5});
+        assert(opt.max_peaks == std::size_t{5});
         assert(opt.algorithm == pdt::SpectrumAlgorithm::Fft);
         assert(!opt.help_requested);
     }
@@ -86,7 +86,7 @@ int main() {
         assert(opt.windowSize == 1024);
         assert(opt.threshold == 0.4);
         assert(opt.peak_mode == pdt::PeakDetectionMode::LocalMaxima);
-        assert(opt.top == 10);
+        assert(opt.max_peaks == 10);
         assert(opt.algorithm == pdt::SpectrumAlgorithm::Auto);
         assert(!opt.help_requested);
     }

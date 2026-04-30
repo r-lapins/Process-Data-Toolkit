@@ -32,13 +32,15 @@ TEST(WavAnalysisServiceTest, ReturnsSpectrumAndPeaks)
     pdt::WavAnalysisRequest request{
         .samples = signal,
         .sample_rate = sample_rate,
-        .algorithm = pdt::SpectrumAlgorithm::Fft,
-        .peak_mode = pdt::PeakDetectionMode::LocalMaxima,
-        .window = pdt::WindowType::None,
-        .top_peaks = 5,
-        .from = 0,
-        .window_size = size,
-        .threshold = 0.5
+        .settings = {
+            .algorithm = pdt::SpectrumAlgorithm::Fft,
+            .peak_mode = pdt::PeakDetectionMode::LocalMaxima,
+            .window = pdt::WindowType::None,
+            .max_peaks = 5,
+            .from = 0,
+            .window_size = size,
+            .threshold = 0.5
+        }
     };
 
     const auto result = pdt::analyze_wav(request);
@@ -68,7 +70,9 @@ TEST(WavAnalysisServiceTest, ThrowsOnOutOfRangeFrom)
     pdt::WavAnalysisRequest request{
         .samples = signal,
         .sample_rate = 1024.0,
-        .from = 2048
+        .settings = {
+            .from = 2048
+        }
     };
 
     EXPECT_THROW((void)pdt::analyze_wav(request), std::out_of_range);

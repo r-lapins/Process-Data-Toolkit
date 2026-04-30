@@ -171,7 +171,7 @@ bool parse_cli(int argc, const char* const* argv, CliOptions& options, std::ostr
                 return false;
             }
 
-            if (!common_cli::parse_size_t(*value, options.top) || options.top == 0) {
+            if (!common_cli::parse_size_t(*value, options.max_peaks) || options.max_peaks == 0) {
                 err << "Invalid value for --top: " << *value << '\n';
                 return false;
             }

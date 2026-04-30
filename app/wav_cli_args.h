@@ -17,7 +17,7 @@ struct CliOptions {
     pdt::SpectrumAlgorithm algorithm{pdt::SpectrumAlgorithm::Auto};
     pdt::PeakDetectionMode peak_mode{pdt::PeakDetectionMode::LocalMaxima};
     double threshold{0.4};
-    std::size_t top{10};
+    std::size_t max_peaks{10};
     bool use_window{true};
     bool help_requested{false};
     std::string output_csv_path;

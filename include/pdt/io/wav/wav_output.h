@@ -22,7 +22,7 @@ struct SpectrumMetadata {
     pdt::SpectrumAlgorithm algorithm;
     pdt::PeakDetectionMode peak_mode;
     double threshold{};
-    std::size_t top{};
+    std::size_t max_peaks{};
 };
 
 struct SpectrumReport {

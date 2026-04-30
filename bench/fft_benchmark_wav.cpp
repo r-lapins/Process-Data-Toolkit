@@ -24,7 +24,7 @@ struct BenchOptions {
     int measure_iters{10};
     pdt::WindowType window{pdt::WindowType::Hann};
     double threshold{0.4};
-    std::size_t top{10};
+    std::size_t max_peaks{10};
     pdt::PeakDetectionMode peak_mode{pdt::PeakDetectionMode::LocalMaxima};
 };
 
@@ -197,7 +197,7 @@ bool parse_args(int argc, char** argv, BenchOptions& options)
             const auto v = require_value("--top");
             if (!v) { return false; }
             try {
-                options.top = static_cast<std::size_t>(std::stoull(*v));
+                options.max_peaks = static_cast<std::size_t>(std::stoull(*v));
             } catch (...) {
                 std::cerr << "Invalid --top\n";
                 return false;
@@ -247,7 +247,7 @@ RunStats benchmark_backend(
                                                   .window = opt.window,
                                                   .peak_mode = opt.peak_mode,
                                                   .threshold = opt.threshold,
-                                                  .top = opt.top};
+                                                  .max_peaks = opt.max_peaks};
 
     RunStats stats{};
 
