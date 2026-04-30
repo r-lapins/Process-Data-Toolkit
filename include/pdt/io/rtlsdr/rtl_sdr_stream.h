@@ -26,6 +26,7 @@ class RtlSdrStream {
                FrameCallback callback);
 
     void stop();
+    void request_stop();
     bool is_running() const noexcept;
 
   private:

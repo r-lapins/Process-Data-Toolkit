@@ -46,6 +46,7 @@ int main()
 
                                      if (n >= 10) {
                                          should_stop = true;
+                                         stream.request_stop();
                                      }
                                  });
 

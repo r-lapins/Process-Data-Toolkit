@@ -67,6 +67,12 @@ void RtlSdrStream::stop()
     device_.close();
 }
 
+void RtlSdrStream::request_stop()
+{
+    running_ = false;
+    device_.cancel_async();
+}
+
 bool RtlSdrStream::is_running() const noexcept
 {
     return running_;
