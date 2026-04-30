@@ -191,4 +191,10 @@ FftComputationResult CudaFftBackend::compute_spectrum(std::span<const double> si
     };
 }
 
+FftComputationResult CudaFftBackend::compute_iq_spectrum(std::span<const std::complex<float>>,
+                                                         double,
+                                                         WindowType) {
+    throw std::runtime_error("CUDA IQ spectrum is not implemented yet");
+}
+
 } // namespace pdt

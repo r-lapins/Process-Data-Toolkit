@@ -46,6 +46,9 @@ target_link_libraries(test_fft_size_policy PRIVATE GTest::gtest_main)
 if(PDT_BUILD_RTLSDR)
     add_pdt_test(test_iq_ring_buffer rtlsdr/test_iq_ring_buffer.cpp)
     target_link_libraries(test_iq_ring_buffer PRIVATE GTest::gtest_main)
+
+    add_pdt_test(test_iq_fft_backend rtlsdr/test_iq_fft_backend.cpp)
+    target_link_libraries(test_iq_fft_backend PRIVATE GTest::gtest_main pdt_dsp)
 endif()
 
 add_executable(test_csv_cli_smoke test_csv_cli_smoke.cpp)

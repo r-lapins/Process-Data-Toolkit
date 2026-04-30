@@ -43,6 +43,7 @@ add_library(pdt_dsp
     src/pipeline/spectrum_engine.cpp
     src/pipeline/wav_analysis_service.cpp
     src/pipeline/wav_analysis_session.cpp
+    src/dsp/complex_fft.cpp
 )
 target_include_directories(pdt_dsp PUBLIC include)
 

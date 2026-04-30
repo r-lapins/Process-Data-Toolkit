@@ -3,6 +3,7 @@
 #include "pdt/dsp/spectrum.h"
 #include "pdt/dsp/window.h"
 
+#include <complex>
 #include <span>
 
 namespace pdt {
@@ -20,7 +21,13 @@ class IFftBackend {
     virtual const char* name()  const noexcept = 0;
     virtual bool is_gpu()       const noexcept = 0;
 
-    virtual FftComputationResult compute_spectrum(std::span<const double> signal, double sample_rate, WindowType window) = 0;
+    virtual FftComputationResult compute_spectrum(std::span<const double> signal,
+                                                  double sample_rate,
+                                                  WindowType window) = 0;
+
+    virtual FftComputationResult compute_iq_spectrum(std::span<const std::complex<float>> iq,
+                                                     double sample_rate,
+                                                     WindowType window) = 0;
 };
 
 } // namespace pdt
