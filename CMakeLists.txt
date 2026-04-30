@@ -12,6 +12,7 @@ option(PDT_BUILD_TESTS "Build tests" ON)
 option(PDT_BUILD_BENCH "Build benchmarks" ON)
 option(PDT_ENABLE_SANITIZERS "Enable sanitizers" ON)
 option(PDT_ENABLE_CUDA "Enable CUDA FFT backend" OFF)
+option(PDT_BUILD_RTLSDR "Build RTL-SDR tools" OFF)
 
 # Sanitizers (ASAN/UBSAN)
 if(PDT_ENABLE_SANITIZERS AND CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -53,7 +54,7 @@ if(PDT_ENABLE_CUDA)
     target_compile_definitions(pdt_dsp PUBLIC PDT_ENABLE_CUDA)
 endif()
 
-# I/O
+# I/O WAV
 add_library(pdt_io_wav
     src/io/wav/wav_output.cpp
     src/io/wav/wav_reader.cpp
@@ -61,11 +62,29 @@ add_library(pdt_io_wav
 target_include_directories(pdt_io_wav PUBLIC include)
 target_link_libraries(pdt_io_wav PUBLIC pdt_dsp)
 
+# I/O RTL-SDR
+if(PDT_BUILD_RTLSDR)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(RTLSDR REQUIRED IMPORTED_TARGET librtlsdr)
+
+    add_library(pdt_io_rtlsdr
+        src/io/rtlsdr/rtl_sdr_device.cpp
+        src/io/rtlsdr/rtl_sdr_stream.cpp
+    )
+
+    target_include_directories(pdt_io_rtlsdr PUBLIC include)
+    target_link_libraries(pdt_io_rtlsdr PUBLIC PkgConfig::RTLSDR)
+endif()
+
 # Sanitizers
 if(TARGET pdt_sanitizers)
     target_link_libraries(pdt_csv PUBLIC pdt_sanitizers)
     target_link_libraries(pdt_dsp PUBLIC pdt_sanitizers)
     target_link_libraries(pdt_io_wav PUBLIC pdt_sanitizers)
+
+    if(TARGET pdt_io_rtlsdr)
+        target_link_libraries(pdt_io_rtlsdr PUBLIC pdt_sanitizers)
+    endif()
 endif()
 
 # CLI helpers
@@ -108,4 +127,9 @@ if(PDT_BUILD_BENCH AND PDT_ENABLE_CUDA)
 
     add_executable(fft_benchmark_wav bench/fft_benchmark_wav.cpp)
     target_link_libraries(fft_benchmark_wav PRIVATE pdt_dsp pdt_io_wav)
+endif()
+
+if(PDT_BUILD_RTLSDR)
+    add_executable(rtl_sdr_smoke app/rtl_sdr_smoke.cpp)
+    target_link_libraries(rtl_sdr_smoke PRIVATE pdt_io_rtlsdr)
 endif()
