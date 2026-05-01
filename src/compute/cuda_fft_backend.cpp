@@ -1,7 +1,7 @@
 #include "pdt/compute/cuda_fft_backend.h"
 
-#include "pdt/dsp/window.h"
 #include "pdt/dsp/fft.h"
+#include "pdt/dsp/window.h"
 
 #include <cuda_runtime.h>
 #include <cufft.h>
@@ -99,7 +99,22 @@ struct CudaFftBackend::Impl {
     std::vector<float> host_input;
     std::vector<cufftComplex> host_output;
 
-    ~Impl() { if (plan_ready) { cufftDestroy(plan); } }
+    std::size_t iq_planned_n{0};
+
+    cufftHandle iq_plan{};
+    bool iq_plan_ready{false};
+
+    std::size_t iq_work_size_bytes{0};
+    DeviceBytePtr iq_work_area{nullptr};
+
+    DeviceComplexPtr iq_d_data{nullptr};
+    std::vector<cufftComplex> iq_host_data;
+
+    ~Impl()
+    {
+        release_resources();
+        release_iq_resources();
+    }
 
     // Ensures that plan, work area and device/host buffers are allocated
     // for the requested FFT size. Rebuilds cached state only when N changes.
@@ -139,6 +154,36 @@ struct CudaFftBackend::Impl {
         check_cufft(cufftSetWorkArea(plan, work_area.get()), "cufftSetWorkArea");
     }
 
+    void ensure_iq_ready(std::size_t n) {
+        if (iq_plan_ready && iq_planned_n == n) { return; }
+
+        release_iq_resources();
+
+        iq_planned_n = n;
+
+        check_cuda(cudaSetDevice(device_id), "cudaSetDevice");
+        check_cuda(cudaFree(nullptr), "cudaFree(nullptr)");
+
+        cufftComplex* raw_data = nullptr;
+        check_cuda(cudaMalloc(&raw_data, n * sizeof(cufftComplex)), "cudaMalloc iq_d_data");
+
+        iq_d_data.reset(raw_data);
+        iq_host_data.resize(n);
+
+        check_cufft(cufftCreate(&iq_plan), "cufftCreate IQ");
+        iq_plan_ready = true;
+
+        check_cufft(cufftSetAutoAllocation(iq_plan, 0), "cufftSetAutoAllocation IQ");
+        check_cufft(cufftMakePlan1d(iq_plan, static_cast<int>(n), CUFFT_C2C, 1, &iq_work_size_bytes),
+                    "cufftMakePlan1d IQ");
+
+        std::byte* raw_work = nullptr;
+        check_cuda(cudaMalloc(reinterpret_cast<void**>(&raw_work), iq_work_size_bytes), "cudaMalloc iq_work_area");
+        iq_work_area.reset(raw_work);
+
+        check_cufft(cufftSetWorkArea(iq_plan, iq_work_area.get()), "cufftSetWorkArea IQ");
+    }
+
     // Releases all cached CUDA/cuFFT resources associated with the current FFT size
     void release_resources() {
         if (plan_ready) {
@@ -157,6 +202,22 @@ struct CudaFftBackend::Impl {
 
         host_input.clear();
         host_output.clear();
+    }
+
+    void release_iq_resources() {
+        if (iq_plan_ready) {
+            cufftDestroy(iq_plan);
+            iq_plan_ready = false;
+            iq_plan = {};
+        }
+
+        iq_work_area.reset(nullptr);
+        iq_d_data.reset(nullptr);
+
+        iq_work_size_bytes = 0;
+        iq_planned_n = 0;
+
+        iq_host_data.clear();
     }
 };
 
@@ -216,55 +277,44 @@ FftComputationResult CudaFftBackend::compute_spectrum(std::span<const double> si
 FftComputationResult CudaFftBackend::compute_iq_spectrum(std::span<const std::complex<float>> iq,
                                                              double sample_rate,
                                                              WindowType window) {
-#ifndef PDT_ENABLE_CUDA
-    throw std::runtime_error("CUDA support not enabled");
-#else
     if (iq.empty() || sample_rate <= 0.0) { return {}; }
 
     const auto windowed = apply_window_iq(iq, window);
     const std::size_t n = windowed.size();
 
-    cufftComplex* d_data = nullptr;
+    if (n < 2) { return {}; }
 
-    check_cuda(cudaMalloc(reinterpret_cast<void**>(&d_data),
-                          n * sizeof(cufftComplex)),
-               "cudaMalloc IQ buffer failed");
-
-    std::vector<cufftComplex> host_data;
-    host_data.reserve(n);
-
-    for (const auto& s : windowed) {
-        host_data.push_back(cufftComplex{.x = s.real(),
-                                         .y = s.imag()});
+    if (!is_power_of_two(n)) {
+        throw std::invalid_argument("CUDA IQ FFT currently requires power-of-two size");
     }
 
-    check_cuda(cudaMemcpy(d_data,
-                          host_data.data(),
+    impl_->ensure_iq_ready(n);
+
+    for (std::size_t i = 0; i < n; ++i) {
+        impl_->iq_host_data[i] = cufftComplex{
+            .x = windowed[i].real(),
+            .y = windowed[i].imag()
+        };
+    }
+
+    check_cuda(cudaMemcpy(impl_->iq_d_data.get(),
+                          impl_->iq_host_data.data(),
                           n * sizeof(cufftComplex),
                           cudaMemcpyHostToDevice),
-               "cudaMemcpy H2D IQ failed");
+               "cudaMemcpy H2D IQ");
 
-    cufftHandle plan{};
-    check_cufft(cufftPlan1d(&plan,
-                            static_cast<int>(n),
-                            CUFFT_C2C,
-                            1),
-                "cufftPlan1d C2C failed");
-
-    check_cufft(cufftExecC2C(plan,
-                             d_data,
-                             d_data,
+    check_cufft(cufftExecC2C(impl_->iq_plan,
+                             impl_->iq_d_data.get(),
+                             impl_->iq_d_data.get(),
                              CUFFT_FORWARD),
-                "cufftExecC2C failed");
+                "cufftExecC2C IQ");
 
-    check_cuda(cudaMemcpy(host_data.data(),
-                          d_data,
+    check_cuda(cudaMemcpy(impl_->iq_host_data.data(),
+                          impl_->iq_d_data.get(),
                           n * sizeof(cufftComplex),
                           cudaMemcpyDeviceToHost),
-               "cudaMemcpy D2H IQ failed");
+               "cudaMemcpy D2H IQ");
 
-    cufftDestroy(plan);
-    cudaFree(d_data);
 
     Spectrum spectrum;
     spectrum.frequencies.reserve(n);
@@ -279,7 +329,8 @@ FftComputationResult CudaFftBackend::compute_iq_spectrum(std::span<const std::co
             (static_cast<double>(i) - static_cast<double>(half))
             * sample_rate / static_cast<double>(n);
 
-        const auto& x = host_data[bin];
+        const auto& x = impl_->iq_host_data[bin];
+
         const double mag = std::sqrt(
             (static_cast<double>(x.x) * static_cast<double>(x.x)) +
             (static_cast<double>(x.y) * static_cast<double>(x.y)));
@@ -291,7 +342,6 @@ FftComputationResult CudaFftBackend::compute_iq_spectrum(std::span<const std::co
     return FftComputationResult{.spectrum = std::move(spectrum),
                                 .algorithm = SpectrumAlgorithm::cuFft
     };
-#endif
 }
 
 } // namespace pdt
