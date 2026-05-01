@@ -76,7 +76,7 @@ if(PDT_BUILD_RTLSDR)
     )
 
     target_include_directories(pdt_io_rtlsdr PUBLIC include)
-    target_link_libraries(pdt_io_rtlsdr PUBLIC PkgConfig::RTLSDR)
+    target_link_libraries(pdt_io_rtlsdr PUBLIC PkgConfig::RTLSDR pdt_dsp)
 endif()
 
 # Sanitizers
