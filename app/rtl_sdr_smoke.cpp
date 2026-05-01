@@ -2,7 +2,12 @@
 #include "pdt/io/rtlsdr/rtl_sdr_stream.h"
 #include "pdt/io/rtlsdr/iq_ring_buffer.h"
 #include "pdt/pipeline/iq_spectrum_engine.h"
-#include "pdt/compute/cpu_fft_backend.h"
+
+#ifdef PDT_ENABLE_CUDA
+    #include "pdt/compute/cuda_fft_backend.h"
+#else
+    #include "pdt/compute/cpu_fft_backend.h"
+#endif
 
 #include <atomic>
 #include <chrono>
@@ -57,7 +62,11 @@ int main()
     std::atomic<bool> running = true;
 
     // === processing ===
-    pdt::CpuFftBackend backend;
+    #ifdef PDT_ENABLE_CUDA
+        pdt::CudaFftBackend backend;
+    #else
+        pdt::CpuFftBackend backend;
+    #endif
     pdt::IqSpectrumEngine engine{backend};
 
     pdt::SpectrumAnalysisOptions options;
@@ -96,7 +105,7 @@ int main()
     });
 
     // === capture ===
-    const bool ok = stream.start(cfg, 16384,
+    const bool ok = stream.start(cfg, 16384*32,
                                  [&](pdt::IqFrame frame) {
                                      buffer.push(std::move(frame));
                                  });

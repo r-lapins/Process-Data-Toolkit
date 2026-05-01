@@ -1,10 +1,12 @@
 #include "pdt/compute/cuda_fft_backend.h"
 
 #include "pdt/dsp/window.h"
+#include "pdt/dsp/fft.h"
 
 #include <cuda_runtime.h>
 #include <cufft.h>
 
+#include <complex>
 #include <cmath>
 #include <cstddef>
 #include <memory>
@@ -14,6 +16,26 @@
 
 namespace pdt {
 namespace {
+
+std::vector<std::complex<float>> apply_window_iq(
+    std::span<const std::complex<float>> iq,
+    pdt::WindowType window)
+{
+    if (window == pdt::WindowType::None) {
+        return {iq.begin(), iq.end()};
+    }
+
+    const auto w = pdt::make_window(window, iq.size());
+
+    std::vector<std::complex<float>> out;
+    out.reserve(iq.size());
+
+    for (std::size_t i = 0; i < iq.size(); ++i) {
+        out.push_back(iq[i] * static_cast<float>(w[i]));
+    }
+
+    return out;
+}
 
 const char* cufft_result_to_string(cufftResult r)
 {
@@ -191,10 +213,85 @@ FftComputationResult CudaFftBackend::compute_spectrum(std::span<const double> si
     };
 }
 
-FftComputationResult CudaFftBackend::compute_iq_spectrum(std::span<const std::complex<float>>,
-                                                         double,
-                                                         WindowType) {
-    throw std::runtime_error("CUDA IQ spectrum is not implemented yet");
+FftComputationResult CudaFftBackend::compute_iq_spectrum(std::span<const std::complex<float>> iq,
+                                                             double sample_rate,
+                                                             WindowType window) {
+#ifndef PDT_ENABLE_CUDA
+    throw std::runtime_error("CUDA support not enabled");
+#else
+    if (iq.empty() || sample_rate <= 0.0) { return {}; }
+
+    const auto windowed = apply_window_iq(iq, window);
+    const std::size_t n = windowed.size();
+
+    cufftComplex* d_data = nullptr;
+
+    check_cuda(cudaMalloc(reinterpret_cast<void**>(&d_data),
+                          n * sizeof(cufftComplex)),
+               "cudaMalloc IQ buffer failed");
+
+    std::vector<cufftComplex> host_data;
+    host_data.reserve(n);
+
+    for (const auto& s : windowed) {
+        host_data.push_back(cufftComplex{.x = s.real(),
+                                         .y = s.imag()});
+    }
+
+    check_cuda(cudaMemcpy(d_data,
+                          host_data.data(),
+                          n * sizeof(cufftComplex),
+                          cudaMemcpyHostToDevice),
+               "cudaMemcpy H2D IQ failed");
+
+    cufftHandle plan{};
+    check_cufft(cufftPlan1d(&plan,
+                            static_cast<int>(n),
+                            CUFFT_C2C,
+                            1),
+                "cufftPlan1d C2C failed");
+
+    check_cufft(cufftExecC2C(plan,
+                             d_data,
+                             d_data,
+                             CUFFT_FORWARD),
+                "cufftExecC2C failed");
+
+    check_cuda(cudaMemcpy(host_data.data(),
+                          d_data,
+                          n * sizeof(cufftComplex),
+                          cudaMemcpyDeviceToHost),
+               "cudaMemcpy D2H IQ failed");
+
+    cufftDestroy(plan);
+    cudaFree(d_data);
+
+    Spectrum spectrum;
+    spectrum.frequencies.reserve(n);
+    spectrum.magnitudes.reserve(n);
+
+    const std::size_t half = n / 2;
+
+    for (std::size_t i = 0; i < n; ++i) {
+        const std::size_t bin = (i + half) % n;
+
+        const double frequency =
+            (static_cast<double>(i) - static_cast<double>(half))
+            * sample_rate / static_cast<double>(n);
+
+        const auto& x = host_data[bin];
+        const double mag = std::sqrt(
+            (static_cast<double>(x.x) * static_cast<double>(x.x)) +
+            (static_cast<double>(x.y) * static_cast<double>(x.y)));
+
+        spectrum.frequencies.push_back(frequency);
+        spectrum.magnitudes.push_back(mag);
+    }
+
+    return FftComputationResult{.spectrum = std::move(spectrum),
+                                .algorithm = SpectrumAlgorithm::cuFft
+    };
+#endif
 }
 
 } // namespace pdt
