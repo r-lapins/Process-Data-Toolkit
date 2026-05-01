@@ -72,6 +72,7 @@ if(PDT_BUILD_RTLSDR)
         src/io/rtlsdr/rtl_sdr_device.cpp
         src/io/rtlsdr/rtl_sdr_stream.cpp
         src/io/rtlsdr/iq_ring_buffer.cpp
+        src/pipeline/iq_spectrum_engine.cpp
     )
 
     target_include_directories(pdt_io_rtlsdr PUBLIC include)
