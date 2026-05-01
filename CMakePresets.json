@@ -50,6 +50,18 @@
       }
     },
     {
+      "name": "debug-rtlsdr-cuda-nosan",
+      "displayName": "Debug (RTL-SDR, CUDA, no sanitizers)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/debug-rtlsdr-cuda-nosan",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "PDT_ENABLE_SANITIZERS": "OFF",
+        "PDT_ENABLE_CUDA": "ON",
+        "PDT_BUILD_RTLSDR": "ON"
+      }
+    },
+    {
       "name": "release",
       "displayName": "Release",
       "generator": "Ninja",
@@ -90,6 +102,10 @@
       "configurePreset": "debug-cuda-nosan"
     },
     {
+      "name": "debug-rtlsdr-cuda-nosan",
+      "configurePreset": "debug-rtlsdr-cuda-nosan"
+    },
+    {
       "name": "release",
       "configurePreset": "release"
     },
@@ -101,11 +117,52 @@
   "testPresets": [
     {
       "name": "debug",
-      "configurePreset": "debug"
+      "configurePreset": "debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "debug-qt",
+      "configurePreset": "debug-qt",
+      "output": {
+        "outputOnFailure": true
+      }
     },
     {
       "name": "debug-nosan",
-      "configurePreset": "debug-nosan"
+      "configurePreset": "debug-nosan",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "debug-cuda-nosan",
+      "configurePreset": "debug-cuda-nosan",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "debug-rtlsdr-cuda-nosan",
+      "configurePreset": "debug-rtlsdr-cuda-nosan",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "release",
+      "configurePreset": "release",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "release-cuda",
+      "configurePreset": "release-cuda",
+      "output": {
+        "outputOnFailure": true
+      }
     }
   ]
 }
