@@ -33,6 +33,7 @@ target_include_directories(pdt_csv PUBLIC include)
 
 # DSP libraries
 add_library(pdt_dsp
+    src/dsp/complex_fft.cpp
     src/dsp/dft.cpp
     src/dsp/fft.cpp
     src/dsp/peak_detection.cpp
@@ -43,7 +44,6 @@ add_library(pdt_dsp
     src/pipeline/spectrum_engine.cpp
     src/pipeline/wav_analysis_service.cpp
     src/pipeline/wav_analysis_session.cpp
-    src/dsp/complex_fft.cpp
 )
 target_include_directories(pdt_dsp PUBLIC include)
 

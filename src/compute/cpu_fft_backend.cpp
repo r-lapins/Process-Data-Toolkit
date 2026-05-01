@@ -1,7 +1,8 @@
 #include "pdt/compute/cpu_fft_backend.h"
 
-#include "pdt/dsp/fft.h"
+#include "pdt/dsp/complex_fft.h"
 #include "pdt/dsp/dft.h"
+#include "pdt/dsp/fft.h"
 #include "pdt/dsp/window.h"
 
 #include <complex>
@@ -61,17 +62,8 @@ FftComputationResult CpuFftBackend::compute_iq_spectrum(std::span<const std::com
         throw std::invalid_argument("CPU IQ FFT currently requires power-of-two size");
     }
 
-    // tymczasowo: realna część jako fallback MVP
-    // docelowo: dodać complex FFT
-    std::vector<double> real;
-    real.reserve(windowed.size());
-
-    for (const auto& s : windowed) {
-        real.push_back(static_cast<double>(s.real()));
-    }
-
     return {
-        .spectrum = compute_single_sided_spectrum_fft(real, sample_rate),
+        .spectrum = compute_centered_iq_spectrum(windowed, sample_rate),
         .algorithm = SpectrumAlgorithm::Fft
     };
 }
