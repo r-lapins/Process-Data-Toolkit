@@ -169,3 +169,55 @@ Notes:
 - Time filtering is inclusive
 - `--skipped` prints invalid CSV rows with line numbers
 - `--method <zscore|iqr|mad>` chooses the anomaly detection strategy
+
+---
+
+## Algorithms
+
+#### Standard deviation:
+
+```md
+σ = sqrt( Σ(x - μ)² / N )
+```
+
+### Anomaly detection methods:
+
+The CSV CLI supports three anomaly detection methods:
+
+####  - Z-score
+
+```md
+z = (x - μ) / σ
+```
+
+Samples with `|z| > threshold` are reported as anomalies.
+
+####  - IQR
+
+The interquartile range method uses:
+
+```md
+IQR = Q3 - Q1
+```
+
+Samples outside the interval
+
+[Q1 - threshold · IQR, Q3 + threshold · IQR]
+
+are reported as anomalies.
+
+####  - MAD
+
+The median absolute deviation method uses:
+
+```md
+MAD = median(|x - median(x)|)
+```
+
+A robust anomaly score is computed:
+
+```md
+score = (x - median(x)) / MAD
+```
+
+Samples with `|score| > threshold` are reported as anomalies.

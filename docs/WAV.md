@@ -231,3 +231,52 @@ Notes:
     - cuFFT plan creation 
     - GPU memory allocation
 - Avg engine [ms] reflects steady-state performance (important for SDR / streaming)
+
+---
+
+## Algorithms
+
+### WAV signal processing methods:
+
+#### - Discrete Fourier Transform (DFT)
+
+```md
+X[k] = Σ x[n] · e^(−j2πkn/N),  k = 0..N−1
+```
+
+Current implementation is `O(N²)` and serves as a reference implementation.
+
+#### - Fast Fourier Transform (FFT)
+
+The project implements a radix-2 Cooley–Tukey FFT algorithm.
+
+The FFT recursively decomposes the DFT into even and odd indexed samples:
+
+```md
+X[k] = E[k] + W_N^k · O[k]
+X[k + N/2] = E[k] - W_N^k · O[k]
+```
+
+where:
+
+```md
+W_N^k = e^(−j2πk/N)
+```
+
+The algorithm requires the input size to be a power of two and has time complexity `O(N log N)`
+
+#### - Spectral peak detection
+
+Two strategies:
+
+**ThresholdOnly**
+
+```md
+X[i] >= threshold_ratio · max(X)
+```
+
+**LocalMaxima**
+
+```md
+X[i] > X[i-1] && X[i] > X[i+1]
+```

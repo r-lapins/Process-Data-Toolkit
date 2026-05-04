@@ -14,6 +14,20 @@ sudo dnf install clang clang-tools-extra ninja-build cmake
 sudo apt-get install clang clang-tidy ninja-build cmake
 ```
 
+### RTLSDR
+
+#### Fedora
+
+```bash
+sudo dnf install rtl-sdr-devel pkgconf-pkg-config
+```
+
+#### Ubuntu
+
+```bash
+sudo apt-get install librtlsdr-dev pkg-config
+```
+
 ### Optional (CUDA)
 
 #### Fedora:
@@ -51,6 +65,13 @@ cmake --build --preset debug-cuda-nosan
 ```
 
 CUDA builds disable sanitizers (ASan/UBSan are not compatible with CUDA).
+
+### Debug RTL-SDR with CUDA
+
+```bash
+cmake --preset debug-rtlsdr-cuda-nosan
+cmake --build --preset debug-rtlsdr-cuda-nosan
+```
 
 ### Release
 
